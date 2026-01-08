@@ -1,0 +1,702 @@
+// SafariPlus Database Schema
+// Tour Booking Platform for East Africa
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// USER & AUTHENTICATION
+// ============================================================================
+
+enum UserRole {
+  CLIENT
+  AGENT
+  ADMIN
+}
+
+enum AccountStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  DEACTIVATED
+}
+
+model User {
+  id            String        @id @default(cuid())
+  email         String        @unique
+  emailVerified DateTime?
+  password      String?
+  name          String?
+  firstName     String?
+  lastName      String?
+  phone         String?
+  avatar        String?
+  role          UserRole      @default(CLIENT)
+  status        AccountStatus @default(ACTIVE)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Relations
+  accounts      Account[]
+  sessions      Session[]
+  bookings      Booking[]
+  reviews       Review[]
+  wishlist      Wishlist[]
+  messages      Message[]     @relation("UserMessages")
+  conversations ConversationParticipant[]
+
+  // Agent specific
+  agent         Agent?
+
+  @@index([email])
+  @@index([role])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique
+  expires   DateTime
+  used      Boolean  @default(false)
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@unique([email, token])
+  @@index([email])
+}
+
+// ============================================================================
+// AGENT (Tour Operator)
+// ============================================================================
+
+model Agent {
+  id                 String        @id @default(cuid())
+  userId             String        @unique
+  businessName       String
+  businessEmail      String?
+  businessPhone      String?
+  description        String?
+  logo               String?
+  coverImage         String?
+  website            String?
+  address            String?
+  city               String?
+  country            String?
+
+  // Verification
+  licenseNumber      String?
+  katoMember         Boolean       @default(false)
+  tatoMember         Boolean       @default(false)
+  autoMember         Boolean       @default(false)
+  verifiedAt         DateTime?
+  isVerified         Boolean       @default(false)
+
+  // Business details
+  yearsInBusiness    Int?
+  toursConducted     Int           @default(0)
+
+  // Commission
+  commissionRate     Float         @default(12.0) // Platform commission %
+
+  // Status
+  status             AccountStatus @default(PENDING)
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  // Relations
+  user               User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tours              Tour[]
+  bookings           Booking[]
+  earnings           AgentEarning[]
+  withdrawals        WithdrawalRequest[]
+  bankDetails        BankDetails?
+
+  @@index([userId])
+  @@index([status])
+  @@index([isVerified])
+}
+
+model BankDetails {
+  id            String   @id @default(cuid())
+  agentId       String   @unique
+  bankName      String?
+  accountNumber String?
+  accountName   String?
+  branchCode    String?
+  swiftCode     String?
+  mpesaNumber   String?
+  mpesaName     String?
+  preferredMethod String  @default("mpesa") // "mpesa" | "bank"
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  agent         Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+}
+
+// ============================================================================
+// TOURS & PACKAGES
+// ============================================================================
+
+enum TourStatus {
+  DRAFT
+  PENDING_REVIEW
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
+
+enum TourType {
+  SAFARI
+  BEACH
+  MOUNTAIN
+  CULTURAL
+  ADVENTURE
+  WILDLIFE
+  GORILLA_TREKKING
+  BIRD_WATCHING
+  PHOTOGRAPHY
+  HONEYMOON
+  FAMILY
+  LUXURY
+  BUDGET
+}
+
+model Tour {
+  id               String      @id @default(cuid())
+  agentId          String
+  slug             String      @unique
+  title            String
+  subtitle         String?
+  description      String
+  highlights       String    @default("[]") // JSON array
+  included         String    @default("[]") // JSON array
+  excluded         String    @default("[]") // JSON array
+
+  // Location
+  destination      String
+  country          String
+  region           String?
+  startLocation    String?
+  endLocation      String?
+
+  // Duration
+  durationDays     Int
+  durationNights   Int
+
+  // Pricing
+  basePrice        Float
+  currency         String      @default("USD")
+  pricePerPerson   Boolean     @default(true)
+  childPrice       Float?
+  infantPrice      Float?
+  singleSupplement Float?
+
+  // Capacity
+  minGroupSize     Int         @default(1)
+  maxGroupSize     Int         @default(20)
+
+  // Media
+  coverImage       String?
+  images           String    @default("[]") // JSON array
+  videoUrl         String?
+
+  // Categorization
+  tourType         String    @default("[]") // JSON array of TourType values
+  difficulty       String?     // Easy, Moderate, Challenging
+  bestSeason       String    @default("[]") // JSON array of months
+
+  // Status
+  status           TourStatus  @default(DRAFT)
+  featured         Boolean     @default(false)
+  viewCount        Int         @default(0)
+
+  // SEO
+  metaTitle        String?
+  metaDescription  String?
+
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  // Relations
+  agent            Agent       @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  itinerary        Itinerary[]
+  accommodationOptions AccommodationOption[]
+  activityAddons   ActivityAddon[]
+  bookings         Booking[]
+  reviews          Review[]
+  wishlist         Wishlist[]
+  seasonalPricing  SeasonalPricing[]
+
+  @@index([agentId])
+  @@index([status])
+  @@index([destination])
+  @@index([country])
+  @@index([basePrice])
+  @@index([featured])
+}
+
+model Itinerary {
+  id          String   @id @default(cuid())
+  tourId      String
+  dayNumber   Int
+  title       String
+  description String
+  location    String?  // e.g., "Masai Mara National Reserve"
+  meals       String    @default("[]") // JSON array: Breakfast, Lunch, Dinner
+  activities  String    @default("[]") // JSON array
+  overnight   String?  // Display name for overnight stay
+
+  // Accommodation and add-on references for booking
+  availableAccommodationIds String  @default("[]") // JSON array of accommodation IDs available this night
+  defaultAccommodationId    String? // Default accommodation for this night
+  availableAddonIds         String  @default("[]") // JSON array of add-on IDs available this day
+
+  tour        Tour     @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
+  @@unique([tourId, dayNumber])
+  @@index([tourId])
+}
+
+model AccommodationOption {
+  id           String   @id @default(cuid())
+  tourId       String
+  dayNumber    Int?     // If null, applies to all days
+  name         String
+  description  String?
+  tier         String   // budget, mid-range, luxury, ultra-luxury
+  pricePerNight Float
+  images       String    @default("[]") // JSON array
+  amenities    String    @default("[]") // JSON array
+  location     String?
+  rating       Float?
+
+  tour         Tour     @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  bookingAccommodations BookingAccommodation[]
+
+  @@index([tourId])
+  @@index([tier])
+}
+
+model ActivityAddon {
+  id          String   @id @default(cuid())
+  tourId      String
+  name        String
+  description String?
+  price       Float
+  duration    String?  // e.g., "2 hours", "Half day"
+  images      String    @default("[]") // JSON array
+  maxCapacity Int?
+  dayAvailable String   @default("[]") // JSON array of day numbers
+
+  tour        Tour     @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  bookingActivities BookingActivity[]
+
+  @@index([tourId])
+}
+
+model SeasonalPricing {
+  id          String   @id @default(cuid())
+  tourId      String
+  name        String   // "Peak Season", "Low Season"
+  startDate   DateTime
+  endDate     DateTime
+  priceMultiplier Float // e.g., 1.2 for 20% increase
+  isActive    Boolean  @default(true)
+
+  tour        Tour     @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
+  @@index([tourId])
+  @@index([startDate, endDate])
+}
+
+// ============================================================================
+// BOOKINGS
+// ============================================================================
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  PAID
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+model Booking {
+  id                String        @id @default(cuid())
+  bookingReference  String        @unique @default(cuid())
+  userId            String
+  tourId            String
+  agentId           String
+
+  // Dates
+  startDate         DateTime
+  endDate           DateTime
+
+  // Guests
+  adults            Int           @default(1)
+  children          Int           @default(0)
+  infants           Int           @default(0)
+
+  // Pricing
+  baseAmount        Float
+  accommodationAmount Float       @default(0)
+  activitiesAmount  Float         @default(0)
+  taxAmount         Float         @default(0)
+  discountAmount    Float         @default(0)
+  totalAmount       Float
+  currency          String        @default("USD")
+
+  // Commission
+  platformCommission Float
+  agentEarnings     Float
+
+  // Status
+  status            BookingStatus @default(PENDING)
+  paymentStatus     PaymentStatus @default(PENDING)
+
+  // Contact
+  contactName       String
+  contactEmail      String
+  contactPhone      String
+  specialRequests   String?
+
+  // Cancellation
+  cancelledAt       DateTime?
+  cancellationReason String?
+  refundAmount      Float?
+
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  // Relations
+  user              User          @relation(fields: [userId], references: [id])
+  tour              Tour          @relation(fields: [tourId], references: [id])
+  agent             Agent         @relation(fields: [agentId], references: [id])
+  payments          Payment[]
+  accommodations    BookingAccommodation[]
+  activities        BookingActivity[]
+  review            Review?
+
+  @@index([userId])
+  @@index([tourId])
+  @@index([agentId])
+  @@index([status])
+  @@index([startDate])
+  @@index([bookingReference])
+}
+
+model BookingAccommodation {
+  id                    String              @id @default(cuid())
+  bookingId             String
+  accommodationOptionId String
+  dayNumber             Int
+  price                 Float
+
+  booking               Booking             @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  accommodationOption   AccommodationOption @relation(fields: [accommodationOptionId], references: [id])
+
+  @@index([bookingId])
+}
+
+model BookingActivity {
+  id              String        @id @default(cuid())
+  bookingId       String
+  activityAddonId String
+  quantity        Int           @default(1)
+  price           Float
+
+  booking         Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  activityAddon   ActivityAddon @relation(fields: [activityAddonId], references: [id])
+
+  @@index([bookingId])
+}
+
+// ============================================================================
+// PAYMENTS
+// ============================================================================
+
+enum PaymentMethod {
+  MPESA
+  CARD
+  BANK_TRANSFER
+  PAYPAL
+}
+
+model Payment {
+  id                 String        @id @default(cuid())
+  bookingId          String
+  amount             Float
+  currency           String        @default("USD")
+  method             PaymentMethod
+
+  // Pesapal
+  pesapalTrackingId  String?
+  pesapalMerchantRef String?
+  pesapalOrderId     String?
+
+  // Status
+  status             PaymentStatus @default(PENDING)
+  statusMessage      String?
+
+  // Card details (last 4 only)
+  cardLastFour       String?
+  cardType           String?
+
+  // Timestamps
+  initiatedAt        DateTime      @default(now())
+  completedAt        DateTime?
+  failedAt           DateTime?
+
+  // Idempotency
+  idempotencyKey     String?       @unique
+
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  booking            Booking       @relation(fields: [bookingId], references: [id])
+
+  @@index([bookingId])
+  @@index([pesapalTrackingId])
+  @@index([status])
+}
+
+// ============================================================================
+// AGENT EARNINGS & WITHDRAWALS
+// ============================================================================
+
+model AgentEarning {
+  id          String   @id @default(cuid())
+  agentId     String
+  bookingId   String?
+  amount      Float
+  currency    String   @default("USD")
+  description String?
+  type        String   // "booking", "bonus", "adjustment"
+  createdAt   DateTime @default(now())
+
+  agent       Agent    @relation(fields: [agentId], references: [id])
+
+  @@index([agentId])
+  @@index([createdAt])
+}
+
+enum WithdrawalStatus {
+  PENDING
+  APPROVED
+  PROCESSING
+  COMPLETED
+  REJECTED
+}
+
+model WithdrawalRequest {
+  id            String           @id @default(cuid())
+  agentId       String
+  amount        Float
+  currency      String           @default("USD")
+  method        String           // "mpesa" | "bank"
+  status        WithdrawalStatus @default(PENDING)
+
+  // Processing
+  processedBy   String?
+  processedAt   DateTime?
+  rejectionReason String?
+  transactionRef String?
+
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  agent         Agent            @relation(fields: [agentId], references: [id])
+
+  @@index([agentId])
+  @@index([status])
+}
+
+// ============================================================================
+// REVIEWS
+// ============================================================================
+
+model Review {
+  id          String   @id @default(cuid())
+  userId      String
+  tourId      String
+  bookingId   String   @unique
+  rating      Int      // 1-5
+  title       String?
+  content     String
+  images      String    @default("[]") // JSON array
+
+  // Response
+  agentResponse String?
+  respondedAt   DateTime?
+
+  // Moderation
+  isApproved  Boolean  @default(false)
+  isVerified  Boolean  @default(true) // Verified purchase
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id])
+  tour        Tour     @relation(fields: [tourId], references: [id])
+  booking     Booking  @relation(fields: [bookingId], references: [id])
+
+  @@index([tourId])
+  @@index([userId])
+  @@index([rating])
+}
+
+// ============================================================================
+// WISHLIST
+// ============================================================================
+
+model Wishlist {
+  id        String   @id @default(cuid())
+  userId    String
+  tourId    String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tour      Tour     @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tourId])
+  @@index([userId])
+}
+
+// ============================================================================
+// MESSAGING
+// ============================================================================
+
+model Conversation {
+  id           String   @id @default(cuid())
+  bookingId    String?
+  subject      String?
+  lastMessageAt DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  participants ConversationParticipant[]
+  messages     Message[]
+
+  @@index([lastMessageAt])
+}
+
+model ConversationParticipant {
+  id             String       @id @default(cuid())
+  conversationId String
+  userId         String
+  lastReadAt     DateTime?
+  createdAt      DateTime     @default(now())
+
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, userId])
+  @@index([userId])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  senderId       String
+  content        String
+  attachments    String       @default("[]") // JSON array
+  isRead         Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         User         @relation("UserMessages", fields: [senderId], references: [id])
+
+  @@index([conversationId])
+  @@index([senderId])
+}
+
+// ============================================================================
+// PLATFORM SETTINGS
+// ============================================================================
+
+model PlatformSettings {
+  id                    String   @id @default("default")
+  defaultCommissionRate Float    @default(12.0)
+  minWithdrawalAmount   Float    @default(50.0)
+  supportEmail          String   @default("support@safariplus.com")
+  supportPhone          String?
+  termsUrl              String?
+  privacyUrl            String?
+  updatedAt             DateTime @updatedAt
+}
+
+// ============================================================================
+// AUDIT LOG
+// ============================================================================
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  action     String
+  resource   String
+  resourceId String?
+  metadata   Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([resource])
+  @@index([createdAt])
+}
