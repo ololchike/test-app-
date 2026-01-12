@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { createLogger } from "@/lib/logger"
+
+const log = createLogger("Reviews Helpful")
 
 export async function POST(
   request: NextRequest,
@@ -105,7 +108,7 @@ export async function POST(
         : "Removed helpful mark",
     })
   } catch (error) {
-    console.error("Error updating helpful status:", error)
+    log.error("Error updating helpful status", error)
     return NextResponse.json(
       { error: "Failed to update helpful status" },
       { status: 500 }

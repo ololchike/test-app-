@@ -4,8 +4,92 @@ import { getPesapalClient, mapPaymentMethod, mapPaymentStatus, validateIPNNotifi
 import { renderToBuffer } from "@react-pdf/renderer"
 import { ItineraryPDF } from "@/lib/pdf/itinerary-template"
 import { sendBookingConfirmationEmail } from "@/lib/email"
+import { createLogger } from "@/lib/logger"
 import { format } from "date-fns"
 import React from "react"
+
+const log = createLogger("Pesapal IPN")
+
+// Type for Pesapal IPN notification
+interface PesapalNotification {
+  OrderTrackingId: string
+  OrderMerchantReference: string
+  OrderNotificationType: string
+}
+
+// Type for booking with included relations for email/PDF generation
+interface BookingWithRelations {
+  id: string
+  bookingReference: string
+  startDate: Date
+  endDate: Date
+  adults: number
+  children: number
+  baseAmount: number
+  accommodationAmount: number
+  activitiesAmount: number
+  taxAmount: number
+  totalAmount: number
+  currency: string
+  contactName: string
+  contactEmail: string
+  contactPhone: string
+  specialRequests: string | null
+  userId: string
+  agentId: string
+  tour: {
+    id: string
+    title: string
+    destination: string
+    durationDays: number
+    durationNights: number
+    itinerary: Array<{
+      dayNumber: number
+      title: string
+      description: string | null
+      location: string | null
+      meals: string
+      activities: string
+      overnight: string | null
+    }>
+  }
+  agent: {
+    id: string
+    businessName: string
+    businessEmail: string | null
+    businessPhone: string | null
+  }
+  user: {
+    id: string
+    name: string | null
+    email: string
+  }
+  accommodations: Array<{
+    dayNumber: number
+    price: number
+    accommodationOption: {
+      name: string
+      tier: string
+    }
+  }>
+  activities: Array<{
+    price: number
+    activityAddon: {
+      name: string
+    }
+  }>
+}
+
+// Type for itinerary day
+interface ItineraryDay {
+  dayNumber: number
+  title: string
+  description: string
+  location: string | null
+  meals: string[]
+  activities: string[]
+  overnight: string | null
+}
 
 /**
  * Pesapal IPN (Instant Payment Notification) Webhook Handler
@@ -26,11 +110,11 @@ const processedNotifications = new Set<string>()
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now()
-  let notificationData: any = null
+  let notificationData: PesapalNotification | null = null
 
   try {
     // Parse request body
-    const body = await request.json()
+    const body = await request.json() as PesapalNotification
     notificationData = body
 
     const {
@@ -39,7 +123,7 @@ export async function POST(request: NextRequest) {
       OrderNotificationType,
     } = body
 
-    console.log(`[Pesapal IPN] Received notification:`, {
+    log.info("Received notification", {
       OrderTrackingId,
       OrderMerchantReference,
       OrderNotificationType,
@@ -48,7 +132,7 @@ export async function POST(request: NextRequest) {
 
     // Validate notification structure
     if (!validateIPNNotification(body)) {
-      console.error("[Pesapal IPN] Invalid notification structure:", body)
+      log.error("Invalid notification structure:", body)
       return NextResponse.json(
         { error: "Invalid notification structure" },
         { status: 400 }
@@ -58,7 +142,7 @@ export async function POST(request: NextRequest) {
     // Check for duplicate processing in current request cycle
     const notificationKey = `${OrderTrackingId}-${OrderMerchantReference}`
     if (processedNotifications.has(notificationKey)) {
-      console.log(`[Pesapal IPN] Duplicate notification detected: ${notificationKey}`)
+      log.info(`Duplicate notification detected: ${notificationKey}`)
       return NextResponse.json({
         message: "Notification already processed",
         orderNotificationType: OrderNotificationType,
@@ -77,7 +161,7 @@ export async function POST(request: NextRequest) {
     try {
       transactionStatus = await pesapal.getTransactionStatus(OrderTrackingId)
     } catch (statusError) {
-      console.error("[Pesapal IPN] Failed to verify transaction status:", statusError)
+      log.error("Failed to verify transaction status:", statusError)
       return NextResponse.json(
         {
           error: "Failed to verify transaction status",
@@ -87,7 +171,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log(`[Pesapal IPN] Transaction status:`, {
+    log.info("Transaction status", {
       statusCode: transactionStatus.status_code,
       description: transactionStatus.payment_status_description,
       amount: transactionStatus.amount,
@@ -158,7 +242,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (!payment) {
-      console.error(`[Pesapal IPN] Payment not found:`, {
+      log.error("Payment not found", {
         OrderTrackingId,
         OrderMerchantReference,
       })
@@ -170,7 +254,7 @@ export async function POST(request: NextRequest) {
 
     // Check if payment is already in final state (idempotency)
     if (payment.status === "COMPLETED" || payment.status === "REFUNDED") {
-      console.log(`[Pesapal IPN] Payment already in final state: ${payment.status}`)
+      log.info(`Payment already in final state: ${payment.status}`)
       return NextResponse.json({
         message: "Payment already processed",
         orderNotificationType: OrderNotificationType,
@@ -184,7 +268,7 @@ export async function POST(request: NextRequest) {
     const newPaymentStatus = mapPaymentStatus(transactionStatus.status_code)
     const paymentMethod = mapPaymentMethod(transactionStatus.payment_method)
 
-    console.log(`[Pesapal IPN] Updating payment status:`, {
+    log.info("Updating payment status", {
       paymentId: payment.id,
       oldStatus: payment.status,
       newStatus: newPaymentStatus,
@@ -206,7 +290,7 @@ export async function POST(request: NextRequest) {
 
     // Handle payment completion
     if (newPaymentStatus === "COMPLETED") {
-      console.log(`[Pesapal IPN] Processing successful payment for booking: ${payment.booking.bookingReference}`)
+      log.info(`Processing successful payment for booking: ${payment.booking.bookingReference}`)
 
       // Use transaction to ensure all updates succeed or fail together
       await prisma.$transaction(async (tx) => {
@@ -252,18 +336,18 @@ export async function POST(request: NextRequest) {
       })
 
       // Send confirmation email with PDF itinerary (non-blocking)
-      sendConfirmationEmailWithPDF(payment.booking)
+      sendConfirmationEmailWithPDF(payment.booking as BookingWithRelations)
         .then(() => {
-          console.log(`[Pesapal IPN] Confirmation email sent for booking: ${payment.booking.bookingReference}`)
+          log.info(`Confirmation email sent for booking: ${payment.booking.bookingReference}`)
         })
         .catch((error) => {
-          console.error(`[Pesapal IPN] Error sending confirmation email:`, error)
+          log.error("Error sending confirmation email", error)
         })
     }
 
     // Handle payment failure
     if (newPaymentStatus === "FAILED") {
-      console.log(`[Pesapal IPN] Processing failed payment for booking: ${payment.booking.bookingReference}`)
+      log.info(`Processing failed payment for booking: ${payment.booking.bookingReference}`)
 
       // Update booking status
       await prisma.booking.update({
@@ -293,7 +377,7 @@ export async function POST(request: NextRequest) {
 
     // Handle refunds
     if (newPaymentStatus === "REFUNDED") {
-      console.log(`[Pesapal IPN] Processing refund for booking: ${payment.booking.bookingReference}`)
+      log.info(`Processing refund for booking: ${payment.booking.bookingReference}`)
 
       // Update booking status
       await prisma.booking.update({
@@ -322,7 +406,7 @@ export async function POST(request: NextRequest) {
     }
 
     const processingTime = Date.now() - startTime
-    console.log(`[Pesapal IPN] Notification processed successfully in ${processingTime}ms`)
+    log.info(`Notification processed successfully in ${processingTime}ms`)
 
     // Return success response to Pesapal
     return NextResponse.json({
@@ -333,7 +417,7 @@ export async function POST(request: NextRequest) {
       status: 200,
     })
   } catch (error) {
-    console.error("[Pesapal IPN] Error processing notification:", error)
+    log.error("Error processing notification:", error)
 
     // Log error to database for investigation
     try {
@@ -343,13 +427,13 @@ export async function POST(request: NextRequest) {
           resource: "PesapalIPN",
           metadata: {
             error: error instanceof Error ? error.message : "Unknown error",
-            notification: notificationData,
+            notification: notificationData ? JSON.parse(JSON.stringify(notificationData)) : null,
             timestamp: new Date().toISOString(),
           },
         },
       })
     } catch (logError) {
-      console.error("[Pesapal IPN] Failed to log error:", logError)
+      log.error("Failed to log error", logError)
     }
 
     return NextResponse.json(
@@ -372,16 +456,16 @@ export async function POST(request: NextRequest) {
  * Send confirmation email with PDF itinerary
  * Extracted from payment initiate route for reuse
  */
-async function sendConfirmationEmailWithPDF(booking: any) {
+async function sendConfirmationEmailWithPDF(booking: BookingWithRelations) {
   try {
     // Parse itinerary JSON fields
-    const itinerary = booking.tour.itinerary.map((day: any) => ({
+    const itinerary: ItineraryDay[] = booking.tour.itinerary.map((day) => ({
       dayNumber: day.dayNumber,
       title: day.title,
       description: day.description || "",
       location: day.location,
-      meals: JSON.parse(day.meals || "[]"),
-      activities: JSON.parse(day.activities || "[]"),
+      meals: JSON.parse(day.meals || "[]") as string[],
+      activities: JSON.parse(day.activities || "[]") as string[],
       overnight: day.overnight,
     }))
 
@@ -432,9 +516,10 @@ async function sendConfirmationEmailWithPDF(booking: any) {
     }
 
     // Generate PDF buffer
-    const pdfBuffer = await renderToBuffer(
-      React.createElement(ItineraryPDF, pdfData) as any
-    )
+    // Note: Type assertion needed for React-PDF compatibility with renderToBuffer
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const pdfElement = React.createElement(ItineraryPDF, pdfData) as any
+    const pdfBuffer = await renderToBuffer(pdfElement)
 
     // Send confirmation email
     await sendBookingConfirmationEmail({
@@ -451,7 +536,7 @@ async function sendConfirmationEmailWithPDF(booking: any) {
       pdfBuffer: pdfBuffer,
     })
   } catch (error) {
-    console.error("[Pesapal IPN] Error in sendConfirmationEmailWithPDF:", error)
+    log.error("Error in sendConfirmationEmailWithPDF:", error)
     throw error
   }
 }
@@ -470,7 +555,7 @@ export async function GET(request: NextRequest) {
       OrderNotificationType: searchParams.get("OrderNotificationType"),
     }
 
-    console.log("[Pesapal IPN] GET request received:", body)
+    log.info("GET request received", body)
 
     // Forward to POST handler logic
     return POST(
@@ -480,7 +565,7 @@ export async function GET(request: NextRequest) {
       })
     )
   } catch (error) {
-    console.error("[Pesapal IPN] Error processing GET notification:", error)
+    log.error("Error processing GET notification:", error)
     return NextResponse.json(
       { error: "Failed to process notification" },
       { status: 500 }

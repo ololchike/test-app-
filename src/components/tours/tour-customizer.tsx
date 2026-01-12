@@ -34,7 +34,7 @@ export interface AccommodationOption {
 export interface ActivityAddon {
   id: string
   name: string
-  description: string
+  description: string | null
   price: number
   duration: string | null
   images: string[]

@@ -2,11 +2,17 @@
 
 ## Status
 - [x] Requirements Approved
-- [ ] Design Complete
-- [ ] Implementation Started
-- [ ] Implementation Complete
-- [ ] Testing Complete
+- [x] Design Complete
+- [x] Implementation Started
+- [x] Implementation Complete
+- [x] Testing Complete
 - [ ] Deployed
+
+## Recent Updates
+- **2026-01-12**: Added development mode support (PESAPAL_DEV_MODE) for testing with 1 KES
+- **2026-01-12**: Replaced alert() with toast notifications for better UX
+- **2026-01-12**: Enhanced error handling and logging
+- See [Payment System Dev Mode Documentation](./PAYMENT-SYSTEM-DEV-MODE.md) for details
 
 ## Overview
 

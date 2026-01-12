@@ -120,12 +120,17 @@ export const authConfig: NextAuthConfig = {
   },
   events: {
     async signIn({ user, account }) {
-      // Log sign-in event
-      console.log(`User signed in: ${user.email} via ${account?.provider}`)
+      // Sign-in event - could be used for analytics/audit logging
+      // In production, use a proper logging service
+      if (process.env.NODE_ENV === "development") {
+        // eslint-disable-next-line no-console
+        console.log(`User signed in: ${user.email} via ${account?.provider}`)
+      }
     },
     async signOut(message) {
-      // Log sign-out event
-      if ("token" in message && message.token) {
+      // Sign-out event - could be used for analytics/audit logging
+      if (process.env.NODE_ENV === "development" && "token" in message && message.token) {
+        // eslint-disable-next-line no-console
         console.log(`User signed out: ${message.token.email}`)
       }
     },

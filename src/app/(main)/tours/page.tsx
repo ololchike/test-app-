@@ -6,7 +6,9 @@ import { TourCard } from "@/components/tours/tour-card"
 import { TourFilters, TourFiltersSidebar } from "@/components/tours/tour-filters"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Pagination } from "@/components/ui/pagination"
-import { Loader2 } from "lucide-react"
+import { Loader2, Map } from "lucide-react"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
 
 interface Tour {
   id: string
@@ -20,6 +22,7 @@ interface Tour {
   durationNights: number
   tourType: string[]
   featured: boolean
+  rating?: number
   agent: {
     businessName: string
     isVerified: boolean
@@ -121,7 +124,11 @@ function ToursContent() {
         setTours(data.tours)
         setPagination(data.pagination)
       } catch (err) {
-        console.error("Error fetching tours:", err)
+        // Error is logged for debugging but not exposed to user
+        if (process.env.NODE_ENV === "development") {
+          // eslint-disable-next-line no-console
+          console.error("Error fetching tours:", err)
+        }
         setError("Failed to load tours. Please try again.")
       } finally {
         setIsLoading(false)
@@ -165,7 +172,7 @@ function ToursContent() {
 
           {/* Results */}
           <div className="flex-1">
-            {/* Results Count */}
+            {/* Results Count & Map View Toggle */}
             {!isLoading && (
               <div className="flex items-center justify-between mb-6">
                 <p className="text-muted-foreground">
@@ -192,6 +199,12 @@ function ToursContent() {
                     </>
                   )}
                 </p>
+                <Button asChild variant="outline" size="sm">
+                  <Link href="/tours/map">
+                    <Map className="h-4 w-4 mr-2" />
+                    Map View
+                  </Link>
+                </Button>
               </div>
             )}
 
@@ -233,7 +246,7 @@ function ToursContent() {
                       tour={{
                         ...tour,
                         coverImage: tour.coverImage || "",
-                        rating: 4.8, // TODO: Calculate from actual reviews
+                        rating: tour.rating || 0,
                         reviewCount: tour._count.reviews,
                       }}
                     />

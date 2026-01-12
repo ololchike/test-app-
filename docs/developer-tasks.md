@@ -525,75 +525,130 @@ This document provides a checkbox-based task list for developers to track implem
 
 ### Sprint 9-10: Communication & Reviews
 
-#### Messaging
+#### Messaging (COMPLETE - Jan 2026)
 
-- [ ] **Set up Pusher**
-  - [ ] Create Pusher account
-  - [ ] Configure environment variables
-  - [ ] Create server client
-  - [ ] Create browser client
-  - [ ] Set up authentication endpoint
+- [x] **Set up Pusher**
+  - [x] Configure environment variables
+  - [x] Create server client (`src/lib/pusher/server.ts`)
+  - [x] Create browser client (`src/lib/pusher/client.ts`)
+  - [x] Set up authentication endpoint (`/api/pusher/auth`)
 
-- [ ] **Implement Conversations API**
-  - [ ] List conversations
-  - [ ] Create/get conversation
-  - [ ] Get messages with pagination
-  - [ ] Send message
-  - [ ] Mark as read
-  - [ ] Real-time broadcast
+- [x] **Implement Conversations API**
+  - [x] List conversations (`GET /api/messages/conversations`)
+  - [x] Create/get conversation (`POST /api/messages/conversations`)
+  - [x] Get messages with pagination (`GET /api/messages`)
+  - [x] Send message (`POST /api/messages`)
+  - [x] Mark as read (automatic on view)
+  - [x] Real-time broadcast via Pusher
 
-- [ ] **Create Chat UI**
-  - [ ] Conversation list
-  - [ ] Message thread
-  - [ ] Message input
-  - [ ] Real-time updates
-  - [ ] Read receipts
-  - [ ] Unread badge
+- [x] **Create Chat UI**
+  - [x] Conversation list (`src/components/messages/conversation-list.tsx`)
+  - [x] Message thread (`src/components/messages/message-thread.tsx`)
+  - [x] Message input (`src/components/messages/message-input.tsx`)
+  - [x] Chat container (`src/components/messages/chat-container.tsx`)
+  - [x] Real-time updates via Pusher subscription
+  - [x] Read receipts (checkmarks)
+  - [x] Unread badge in sidebar navigation
 
-#### Reviews
+- [x] **Create Messages Pages**
+  - [x] Agent messages page (`/agent/messages`)
+  - [x] Client messages page (`/dashboard/messages`)
 
-- [ ] **Implement Reviews API**
-  - [ ] Submit review (verified booking)
-  - [ ] Update review (7 day window)
-  - [ ] Agent response
-  - [ ] List reviews
-  - [ ] Rating calculation
+#### Reviews (COMPLETE - Jan 2026)
 
-- [ ] **Create Review components**
-  - [ ] Review form
-  - [ ] Star rating input
-  - [ ] Review card
-  - [ ] Rating breakdown chart
-  - [ ] Agent response section
+- [x] **Implement Reviews API**
+  - [x] Submit review (verified booking) (`POST /api/reviews`)
+  - [x] Agent response (`POST /api/reviews/[id]/respond`)
+  - [x] List reviews (`GET /api/tours/[slug]/reviews`)
+  - [x] Rating calculation
+  - [x] Helpful voting (`POST /api/reviews/[id]/helpful`)
+
+- [x] **Create Review components**
+  - [x] Review form (`src/components/reviews/review-form.tsx`)
+  - [x] Star rating input
+  - [x] Review card (`src/components/reviews/review-list.tsx`)
+  - [x] Rating breakdown chart (`src/components/reviews/review-stats.tsx`)
+  - [x] Agent response section
 
 ---
 
 ### Sprint 11-12: Enhanced Agent Tools
 
-#### Withdrawals
+#### Withdrawals (COMPLETE - Jan 2026)
 
-- [ ] **Implement Withdrawal API**
-  - [ ] Create withdrawal request
-  - [ ] List withdrawals
-  - [ ] Admin approve
-  - [ ] Admin reject
-  - [ ] Statistics
+- [x] **Implement Withdrawal API**
+  - [x] Create withdrawal request (`POST /api/agent/withdrawals`)
+  - [x] List withdrawals (`GET /api/agent/withdrawals`)
+  - [x] Admin approve (`POST /api/admin/withdrawals/[id]/approve`)
+  - [x] Admin reject (`POST /api/admin/withdrawals/[id]/reject`)
+  - [x] Process withdrawal (`POST /api/admin/withdrawals/[id]/process`)
+  - [x] Balance tracking (`GET /api/agent/balance`)
 
-- [ ] **Create Withdrawal UI**
-  - [ ] Request modal
-  - [ ] Withdrawal history
-  - [ ] Admin management page
-  - [ ] Approval/Rejection modals
+- [x] **Create Withdrawal UI**
+  - [x] Request form (`src/components/agent/withdrawal-form.tsx`)
+  - [x] Withdrawal history (`src/components/agent/withdrawal-history.tsx`)
+  - [x] Agent earnings page with withdrawals (`/agent/earnings`)
+  - [x] Admin management page (`/admin/withdrawals`)
 
 ---
 
-### Sprint 13-14: Discovery & Profiles
+### Sprint 13-14: Discovery & Profiles (PARTIAL - Jan 2026)
 
-- [ ] **Advanced search features**
-- [ ] **Map-based search**
-- [ ] **Client profile page**
-- [ ] **Wishlist feature**
-- [ ] **Admin reports**
+#### Wishlist (COMPLETE)
+- [x] **Implement Wishlist API**
+  - [x] Get wishlist (`GET /api/wishlist`)
+  - [x] Add to wishlist (`POST /api/wishlist`)
+  - [x] Remove from wishlist (`DELETE /api/wishlist`)
+  - [x] Check wishlist status (`GET /api/wishlist/check`)
+
+- [x] **Create Wishlist UI**
+  - [x] Wishlist button component (`src/components/tours/wishlist-button.tsx`)
+  - [x] Wishlist page (`/dashboard/wishlist`)
+  - [x] Wishlist hook (`src/hooks/use-wishlist.ts`)
+
+#### Client Profile (COMPLETE)
+- [x] **Implement Profile API**
+  - [x] Get profile (`GET /api/client/profile`)
+  - [x] Update profile (`PUT /api/client/profile`)
+  - [x] Travel stats calculation
+
+- [x] **Create Profile UI**
+  - [x] Profile page (`/dashboard/profile`)
+  - [x] Edit mode with form
+  - [x] Travel stats display
+
+#### Featured Tours (COMPLETE)
+- [x] **Implement Featured Tours API**
+  - [x] Get featured tours (`GET /api/tours/featured`)
+  - [x] Featured tours component (`src/components/tours/featured-tours.tsx`)
+
+#### Availability Calendar (COMPLETE - Jan 2026)
+- [x] **Implement Availability API**
+  - [x] TourAvailability model (AVAILABLE, BLOCKED, LIMITED types)
+  - [x] Agent availability management (`/api/agent/tours/[tourId]/availability`)
+  - [x] Public availability check (`/api/tours/[slug]/availability`)
+
+- [x] **Create Availability UI**
+  - [x] Availability calendar component (`src/components/agent/availability-calendar.tsx`)
+  - [x] Agent availability page (`/agent/availability`)
+  - [x] Date selection and bulk editing
+
+#### Map-based Search (COMPLETE - Jan 2026)
+- [x] **Implement Map Search**
+  - [x] Add latitude/longitude to Tour model
+  - [x] Filter tours by location (`hasLocation` param)
+  - [x] Leaflet map integration
+
+- [x] **Create Map UI**
+  - [x] Tour map component (`src/components/tours/tour-map.tsx`)
+  - [x] Map search page (`/tours/map`)
+  - [x] Custom price markers
+  - [x] Filter sidebar with country/type/price filters
+  - [x] Map View button on tours page
+
+#### Remaining Tasks
+- [ ] **Admin reports dashboard**
+- [ ] **Platform analytics**
 
 ---
 

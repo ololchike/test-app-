@@ -19,120 +19,187 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
+import { prisma } from "@/lib/prisma"
 
-// Featured destinations data
-const destinations = [
-  {
-    name: "Masai Mara",
-    country: "Kenya",
-    image: "https://images.unsplash.com/photo-1547970810-dc1eac37d174?q=80&w=500",
-    tours: 45,
-  },
-  {
-    name: "Serengeti",
-    country: "Tanzania",
-    image: "https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=500",
-    tours: 38,
-  },
-  {
-    name: "Bwindi Forest",
-    country: "Uganda",
-    image: "https://images.unsplash.com/photo-1521651201144-634f700b36ef?q=80&w=500",
-    tours: 22,
-  },
-  {
-    name: "Volcanoes NP",
-    country: "Rwanda",
-    image: "https://images.unsplash.com/photo-1518709766631-a6a7f45921c3?q=80&w=500",
-    tours: 18,
-  },
-]
+// Destination images mapping
+const destinationImages: Record<string, string> = {
+  "masai mara": "https://images.unsplash.com/photo-1547970810-dc1eac37d174?q=80&w=500",
+  "serengeti": "https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=500",
+  "bwindi": "https://images.unsplash.com/photo-1521651201144-634f700b36ef?q=80&w=500",
+  "volcanoes": "https://images.unsplash.com/photo-1518709766631-a6a7f45921c3?q=80&w=500",
+  "amboseli": "https://images.unsplash.com/photo-1549366021-9f761d450615?q=80&w=500",
+  "ngorongoro": "https://images.unsplash.com/photo-1534177616064-ef61e1f28faf?q=80&w=500",
+  "zanzibar": "https://images.unsplash.com/photo-1590523277543-a94d2e4eb00b?q=80&w=500",
+}
 
-// Featured tours data
-const featuredTours = [
-  {
-    id: "1",
-    title: "7-Day Great Migration Safari",
-    location: "Serengeti & Masai Mara",
-    image: "https://images.unsplash.com/photo-1534177616064-ef61e1f28faf?q=80&w=600",
-    price: 3499,
-    rating: 4.9,
-    reviews: 127,
-    duration: "7 Days",
-    badge: "Best Seller",
-  },
-  {
-    id: "2",
-    title: "Gorilla Trekking Experience",
-    location: "Bwindi, Uganda",
-    image: "https://images.unsplash.com/photo-1521651201144-634f700b36ef?q=80&w=600",
-    price: 2899,
-    rating: 5.0,
-    reviews: 89,
-    duration: "4 Days",
-    badge: "Unique",
-  },
-  {
-    id: "3",
-    title: "Zanzibar Beach & Safari Combo",
-    location: "Tanzania",
-    image: "https://images.unsplash.com/photo-1590523277543-a94d2e4eb00b?q=80&w=600",
-    price: 2199,
-    rating: 4.8,
-    reviews: 156,
-    duration: "10 Days",
-    badge: null,
-  },
-  {
-    id: "4",
-    title: "Kenya Big Five Safari",
-    location: "Masai Mara & Amboseli",
-    image: "https://images.unsplash.com/photo-1549366021-9f761d450615?q=80&w=600",
-    price: 1899,
-    rating: 4.7,
-    reviews: 203,
-    duration: "5 Days",
-    badge: "Popular",
-  },
-]
+async function getHomePageData() {
+  try {
+    // Fetch featured tours
+    const featuredTours = await prisma.tour.findMany({
+      where: {
+        status: "ACTIVE",
+        featured: true,
+      },
+      orderBy: [
+        { viewCount: "desc" },
+        { createdAt: "desc" },
+      ],
+      take: 4,
+      include: {
+        agent: {
+          select: {
+            businessName: true,
+            isVerified: true,
+          },
+        },
+        reviews: {
+          where: { isApproved: true },
+          select: { rating: true },
+        },
+        _count: {
+          select: {
+            reviews: true,
+            bookings: true,
+          },
+        },
+      },
+    })
 
-// Testimonials data
-const testimonials = [
-  {
-    name: "Sarah Thompson",
-    location: "United States",
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=100",
-    rating: 5,
-    text: "An unforgettable experience! SafariPlus connected us with an amazing local guide who knew exactly where to find the wildlife. Highly recommend!",
-    tour: "Serengeti Migration Safari",
-  },
-  {
-    name: "James Chen",
-    location: "Singapore",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=100",
-    rating: 5,
-    text: "The gorilla trekking was the highlight of our lives. The booking process was seamless and the operator was incredibly professional.",
-    tour: "Uganda Gorilla Trek",
-  },
-  {
-    name: "Emma Wilson",
-    location: "United Kingdom",
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=100",
-    rating: 5,
-    text: "Perfect from start to finish. The attention to detail and personalized service made our honeymoon safari absolutely magical.",
-    tour: "Kenya Luxury Safari",
-  },
-]
+    // Get popular destinations with tour counts
+    const destinationsData = await prisma.tour.groupBy({
+      by: ["destination", "country"],
+      where: {
+        status: "ACTIVE",
+      },
+      _count: {
+        id: true,
+      },
+      orderBy: {
+        _count: {
+          id: "desc",
+        },
+      },
+      take: 4,
+    })
 
-// Stats
-const stats = [
-  { value: "10,000+", label: "Happy Travelers" },
-  { value: "500+", label: "Safari Tours" },
-  { value: "150+", label: "Local Operators" },
-  { value: "4.9", label: "Average Rating" },
-]
+    // Get real reviews for testimonials
+    const reviews = await prisma.review.findMany({
+      where: {
+        isApproved: true,
+        rating: 5,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: 3,
+      include: {
+        user: {
+          select: {
+            name: true,
+            avatar: true,
+          },
+        },
+        tour: {
+          select: {
+            title: true,
+          },
+        },
+      },
+    })
 
-export default function HomePage() {
+    // Calculate stats
+    const [totalBookings, totalTours, totalAgents, avgRatingData] = await Promise.all([
+      prisma.booking.count({
+        where: {
+          status: {
+            in: ["CONFIRMED", "PAID", "IN_PROGRESS", "COMPLETED"],
+          },
+        },
+      }),
+      prisma.tour.count({
+        where: {
+          status: "ACTIVE",
+        },
+      }),
+      prisma.agent.count({
+        where: {
+          isVerified: true,
+        },
+      }),
+      prisma.review.aggregate({
+        where: {
+          isApproved: true,
+        },
+        _avg: {
+          rating: true,
+        },
+      }),
+    ])
+
+    return {
+      featuredTours: featuredTours.map((tour) => {
+        const avgRating = tour.reviews.length > 0
+          ? Math.round((tour.reviews.reduce((sum, r) => sum + r.rating, 0) / tour.reviews.length) * 10) / 10
+          : 0
+
+        return {
+          id: tour.id,
+          slug: tour.slug,
+          title: tour.title,
+          location: tour.destination,
+          image: tour.coverImage || (JSON.parse(tour.images || "[]")[0]) || "https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=600",
+          price: tour.basePrice,
+          rating: avgRating,
+          reviews: tour._count.reviews,
+          duration: `${tour.durationDays} Day${tour.durationDays > 1 ? "s" : ""}`,
+          badge: tour.viewCount > 100 ? "Best Seller" : tour.featured ? "Featured" : null,
+        }
+      }),
+      destinations: destinationsData.map((dest) => {
+        const destName = dest.destination.toLowerCase()
+        const imageKey = Object.keys(destinationImages).find((key) => destName.includes(key))
+
+        return {
+          name: dest.destination,
+          country: dest.country,
+          image: imageKey ? destinationImages[imageKey] : "https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=500",
+          tours: dest._count.id,
+        }
+      }),
+      testimonials: reviews.map((review) => ({
+        name: review.user.name || "Anonymous",
+        location: "Verified Customer",
+        image: review.user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(review.user.name || "U")}&background=random`,
+        rating: review.rating,
+        text: review.content,
+        tour: review.tour.title,
+      })),
+      stats: [
+        { value: totalBookings > 0 ? `${Math.floor(totalBookings / 100) * 100}+` : "100+", label: "Happy Travelers" },
+        { value: `${totalTours}+`, label: "Safari Tours" },
+        { value: `${totalAgents}+`, label: "Local Operators" },
+        { value: avgRatingData._avg.rating ? avgRatingData._avg.rating.toFixed(1) : "4.9", label: "Average Rating" },
+      ],
+    }
+  } catch (error) {
+    console.error("Error fetching homepage data:", error)
+    // Return fallback data
+    return {
+      featuredTours: [],
+      destinations: [],
+      testimonials: [],
+      stats: [
+        { value: "100+", label: "Happy Travelers" },
+        { value: "50+", label: "Safari Tours" },
+        { value: "20+", label: "Local Operators" },
+        { value: "4.9", label: "Average Rating" },
+      ],
+    }
+  }
+}
+
+export default async function HomePage() {
+  const { featuredTours, destinations, testimonials, stats } = await getHomePageData()
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -347,50 +414,63 @@ export default function HomePage() {
           </div>
 
           <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {featuredTours.map((tour) => (
-              <Card key={tour.id} className="group overflow-hidden">
-                <div className="relative aspect-[4/3] overflow-hidden">
-                  <Image
-                    src={tour.image}
-                    alt={tour.title}
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                  {tour.badge && (
-                    <Badge className="absolute left-3 top-3 bg-primary">
-                      {tour.badge}
-                    </Badge>
-                  )}
-                </div>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-1 text-sm">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span className="font-medium">{tour.rating}</span>
-                    <span className="text-muted-foreground">
-                      ({tour.reviews} reviews)
-                    </span>
-                  </div>
-                  <h3 className="mt-2 font-semibold line-clamp-2 group-hover:text-primary transition-colors">
-                    {tour.title}
-                  </h3>
-                  <div className="mt-1 flex items-center text-sm text-muted-foreground">
-                    <MapPin className="mr-1 h-3 w-3" />
-                    {tour.location}
-                  </div>
-                  <div className="mt-3 flex items-center justify-between">
-                    <div>
-                      <span className="text-lg font-bold">
-                        ${tour.price.toLocaleString()}
-                      </span>
-                      <span className="text-sm text-muted-foreground">
-                        /person
-                      </span>
+            {featuredTours.length > 0 ? (
+              featuredTours.map((tour) => (
+                <Link key={tour.id} href={`/tours/${tour.slug}`}>
+                  <Card className="group overflow-hidden h-full hover:shadow-lg transition-shadow">
+                    <div className="relative aspect-[4/3] overflow-hidden">
+                      <Image
+                        src={tour.image}
+                        alt={tour.title}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                      {tour.badge && (
+                        <Badge className="absolute left-3 top-3 bg-primary">
+                          {tour.badge}
+                        </Badge>
+                      )}
                     </div>
-                    <Badge variant="secondary">{tour.duration}</Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-1 text-sm">
+                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        <span className="font-medium">{tour.rating > 0 ? tour.rating : "New"}</span>
+                        {tour.reviews > 0 && (
+                          <span className="text-muted-foreground">
+                            ({tour.reviews} reviews)
+                          </span>
+                        )}
+                      </div>
+                      <h3 className="mt-2 font-semibold line-clamp-2 group-hover:text-primary transition-colors">
+                        {tour.title}
+                      </h3>
+                      <div className="mt-1 flex items-center text-sm text-muted-foreground">
+                        <MapPin className="mr-1 h-3 w-3" />
+                        {tour.location}
+                      </div>
+                      <div className="mt-3 flex items-center justify-between">
+                        <div>
+                          <span className="text-lg font-bold">
+                            ${tour.price.toLocaleString()}
+                          </span>
+                          <span className="text-sm text-muted-foreground">
+                            /person
+                          </span>
+                        </div>
+                        <Badge variant="secondary">{tour.duration}</Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))
+            ) : (
+              <div className="col-span-full text-center py-12">
+                <p className="text-muted-foreground">No featured tours available at the moment.</p>
+                <Button variant="outline" asChild className="mt-4">
+                  <Link href="/tours">Browse All Tours</Link>
+                </Button>
+              </div>
+            )}
           </div>
 
           <Button variant="outline" asChild className="mt-8 w-full sm:hidden">

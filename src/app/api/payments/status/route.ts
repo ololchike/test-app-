@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { getPesapalClient } from "@/lib/pesapal"
+import { createLogger } from "@/lib/logger"
 import { z } from "zod"
+
+const log = createLogger("Payment Status")
 
 /**
  * Payment Status Check API Endpoint
@@ -115,7 +118,7 @@ export async function GET(request: NextRequest) {
         const pesapal = getPesapalClient()
         const transactionStatus = await pesapal.getTransactionStatus(payment.pesapalOrderId)
 
-        console.log(`[Payment Status] Refreshed status from Pesapal:`, {
+        log.debug("Refreshed status from Pesapal", {
           paymentId: payment.id,
           pesapalStatus: transactionStatus.payment_status_description,
           statusCode: transactionStatus.status_code,

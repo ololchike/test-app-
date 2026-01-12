@@ -25,9 +25,8 @@ import { BookingCard } from "./booking-card"
 import { ReviewStats } from "@/components/reviews/review-stats"
 import { ReviewList } from "@/components/reviews/review-list"
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-interface TourDetailContentProps {
-  tour: {
+// Tour type for detail page
+export interface TourDetailData {
     id: string
     slug: string
     title: string
@@ -77,7 +76,7 @@ interface TourDetailContentProps {
     activityAddons: {
       id: string
       name: string
-      description: string
+      description: string | null
       price: number
       duration: string | null
       images: string[]
@@ -93,15 +92,22 @@ interface TourDetailContentProps {
       rating: number
       reviewCount: number
     }
-    reviews: {
-      id: string
-      user: { name: string | null; avatar: string | null }
-      rating: number
-      title: string | null
-      content: string
-      date: string
-    }[]
-  }
+  reviews: {
+    id: string
+    user: { name: string | null; avatar: string | null }
+    rating: number
+    title: string | null
+    content: string
+    date: string
+    images?: string[]
+    createdAt?: string
+    helpfulCount?: number
+    isVerified?: boolean
+  }[]
+}
+
+interface TourDetailContentProps {
+  tour: TourDetailData
 }
 
 export function TourDetailContent({ tour }: TourDetailContentProps) {
@@ -393,10 +399,18 @@ export function TourDetailContent({ tour }: TourDetailContentProps) {
                     <ReviewList
                       tourSlug={tour.slug}
                       initialReviews={tour.reviews.map((review) => ({
-                        ...review,
-                        createdAt: new Date().toISOString(),
-                        helpfulCount: 0,
-                        isVerified: true,
+                        id: review.id,
+                        rating: review.rating,
+                        title: review.title || undefined,
+                        content: review.content,
+                        images: review.images || [],
+                        createdAt: review.createdAt || new Date().toISOString(),
+                        helpfulCount: review.helpfulCount || 0,
+                        isVerified: review.isVerified ?? true,
+                        user: {
+                          name: review.user.name || "Anonymous",
+                          avatar: review.user.avatar || undefined,
+                        },
                       }))}
                       initialMeta={{
                         total: tour.reviewCount,

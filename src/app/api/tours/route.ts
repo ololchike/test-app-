@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { createLogger } from "@/lib/logger"
+
+const log = createLogger("Tours API")
 
 export async function GET(request: NextRequest) {
   try {
@@ -17,6 +20,7 @@ export async function GET(request: NextRequest) {
     const tourTypes = searchParams.get("types") || searchParams.get("tourType") || ""
     const sort = searchParams.get("sort") || searchParams.get("sortBy") || "featured"
     const featured = searchParams.get("featured") === "true"
+    const hasLocation = searchParams.get("hasLocation") === "true"
 
     // Build where clause
     const where: Record<string, unknown> = {
@@ -81,6 +85,12 @@ export async function GET(request: NextRequest) {
       where.featured = true
     }
 
+    // Filter only tours with location data
+    if (hasLocation) {
+      where.latitude = { not: null }
+      where.longitude = { not: null }
+    }
+
     // Build order by
     let orderBy: Record<string, string> | Array<Record<string, string>> = {}
 
@@ -94,7 +104,8 @@ export async function GET(request: NextRequest) {
         orderBy = { basePrice: "desc" }
         break
       case "rating":
-        // TODO: Order by actual rating when available
+        // Note: Sorting by rating requires post-processing since ratings are calculated
+        // We fetch all then sort, or use featured as approximation for now
         orderBy = [{ featured: "desc" }, { createdAt: "desc" }]
         break
       case "newest":
@@ -134,6 +145,10 @@ export async function GET(request: NextRequest) {
               },
             },
           },
+          reviews: {
+            where: { isApproved: true },
+            select: { rating: true },
+          },
           _count: {
             select: {
               reviews: true,
@@ -145,16 +160,27 @@ export async function GET(request: NextRequest) {
       prisma.tour.count({ where }),
     ])
 
-    // Transform tours to parse JSON arrays
-    const transformedTours = tours.map((tour) => ({
-      ...tour,
-      highlights: JSON.parse(tour.highlights || "[]"),
-      included: JSON.parse(tour.included || "[]"),
-      excluded: JSON.parse(tour.excluded || "[]"),
-      images: JSON.parse(tour.images || "[]"),
-      tourType: JSON.parse(tour.tourType || "[]"),
-      bestSeason: JSON.parse(tour.bestSeason || "[]"),
-    }))
+    // Transform tours to parse JSON arrays and calculate rating
+    const transformedTours = tours.map((tour) => {
+      // Calculate average rating from approved reviews
+      const avgRating = tour.reviews.length > 0
+        ? Math.round((tour.reviews.reduce((sum, r) => sum + r.rating, 0) / tour.reviews.length) * 10) / 10
+        : 0
+
+      // Remove reviews from response (only needed for rating calculation)
+      const { reviews, ...tourWithoutReviews } = tour
+
+      return {
+        ...tourWithoutReviews,
+        rating: avgRating,
+        highlights: JSON.parse(tour.highlights || "[]"),
+        included: JSON.parse(tour.included || "[]"),
+        excluded: JSON.parse(tour.excluded || "[]"),
+        images: JSON.parse(tour.images || "[]"),
+        tourType: JSON.parse(tour.tourType || "[]"),
+        bestSeason: JSON.parse(tour.bestSeason || "[]"),
+      }
+    })
 
     return NextResponse.json({
       tours: transformedTours,
@@ -167,7 +193,7 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error("Error fetching tours:", error)
+    log.error("Error fetching tours", error)
     return NextResponse.json(
       { error: "Failed to fetch tours" },
       { status: 500 }

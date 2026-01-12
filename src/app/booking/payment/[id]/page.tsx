@@ -7,6 +7,7 @@ import { CheckCircle, Clock, CreditCard, Smartphone, ChevronLeft } from "lucide-
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
+import { toast } from "sonner"
 
 interface BookingData {
   id: string
@@ -84,11 +85,14 @@ export default function PaymentPage() {
           window.location.href = `/booking/confirmation/${booking.id}`
         }
       } else {
-        throw new Error("Payment initiation failed")
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Payment initiation failed")
       }
     } catch (error) {
       console.error("Payment error:", error)
-      alert("Payment failed. Please try again.")
+      toast.error("Payment Failed", {
+        description: error instanceof Error ? error.message : "Payment failed. Please try again.",
+      })
     } finally {
       setIsProcessing(false)
     }

@@ -18,6 +18,8 @@ import {
   FileText,
   Bell,
   HelpCircle,
+  Mail,
+  Star,
 } from "lucide-react"
 import { signOut } from "next-auth/react"
 import { cn } from "@/lib/utils"
@@ -74,6 +76,11 @@ const adminNavItems = [
         href: "/admin/bookings",
         icon: Calendar,
       },
+      {
+        title: "Reviews",
+        href: "/admin/reviews",
+        icon: Star,
+      },
     ],
   },
   {
@@ -93,17 +100,27 @@ const adminNavItems = [
     ],
   },
   {
+    section: "Communication",
+    items: [
+      {
+        title: "Contact Messages",
+        href: "/admin/contacts",
+        icon: Mail,
+      },
+      {
+        title: "Notifications",
+        href: "/admin/notifications",
+        icon: Bell,
+      },
+    ],
+  },
+  {
     section: "System",
     items: [
       {
         title: "Reports",
         href: "/admin/reports",
         icon: FileText,
-      },
-      {
-        title: "Notifications",
-        href: "/admin/notifications",
-        icon: Bell,
       },
       {
         title: "Settings",

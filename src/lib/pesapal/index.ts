@@ -452,21 +452,48 @@ export function generateMerchantReference(bookingReference: string): string {
   return `SP-${bookingReference}-${timestamp}`
 }
 
+// Pesapal IPN notification type
+interface IPNNotification {
+  OrderTrackingId?: string
+  OrderMerchantReference?: string
+  OrderNotificationType?: string
+}
+
 /**
  * Validate Pesapal IPN notification
- * This should be enhanced with IP whitelist validation in production
+ * Validates structure and optionally validates source IP
  */
-export function validateIPNNotification(notification: any): boolean {
+export function validateIPNNotification(notification: IPNNotification): boolean {
   // Check required fields
   if (!notification.OrderTrackingId || !notification.OrderMerchantReference) {
-    console.error("Invalid IPN: missing required fields")
     return false
   }
 
-  // TODO: Add IP whitelist validation in production
-  // Pesapal IPs: 196.201.214.0/24, 197.248.0.0/16
-
   return true
+}
+
+/**
+ * Validate that the request is from Pesapal's IP range
+ * Note: This is an additional security measure - the primary security
+ * is verifying transactions by calling back to Pesapal API
+ */
+export function validatePesapalIP(ip: string | null): boolean {
+  if (!ip) return false
+
+  // Pesapal IP ranges (expand as needed from Pesapal documentation)
+  const pesapalIPRanges = [
+    "196.201.214.", // 196.201.214.0/24
+    "197.248.",      // 197.248.0.0/16
+  ]
+
+  // In development, allow localhost
+  if (process.env.NODE_ENV === "development") {
+    if (ip === "127.0.0.1" || ip === "::1" || ip === "localhost") {
+      return true
+    }
+  }
+
+  return pesapalIPRanges.some(range => ip.startsWith(range))
 }
 
 // Export types for use in other modules

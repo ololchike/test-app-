@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { getPesapalClient, generateMerchantReference } from "@/lib/pesapal"
+import { createLogger } from "@/lib/logger"
 import { z } from "zod"
+
+const log = createLogger("Payment Initiate")
 
 /**
  * Payment Initiation API Endpoint
@@ -158,13 +161,27 @@ export async function POST(request: NextRequest) {
     // Initialize Pesapal client
     const pesapal = getPesapalClient()
 
+    // Check for development mode
+    const isDevMode = process.env.PESAPAL_DEV_MODE === "true"
+
+    // In dev mode, use 1 KES for testing; otherwise use actual amount
+    const pesapalAmount = isDevMode ? 1 : booking.totalAmount
+    const pesapalCurrency = isDevMode ? "KES" : booking.currency
+
+    // Log dev mode status for debugging
+    if (isDevMode) {
+      log.info(`Dev mode enabled: Using ${pesapalCurrency} ${pesapalAmount} for testing (actual: ${booking.currency} ${booking.totalAmount})`, {
+        bookingReference: booking.bookingReference,
+      })
+    }
+
     // Prepare order data for Pesapal
     const orderData = {
       id: merchantReference,
-      currency: booking.currency,
-      amount: booking.totalAmount,
+      currency: pesapalCurrency,
+      amount: pesapalAmount,
       description: `Safari Booking: ${booking.tour.title} - ${booking.bookingReference}`,
-      callback_url: `${process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL}/booking/confirmation?bookingId=${booking.id}`,
+      callback_url: `${process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL}/booking/confirmation/${booking.id}`,
       notification_id: process.env.PESAPAL_IPN_ID || "",
       billing_address: {
         email_address: booking.contactEmail,
@@ -221,9 +238,11 @@ export async function POST(request: NextRequest) {
     })
 
     // Log the payment initiation
-    console.log(
-      `Payment initiated: ${payment.id}, Booking: ${booking.bookingReference}, Amount: ${booking.currency} ${booking.totalAmount}`
-    )
+    log.info(`Payment initiated`, {
+      paymentId: payment.id,
+      bookingReference: booking.bookingReference,
+      amount: `${booking.currency} ${booking.totalAmount}`,
+    })
 
     // Return success response with redirect URL
     return NextResponse.json({

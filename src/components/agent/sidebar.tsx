@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   Map,
   Calendar,
+  CalendarDays,
   DollarSign,
   MessageSquare,
   Settings,
@@ -16,12 +17,14 @@ import {
   BarChart3,
   Users,
   Star,
+  Headphones,
 } from "lucide-react"
 import { signOut } from "next-auth/react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
+import { UnreadBadge } from "@/components/messages/unread-badge"
 import type { LucideIcon } from "lucide-react"
 
 interface AgentSidebarProps {
@@ -42,6 +45,7 @@ interface NavItem {
   href: string
   icon: LucideIcon
   badge?: number
+  showUnreadBadge?: boolean
 }
 
 const agentNavItems: NavItem[] = [
@@ -59,6 +63,11 @@ const agentNavItems: NavItem[] = [
     title: "Bookings",
     href: "/agent/bookings",
     icon: Calendar,
+  },
+  {
+    title: "Availability",
+    href: "/agent/availability",
+    icon: CalendarDays,
   },
   {
     title: "Earnings",
@@ -84,6 +93,12 @@ const agentNavItems: NavItem[] = [
     title: "Messages",
     href: "/agent/messages",
     icon: MessageSquare,
+    showUnreadBadge: true,
+  },
+  {
+    title: "Contacts",
+    href: "/agent/contacts",
+    icon: Headphones,
   },
 ]
 
@@ -146,7 +161,7 @@ export function AgentSidebar({ user, agent }: AgentSidebarProps) {
                 isActive
                   ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                collapsed && "justify-center px-2"
+                collapsed && "justify-center px-2 relative"
               )}
             >
               <item.icon className="h-5 w-5 shrink-0" />
@@ -161,7 +176,13 @@ export function AgentSidebar({ user, agent }: AgentSidebarProps) {
                       {item.badge}
                     </Badge>
                   )}
+                  {item.showUnreadBadge && (
+                    <UnreadBadge variant={isActive ? "secondary" : "default"} />
+                  )}
                 </>
+              )}
+              {collapsed && item.showUnreadBadge && (
+                <UnreadBadge className="absolute -top-1 -right-1 h-4 min-w-4 text-[10px]" />
               )}
             </Link>
           )

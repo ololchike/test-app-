@@ -17,6 +17,7 @@ import { signOut } from "next-auth/react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
+import { UnreadBadge } from "@/components/messages/unread-badge"
 
 interface SidebarProps {
   user: {
@@ -32,31 +33,37 @@ const clientNavItems = [
     title: "Dashboard",
     href: "/dashboard",
     icon: LayoutDashboard,
+    showUnreadBadge: false,
   },
   {
     title: "My Bookings",
     href: "/dashboard/bookings",
     icon: Calendar,
+    showUnreadBadge: false,
   },
   {
     title: "Wishlist",
     href: "/dashboard/wishlist",
     icon: Heart,
+    showUnreadBadge: false,
   },
   {
     title: "Messages",
     href: "/dashboard/messages",
     icon: MessageSquare,
+    showUnreadBadge: true,
   },
   {
     title: "Profile",
     href: "/dashboard/profile",
     icon: User,
+    showUnreadBadge: false,
   },
   {
     title: "Settings",
     href: "/dashboard/settings",
     icon: Settings,
+    showUnreadBadge: false,
   },
 ]
 
@@ -96,11 +103,21 @@ export function DashboardSidebar({ user }: SidebarProps) {
                 isActive
                   ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                collapsed && "justify-center px-2"
+                collapsed && "justify-center px-2 relative"
               )}
             >
               <item.icon className="h-5 w-5 shrink-0" />
-              {!collapsed && <span>{item.title}</span>}
+              {!collapsed && (
+                <>
+                  <span className="flex-1">{item.title}</span>
+                  {item.showUnreadBadge && (
+                    <UnreadBadge variant={isActive ? "secondary" : "default"} />
+                  )}
+                </>
+              )}
+              {collapsed && item.showUnreadBadge && (
+                <UnreadBadge className="absolute -top-1 -right-1 h-4 min-w-4 text-[10px]" />
+              )}
             </Link>
           )
         })}

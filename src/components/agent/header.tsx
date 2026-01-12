@@ -32,6 +32,7 @@ import {
   Star,
   BarChart3,
   Users,
+  Headphones,
 } from "lucide-react"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
@@ -55,6 +56,7 @@ const mobileNavItems = [
   { title: "Analytics", href: "/agent/analytics", icon: BarChart3 },
   { title: "Customers", href: "/agent/customers", icon: Users },
   { title: "Messages", href: "/agent/messages", icon: MessageSquare },
+  { title: "Contacts", href: "/agent/contacts", icon: Headphones },
   { title: "Settings", href: "/agent/settings", icon: Settings },
 ]
 
@@ -156,9 +158,6 @@ export function AgentHeader({ user }: AgentHeaderProps) {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="relative">
               <Bell className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-[10px] font-medium text-primary-foreground flex items-center justify-center">
-                5
-              </span>
               <span className="sr-only">Notifications</span>
             </Button>
           </DropdownMenuTrigger>
@@ -166,40 +165,13 @@ export function AgentHeader({ user }: AgentHeaderProps) {
             <DropdownMenuLabel>Notifications</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <div className="max-h-80 overflow-auto">
-              <DropdownMenuItem className="flex flex-col items-start gap-1 cursor-pointer">
-                <div className="flex items-center gap-2">
-                  <Badge variant="default" className="text-[10px]">New Booking</Badge>
-                </div>
-                <p className="text-sm font-medium">New booking received</p>
-                <p className="text-xs text-muted-foreground">
-                  John Doe booked Masai Mara Safari for 4 guests
-                </p>
-                <p className="text-xs text-muted-foreground">2 hours ago</p>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="flex flex-col items-start gap-1 cursor-pointer">
-                <div className="flex items-center gap-2">
-                  <Badge variant="secondary" className="text-[10px]">Payment</Badge>
-                </div>
-                <p className="text-sm font-medium">Payment received</p>
-                <p className="text-xs text-muted-foreground">
-                  $1,200 payment for booking #BK-2024-001
-                </p>
-                <p className="text-xs text-muted-foreground">5 hours ago</p>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="flex flex-col items-start gap-1 cursor-pointer">
-                <div className="flex items-center gap-2">
-                  <Badge className="text-[10px] bg-amber-500">Review</Badge>
-                </div>
-                <p className="text-sm font-medium">New 5-star review</p>
-                <p className="text-xs text-muted-foreground">
-                  Sarah left a 5-star review for Serengeti Tour
-                </p>
-                <p className="text-xs text-muted-foreground">1 day ago</p>
-              </DropdownMenuItem>
+              <div className="p-4 text-center text-sm text-muted-foreground">
+                No new notifications
+              </div>
             </div>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="justify-center text-primary cursor-pointer">
-              View all notifications
+            <DropdownMenuItem className="justify-center text-primary cursor-pointer" asChild>
+              <Link href="/agent/notifications">View all notifications</Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

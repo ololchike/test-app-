@@ -153,7 +153,11 @@ export async function POST(request: NextRequest) {
       where: { id: "default" },
     })
 
-    const minWithdrawal = settings?.minWithdrawalAmount || 50.0
+    // Check for development mode
+    const isDevMode = process.env.PESAPAL_DEV_MODE === "true"
+
+    // In dev mode, allow 1 KES test withdrawals; otherwise enforce minimum
+    const minWithdrawal = isDevMode ? 1 : (settings?.minWithdrawalAmount || 50.0)
 
     // Validate minimum amount
     if (data.amount < minWithdrawal) {
@@ -163,6 +167,11 @@ export async function POST(request: NextRequest) {
         },
         { status: 400 }
       )
+    }
+
+    // Log dev mode status for debugging
+    if (isDevMode && data.amount === 1) {
+      console.log(`Dev mode enabled: Processing 1 KES test withdrawal for agent ${agent.id}`)
     }
 
     // Calculate available balance

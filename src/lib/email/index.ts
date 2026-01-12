@@ -2,6 +2,36 @@ import { Resend } from "resend"
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
+export interface GenericEmailData {
+  to: string | string[]
+  subject: string
+  html: string
+  from?: string
+}
+
+/**
+ * Sends a generic email using Resend
+ * @param data - Email data including recipient, subject, and HTML content
+ * @returns Promise with success status and result or error
+ */
+export async function sendEmail(data: GenericEmailData) {
+  const { to, subject, html, from = "SafariPlus <noreply@safariplus.com>" } = data
+
+  try {
+    const result = await resend.emails.send({
+      from,
+      to: Array.isArray(to) ? to : [to],
+      subject,
+      html,
+    })
+
+    return { success: true, data: result }
+  } catch (error) {
+    console.error("Error sending email:", error)
+    return { success: false, error }
+  }
+}
+
 export interface BookingEmailData {
   to: string
   bookingReference: string

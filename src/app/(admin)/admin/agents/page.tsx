@@ -1,0 +1,405 @@
+"use client"
+
+import { useEffect, useState } from "react"
+import { format } from "date-fns"
+import { Shield, Search, Check, X, Eye } from "lucide-react"
+import { toast } from "sonner"
+import Link from "next/link"
+
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { Skeleton } from "@/components/ui/skeleton"
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog"
+
+interface Agent {
+  id: string
+  businessName: string
+  businessEmail: string | null
+  city: string | null
+  country: string | null
+  status: string
+  isVerified: boolean
+  createdAt: string
+  user: {
+    email: string
+    name: string | null
+  }
+  _count: {
+    tours: number
+    bookings: number
+  }
+}
+
+const statusConfig = {
+  PENDING: { label: "Pending", color: "bg-yellow-500" },
+  ACTIVE: { label: "Active", color: "bg-green-500" },
+  SUSPENDED: { label: "Suspended", color: "bg-red-500" },
+  DEACTIVATED: { label: "Deactivated", color: "bg-gray-500" },
+}
+
+export default function AdminAgentsPage() {
+  const [agents, setAgents] = useState<Agent[]>([])
+  const [loading, setLoading] = useState(true)
+  const [statusFilter, setStatusFilter] = useState<string>("all")
+  const [searchQuery, setSearchQuery] = useState("")
+  const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [dialogType, setDialogType] = useState<"verify" | "suspend" | "activate">("verify")
+  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null)
+  const [isProcessing, setIsProcessing] = useState(false)
+
+  useEffect(() => {
+    fetchAgents()
+  }, [statusFilter, page])
+
+  async function fetchAgents() {
+    setLoading(true)
+    try {
+      const params = new URLSearchParams()
+      if (statusFilter !== "all") params.set("status", statusFilter)
+      if (searchQuery) params.set("search", searchQuery)
+      params.set("page", page.toString())
+      params.set("limit", "10")
+
+      const response = await fetch(`/api/admin/agents?${params}`)
+      if (!response.ok) throw new Error("Failed to fetch agents")
+
+      const data = await response.json()
+      setAgents(data.agents || [])
+      setTotalPages(data.pagination?.totalPages || 1)
+    } catch (error) {
+      console.error("Error fetching agents:", error)
+      toast.error("Failed to load agents")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleAgentAction() {
+    if (!selectedAgent) return
+
+    setIsProcessing(true)
+    try {
+      const endpoint =
+        dialogType === "verify"
+          ? `/api/admin/agents/${selectedAgent.id}/verify`
+          : dialogType === "suspend"
+          ? `/api/admin/agents/${selectedAgent.id}/suspend`
+          : `/api/admin/agents/${selectedAgent.id}/activate`
+
+      const response = await fetch(endpoint, {
+        method: "PATCH",
+      })
+
+      if (!response.ok) throw new Error("Failed to update agent")
+
+      toast.success(
+        dialogType === "verify"
+          ? "Agent verified"
+          : dialogType === "suspend"
+          ? "Agent suspended"
+          : "Agent activated"
+      )
+      setDialogOpen(false)
+      fetchAgents()
+    } catch (error) {
+      console.error("Error updating agent:", error)
+      toast.error("Failed to update agent")
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  const handleSearch = () => {
+    setPage(1)
+    fetchAgents()
+  }
+
+  const statusCounts = agents.reduce((acc, agent) => {
+    acc[agent.status] = (acc[agent.status] || 0) + 1
+    return acc
+  }, {} as Record<string, number>)
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold">Agent Management</h1>
+        <p className="text-muted-foreground mt-2">
+          Manage tour operators and agents
+        </p>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <Card
+          className={`cursor-pointer transition-all hover:shadow-lg ${
+            statusFilter === "all" ? "ring-2 ring-primary" : ""
+          }`}
+          onClick={() => {
+            setStatusFilter("all")
+            setPage(1)
+          }}
+        >
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">All Agents</p>
+                <p className="text-2xl font-bold mt-1">{agents.length}</p>
+              </div>
+              <Shield className="h-8 w-8 text-blue-500" />
+            </div>
+          </CardContent>
+        </Card>
+
+        {Object.entries(statusConfig).map(([status, config]) => {
+          const count = statusCounts[status] || 0
+
+          return (
+            <Card
+              key={status}
+              className={`cursor-pointer transition-all hover:shadow-lg ${
+                statusFilter === status ? "ring-2 ring-primary" : ""
+              }`}
+              onClick={() => {
+                setStatusFilter(status)
+                setPage(1)
+              }}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">{config.label}</p>
+                    <p className="text-2xl font-bold mt-1">{count}</p>
+                  </div>
+                  <div className={`h-3 w-3 rounded-full ${config.color}`}></div>
+                </div>
+              </CardContent>
+            </Card>
+          )
+        })}
+      </div>
+
+      <Card>
+        <CardHeader>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <CardTitle>Agents</CardTitle>
+            <div className="flex gap-2">
+              <div className="relative flex-1 sm:w-80">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Search agents..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                  className="pl-9"
+                />
+              </div>
+              <Button onClick={handleSearch} variant="secondary">
+                Search
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="space-y-4">
+              {[...Array(5)].map((_, i) => (
+                <Skeleton key={i} className="h-16 w-full" />
+              ))}
+            </div>
+          ) : agents.length === 0 ? (
+            <div className="text-center py-12">
+              <Shield className="mx-auto h-12 w-12 text-muted-foreground" />
+              <p className="mt-4 text-muted-foreground">No agents found</p>
+            </div>
+          ) : (
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Business</TableHead>
+                    <TableHead>Owner</TableHead>
+                    <TableHead>Location</TableHead>
+                    <TableHead>Tours</TableHead>
+                    <TableHead>Bookings</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Verified</TableHead>
+                    <TableHead>Joined</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {agents.map((agent) => (
+                    <TableRow key={agent.id}>
+                      <TableCell>
+                        <div>
+                          <p className="font-medium">{agent.businessName}</p>
+                          {agent.businessEmail && (
+                            <p className="text-xs text-muted-foreground">
+                              {agent.businessEmail}
+                            </p>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <p className="font-medium text-sm">
+                            {agent.user.name || "No name"}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {agent.user.email}
+                          </p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {agent.city && agent.country
+                          ? `${agent.city}, ${agent.country}`
+                          : agent.country || "Not specified"}
+                      </TableCell>
+                      <TableCell>{agent._count.tours}</TableCell>
+                      <TableCell>{agent._count.bookings}</TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={`${
+                            statusConfig[agent.status as keyof typeof statusConfig]
+                              ?.color
+                          } text-white border-0`}
+                        >
+                          {
+                            statusConfig[agent.status as keyof typeof statusConfig]
+                              ?.label
+                          }
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {agent.isVerified ? (
+                          <Check className="h-5 w-5 text-green-500" />
+                        ) : (
+                          <X className="h-5 w-5 text-red-500" />
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {format(new Date(agent.createdAt), "MMM dd, yyyy")}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex gap-2 justify-end">
+                          {!agent.isVerified && agent.status === "PENDING" && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedAgent(agent)
+                                setDialogType("verify")
+                                setDialogOpen(true)
+                              }}
+                            >
+                              <Check className="h-4 w-4 mr-1" />
+                              Verify
+                            </Button>
+                          )}
+                          {agent.status === "ACTIVE" && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedAgent(agent)
+                                setDialogType("suspend")
+                                setDialogOpen(true)
+                              }}
+                            >
+                              Suspend
+                            </Button>
+                          )}
+                          {agent.status === "SUSPENDED" && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedAgent(agent)
+                                setDialogType("activate")
+                                setDialogOpen(true)
+                              }}
+                            >
+                              Activate
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between mt-4">
+                  <p className="text-sm text-muted-foreground">
+                    Page {page} of {totalPages}
+                  </p>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPage(page - 1)}
+                      disabled={page === 1}
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPage(page + 1)}
+                      disabled={page === totalPages}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      <ConfirmationDialog
+        isOpen={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        onConfirm={handleAgentAction}
+        title={
+          dialogType === "verify"
+            ? "Verify Agent"
+            : dialogType === "suspend"
+            ? "Suspend Agent"
+            : "Activate Agent"
+        }
+        description={
+          dialogType === "verify"
+            ? `Are you sure you want to verify ${selectedAgent?.businessName}? This will grant them full access to create and manage tours.`
+            : dialogType === "suspend"
+            ? `Are you sure you want to suspend ${selectedAgent?.businessName}? They will not be able to access the platform.`
+            : `Are you sure you want to activate ${selectedAgent?.businessName}? They will be able to access the platform again.`
+        }
+        confirmText={
+          dialogType === "verify"
+            ? "Verify Agent"
+            : dialogType === "suspend"
+            ? "Suspend"
+            : "Activate"
+        }
+        variant={dialogType === "suspend" ? "danger" : "default"}
+        isLoading={isProcessing}
+      />
+    </div>
+  )
+}

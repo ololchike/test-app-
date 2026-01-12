@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { createLogger } from "@/lib/logger"
+
+const log = createLogger("Reviews API")
 
 const reviewSchema = z.object({
   bookingId: z.string().min(1, "Booking ID is required"),
@@ -127,7 +130,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     )
   } catch (error) {
-    console.error("Review submission error:", error)
+    log.error("Review submission error", error)
     return NextResponse.json(
       { error: "Failed to submit review. Please try again." },
       { status: 500 }
@@ -145,15 +148,20 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get("page") || "1")
     const limit = parseInt(searchParams.get("limit") || "10")
 
-    // Build where clause
-    const where: any = { isApproved: true }
+    // Build where clause with Prisma-compatible types
+    const where: {
+      isApproved: boolean
+      tourId?: string
+      userId?: string
+      rating?: number
+    } = { isApproved: true }
 
     if (tourId) where.tourId = tourId
     if (userId) where.userId = userId
     if (rating) where.rating = parseInt(rating)
 
     // Build orderBy clause
-    let orderBy: any = { createdAt: "desc" }
+    let orderBy: { createdAt?: "desc" | "asc"; rating?: "desc" | "asc"; helpfulCount?: "desc" | "asc" } = { createdAt: "desc" }
 
     if (sort === "highest") {
       orderBy = { rating: "desc" }
@@ -230,7 +238,7 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error("Error fetching reviews:", error)
+    log.error("Error fetching reviews", error)
     return NextResponse.json(
       { error: "Failed to fetch reviews" },
       { status: 500 }
