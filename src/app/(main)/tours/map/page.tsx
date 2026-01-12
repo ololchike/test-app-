@@ -88,8 +88,8 @@ function MapSearchContent() {
         setIsLoading(true)
         const params = new URLSearchParams()
         params.set("hasLocation", "true")
-        if (filters.country) params.set("country", filters.country)
-        if (filters.tourType) params.set("tourType", filters.tourType)
+        if (filters.country && filters.country !== "all") params.set("country", filters.country)
+        if (filters.tourType && filters.tourType !== "all") params.set("tourType", filters.tourType)
         if (filters.minPrice) params.set("minPrice", filters.minPrice)
         if (filters.maxPrice) params.set("maxPrice", filters.maxPrice)
 
@@ -152,7 +152,7 @@ function MapSearchContent() {
                         <SelectValue placeholder="All countries" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All countries</SelectItem>
+                        <SelectItem value="all">All countries</SelectItem>
                         <SelectItem value="Kenya">Kenya</SelectItem>
                         <SelectItem value="Tanzania">Tanzania</SelectItem>
                         <SelectItem value="Uganda">Uganda</SelectItem>
@@ -172,7 +172,7 @@ function MapSearchContent() {
                         <SelectValue placeholder="All types" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All types</SelectItem>
+                        <SelectItem value="all">All types</SelectItem>
                         <SelectItem value="SAFARI">Safari</SelectItem>
                         <SelectItem value="BEACH">Beach</SelectItem>
                         <SelectItem value="MOUNTAIN">Mountain</SelectItem>
@@ -229,7 +229,7 @@ function MapSearchContent() {
                   <SelectValue placeholder="Country" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All countries</SelectItem>
+                  <SelectItem value="all">All countries</SelectItem>
                   <SelectItem value="Kenya">Kenya</SelectItem>
                   <SelectItem value="Tanzania">Tanzania</SelectItem>
                   <SelectItem value="Uganda">Uganda</SelectItem>
@@ -246,7 +246,7 @@ function MapSearchContent() {
                   <SelectValue placeholder="Tour Type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All types</SelectItem>
+                  <SelectItem value="all">All types</SelectItem>
                   <SelectItem value="SAFARI">Safari</SelectItem>
                   <SelectItem value="BEACH">Beach</SelectItem>
                   <SelectItem value="MOUNTAIN">Mountain</SelectItem>

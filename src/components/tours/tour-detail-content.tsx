@@ -13,6 +13,11 @@ import {
   Heart,
   Share2,
   MessageSquare,
+  Calendar,
+  Sun,
+  Award,
+  Sparkles,
+  ChevronRight,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -24,6 +29,9 @@ import { InteractiveItinerary } from "./interactive-itinerary"
 import { BookingCard } from "./booking-card"
 import { ReviewStats } from "@/components/reviews/review-stats"
 import { ReviewList } from "@/components/reviews/review-list"
+import { TourReviewSection } from "@/components/reviews/tour-review-section"
+import { motion, AnimatePresence } from "framer-motion"
+import { cn } from "@/lib/utils"
 
 // Tour type for detail page
 export interface TourDetailData {
@@ -113,12 +121,12 @@ interface TourDetailContentProps {
 export function TourDetailContent({ tour }: TourDetailContentProps) {
   const bookNowButtonRef = useRef<HTMLButtonElement>(null)
   const [showFloatingButton, setShowFloatingButton] = useState(false)
+  const [isWishlisted, setIsWishlisted] = useState(false)
 
   // Observe when the Book Now button in the card goes out of view
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        // Show floating button when the card's Book Now button is NOT visible
         setShowFloatingButton(!entry.isIntersecting)
       },
       {
@@ -164,375 +172,543 @@ export function TourDetailContent({ tour }: TourDetailContentProps) {
         endDate,
       }) => (
         <>
-        <div className="container mx-auto px-4 lg:px-8 py-6">
+        <div className="container mx-auto px-4 lg:px-8 py-8">
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Left Column - Tour Details */}
             <div className="flex-1 space-y-8">
               {/* Title and Quick Info */}
-              <div>
-                <div className="flex flex-wrap gap-2 mb-3">
-                  {tour.tourType.map((type: string) => (
-                    <Badge key={type} variant="secondary">
-                      {type}
-                    </Badge>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {tour.tourType.map((type: string, i: number) => (
+                    <motion.div
+                      key={type}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: i * 0.05 }}
+                    >
+                      <Badge
+                        variant="secondary"
+                        className="px-3 py-1 text-sm font-medium bg-primary/10 text-primary border-0 hover:bg-primary/20 transition-colors"
+                      >
+                        {type}
+                      </Badge>
+                    </motion.div>
                   ))}
-                  {tour.featured && <Badge className="bg-primary">Featured</Badge>}
-                </div>
-                <h1 className="text-3xl font-bold tracking-tight">{tour.title}</h1>
-                {tour.subtitle && (
-                  <p className="text-lg text-muted-foreground mt-1">{tour.subtitle}</p>
-                )}
-
-                <div className="flex flex-wrap items-center gap-4 mt-4 text-sm">
-                  <span className="flex items-center gap-1">
-                    <MapPin className="h-4 w-4 text-muted-foreground" />
-                    {tour.destination}, {tour.country}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                    {tour.durationDays} Days / {tour.durationNights} Nights
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Users className="h-4 w-4 text-muted-foreground" />
-                    Max {tour.maxGroupSize} people
-                  </span>
-                  {tour.rating > 0 && (
-                    <span className="flex items-center gap-1">
-                      <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                      <span className="font-medium">{tour.rating}</span>
-                      <span className="text-muted-foreground">
-                        ({tour.reviewCount} reviews)
-                      </span>
-                    </span>
+                  {tour.featured && (
+                    <Badge className="bg-gradient-to-r from-primary to-orange-500 border-0 shadow-lg px-3 py-1">
+                      <Sparkles className="h-3 w-3 mr-1" />
+                      Featured
+                    </Badge>
                   )}
                 </div>
 
-                <div className="flex gap-2 mt-4">
-                  <Button variant="outline" size="sm">
-                    <Heart className="h-4 w-4 mr-2" />
-                    Save
+                <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+                  {tour.title}
+                </h1>
+                {tour.subtitle && (
+                  <p className="text-lg text-muted-foreground mt-2">{tour.subtitle}</p>
+                )}
+
+                <div className="flex flex-wrap items-center gap-4 mt-5">
+                  <motion.span
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/50 text-sm"
+                  >
+                    <MapPin className="h-4 w-4 text-primary" />
+                    {tour.destination}, {tour.country}
+                  </motion.span>
+                  <motion.span
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.15 }}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/50 text-sm"
+                  >
+                    <Clock className="h-4 w-4 text-primary" />
+                    {tour.durationDays} Days / {tour.durationNights} Nights
+                  </motion.span>
+                  <motion.span
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/50 text-sm"
+                  >
+                    <Users className="h-4 w-4 text-primary" />
+                    Max {tour.maxGroupSize} people
+                  </motion.span>
+                  {tour.rating > 0 && (
+                    <motion.span
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.25 }}
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 dark:bg-amber-900/20 text-sm"
+                    >
+                      <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                      <span className="font-semibold">{tour.rating}</span>
+                      <span className="text-muted-foreground">
+                        ({tour.reviewCount} reviews)
+                      </span>
+                    </motion.span>
+                  )}
+                </div>
+
+                {/* Best Season */}
+                {tour.bestSeason.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="mt-4 flex items-center gap-2 text-sm text-muted-foreground"
+                  >
+                    <Sun className="h-4 w-4 text-amber-500" />
+                    <span>Best time to visit: <span className="font-medium text-foreground">{tour.bestSeason.join(", ")}</span></span>
+                  </motion.div>
+                )}
+
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.35 }}
+                  className="flex gap-3 mt-6"
+                >
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className={cn(
+                      "h-10 px-4 border-border/50 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-all",
+                      isWishlisted && "bg-rose-50 text-rose-600 border-rose-200"
+                    )}
+                    onClick={() => setIsWishlisted(!isWishlisted)}
+                  >
+                    <Heart className={cn("h-4 w-4 mr-2", isWishlisted && "fill-current")} />
+                    {isWishlisted ? "Saved" : "Save"}
                   </Button>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" className="h-10 px-4 border-border/50 hover:bg-primary/5 hover:text-primary hover:border-primary/30">
                     <Share2 className="h-4 w-4 mr-2" />
                     Share
                   </Button>
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
 
               {/* Tabs Section */}
-              <Tabs defaultValue="overview" className="w-full">
-                <TabsList className="w-full justify-start border-b rounded-none h-auto p-0 bg-transparent">
-                  <TabsTrigger
-                    value="overview"
-                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
-                  >
-                    Overview
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="itinerary"
-                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
-                  >
-                    Itinerary
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="accommodation"
-                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
-                  >
-                    Accommodation
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="reviews"
-                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
-                  >
-                    Reviews
-                  </TabsTrigger>
-                </TabsList>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
+                <Tabs defaultValue="overview" className="w-full">
+                  <TabsList className="w-full justify-start border-b rounded-none h-auto p-0 bg-transparent gap-6">
+                    {["overview", "itinerary", "accommodation", "reviews"].map((tab) => (
+                      <TabsTrigger
+                        key={tab}
+                        value={tab}
+                        className="relative rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary pb-3 capitalize font-medium transition-all"
+                      >
+                        {tab}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
 
-                <TabsContent value="overview" className="mt-6 space-y-6">
-                  {/* Description */}
-                  <div>
-                    <h2 className="text-xl font-semibold mb-3">About This Tour</h2>
-                    <div className="prose prose-sm max-w-none text-muted-foreground">
-                      {tour.description.split("\n\n").map((paragraph: string, i: number) => (
-                        <p key={i}>{paragraph}</p>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Highlights */}
-                  <div>
-                    <h2 className="text-xl font-semibold mb-3">Highlights</h2>
-                    <ul className="grid sm:grid-cols-2 gap-2">
-                      {tour.highlights.map((highlight: string, i: number) => (
-                        <li key={i} className="flex items-start gap-2">
-                          <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                          <span>{highlight}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Included / Excluded */}
-                  <div className="grid sm:grid-cols-2 gap-6">
-                    <div>
-                      <h3 className="font-semibold mb-3 flex items-center gap-2">
-                        <Check className="h-5 w-5 text-green-500" />
-                        What&apos;s Included
-                      </h3>
-                      <ul className="space-y-2">
-                        {tour.included.map((item: string, i: number) => (
-                          <li key={i} className="text-sm text-muted-foreground">
-                            {item}
-                          </li>
+                  <TabsContent value="overview" className="mt-8 space-y-10">
+                    {/* Description */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4 }}
+                    >
+                      <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                        <span className="h-8 w-1 bg-gradient-to-b from-primary to-accent rounded-full"></span>
+                        About This Tour
+                      </h2>
+                      <div className="prose prose-lg max-w-none text-muted-foreground">
+                        {tour.description.split("\n\n").map((paragraph: string, i: number) => (
+                          <p key={i} className="leading-relaxed">{paragraph}</p>
                         ))}
-                      </ul>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold mb-3 flex items-center gap-2">
-                        <X className="h-5 w-5 text-red-500" />
-                        What&apos;s Not Included
-                      </h3>
-                      <ul className="space-y-2">
-                        {tour.excluded.map((item: string, i: number) => (
-                          <li key={i} className="text-sm text-muted-foreground">
-                            {item}
-                          </li>
+                      </div>
+                    </motion.div>
+
+                    {/* Highlights */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, delay: 0.1 }}
+                    >
+                      <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                        <span className="h-8 w-1 bg-gradient-to-b from-primary to-accent rounded-full"></span>
+                        Tour Highlights
+                      </h2>
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        {tour.highlights.map((highlight: string, i: number) => (
+                          <motion.div
+                            key={i}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.3, delay: i * 0.05 }}
+                            className="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-r from-primary/5 to-transparent border border-primary/10 hover:border-primary/20 transition-colors"
+                          >
+                            <div className="flex-shrink-0 h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center">
+                              <Check className="h-4 w-4 text-primary" />
+                            </div>
+                            <span className="font-medium">{highlight}</span>
+                          </motion.div>
                         ))}
-                      </ul>
-                    </div>
-                  </div>
-                </TabsContent>
+                      </div>
+                    </motion.div>
 
-                <TabsContent value="itinerary" className="mt-6">
-                  <InteractiveItinerary
-                    itinerary={tour.itinerary}
-                    accommodationOptions={tour.accommodationOptions}
-                    activityAddons={tour.activityAddons}
-                    bookingState={bookingState}
-                    onAccommodationChange={updateAccommodation}
-                    onAddonToggle={toggleAddon}
-                    durationDays={tour.durationDays}
-                  />
-                </TabsContent>
-
-                <TabsContent value="accommodation" className="mt-6">
-                  <h2 className="text-xl font-semibold mb-6">
-                    Accommodation Options
-                  </h2>
-                  <p className="text-muted-foreground mb-6">
-                    Choose your preferred accommodation for each night in the Itinerary tab. Below are all available options:
-                  </p>
-                  <div className="grid gap-4">
-                    {tour.accommodationOptions.map((option) => (
-                      <Card key={option.id}>
+                    {/* Included / Excluded */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, delay: 0.2 }}
+                      className="grid sm:grid-cols-2 gap-8"
+                    >
+                      <Card className="border-green-200/50 bg-gradient-to-br from-green-50/50 to-transparent dark:from-green-900/10">
                         <CardHeader className="pb-3">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <Badge variant="outline">{option.tier}</Badge>
-                              <CardTitle className="mt-2">{option.name}</CardTitle>
+                          <CardTitle className="text-lg flex items-center gap-2 text-green-700 dark:text-green-400">
+                            <div className="h-8 w-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                              <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
                             </div>
-                            <div className="text-right">
-                              <p className="text-2xl font-bold">
-                                ${option.pricePerNight}
-                              </p>
-                              <p className="text-sm text-muted-foreground">
-                                per night
-                              </p>
-                            </div>
-                          </div>
+                            What&apos;s Included
+                          </CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <p className="text-muted-foreground mb-3">
-                            {option.description}
-                          </p>
-                          <div className="flex flex-wrap gap-2">
-                            {option.amenities.map((amenity: string) => (
-                              <Badge key={amenity} variant="secondary">
-                                {amenity}
-                              </Badge>
+                          <ul className="space-y-3">
+                            {tour.included.map((item: string, i: number) => (
+                              <li key={i} className="flex items-start gap-2 text-sm">
+                                <ChevronRight className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                                <span>{item}</span>
+                              </li>
                             ))}
-                          </div>
+                          </ul>
                         </CardContent>
                       </Card>
-                    ))}
-                  </div>
 
-                  <h3 className="text-lg font-semibold mt-8 mb-4">
-                    Optional Add-ons
-                  </h3>
-                  <p className="text-muted-foreground mb-4">
-                    Add-ons are available on specific days. Check the Itinerary tab to see availability and add them to your booking.
-                  </p>
-                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {tour.activityAddons.map((addon) => (
-                      <Card key={addon.id}>
-                        <CardContent className="pt-6">
-                          <h4 className="font-semibold">{addon.name}</h4>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            {addon.description}
-                          </p>
-                          <div className="flex items-center justify-between mt-3">
-                            <span className="text-sm text-muted-foreground">
-                              {addon.duration}
-                            </span>
-                            <span className="font-bold">${addon.price}</span>
-                          </div>
+                      <Card className="border-red-200/50 bg-gradient-to-br from-red-50/50 to-transparent dark:from-red-900/10">
+                        <CardHeader className="pb-3">
+                          <CardTitle className="text-lg flex items-center gap-2 text-red-700 dark:text-red-400">
+                            <div className="h-8 w-8 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                              <X className="h-4 w-4 text-red-600 dark:text-red-400" />
+                            </div>
+                            What&apos;s Not Included
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <ul className="space-y-3">
+                            {tour.excluded.map((item: string, i: number) => (
+                              <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+                                <ChevronRight className="h-4 w-4 text-red-400 mt-0.5 flex-shrink-0" />
+                                <span>{item}</span>
+                              </li>
+                            ))}
+                          </ul>
                         </CardContent>
                       </Card>
-                    ))}
-                  </div>
-                </TabsContent>
+                    </motion.div>
+                  </TabsContent>
 
-                <TabsContent value="reviews" className="mt-6">
-                  <ReviewStats
-                    averageRating={tour.rating}
-                    totalReviews={tour.reviewCount}
-                    ratingBreakdown={{
-                      5: 0,
-                      4: 0,
-                      3: 0,
-                      2: 0,
-                      1: 0,
-                    }}
-                  />
-                  <div className="mt-6">
-                    <ReviewList
+                  <TabsContent value="itinerary" className="mt-8">
+                    <InteractiveItinerary
+                      itinerary={tour.itinerary}
+                      accommodationOptions={tour.accommodationOptions}
+                      activityAddons={tour.activityAddons}
+                      bookingState={bookingState}
+                      onAccommodationChange={updateAccommodation}
+                      onAddonToggle={toggleAddon}
+                      durationDays={tour.durationDays}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="accommodation" className="mt-8">
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4 }}
+                    >
+                      <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
+                        <span className="h-8 w-1 bg-gradient-to-b from-primary to-accent rounded-full"></span>
+                        Accommodation Options
+                      </h2>
+                      <p className="text-muted-foreground mb-8">
+                        Choose your preferred accommodation for each night in the Itinerary tab. Below are all available options:
+                      </p>
+                      <div className="grid gap-6">
+                        {tour.accommodationOptions.map((option, index) => (
+                          <motion.div
+                            key={option.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.1 }}
+                          >
+                            <Card className="overflow-hidden border-border/50 hover:border-primary/30 hover:shadow-premium-lg transition-all duration-300">
+                              <CardHeader className="pb-3 bg-gradient-to-r from-muted/50 to-transparent">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <Badge
+                                      variant="outline"
+                                      className={cn(
+                                        "mb-2",
+                                        option.tier === "LUXURY" && "border-amber-400 text-amber-600 bg-amber-50",
+                                        option.tier === "STANDARD" && "border-blue-400 text-blue-600 bg-blue-50",
+                                        option.tier === "BUDGET" && "border-gray-400 text-gray-600 bg-gray-50"
+                                      )}
+                                    >
+                                      {option.tier}
+                                    </Badge>
+                                    <CardTitle className="text-xl">{option.name}</CardTitle>
+                                    {option.location && (
+                                      <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1">
+                                        <MapPin className="h-3 w-3" /> {option.location}
+                                      </p>
+                                    )}
+                                  </div>
+                                  <div className="text-right">
+                                    <p className="text-3xl font-bold text-gradient">
+                                      ${option.pricePerNight}
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">
+                                      per night
+                                    </p>
+                                  </div>
+                                </div>
+                              </CardHeader>
+                              <CardContent className="pt-4">
+                                <p className="text-muted-foreground mb-4">
+                                  {option.description}
+                                </p>
+                                <div className="flex flex-wrap gap-2">
+                                  {option.amenities.map((amenity: string) => (
+                                    <Badge key={amenity} variant="secondary" className="bg-primary/5 text-primary/80 border-0">
+                                      {amenity}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </motion.div>
+                        ))}
+                      </div>
+
+                      <h3 className="text-xl font-bold mt-12 mb-2 flex items-center gap-2">
+                        <span className="h-6 w-1 bg-gradient-to-b from-accent to-secondary rounded-full"></span>
+                        Optional Add-ons
+                      </h3>
+                      <p className="text-muted-foreground mb-6">
+                        Add-ons are available on specific days. Check the Itinerary tab to see availability.
+                      </p>
+                      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        {tour.activityAddons.map((addon, index) => (
+                          <motion.div
+                            key={addon.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.08 }}
+                          >
+                            <Card className="h-full border-border/50 hover:border-accent/30 hover:shadow-lg transition-all duration-300">
+                              <CardContent className="pt-6">
+                                <h4 className="font-bold text-lg">{addon.name}</h4>
+                                <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                                  {addon.description}
+                                </p>
+                                <div className="flex items-center justify-between mt-4 pt-4 border-t border-border/50">
+                                  <span className="text-sm text-muted-foreground flex items-center gap-1">
+                                    <Clock className="h-4 w-4" />
+                                    {addon.duration}
+                                  </span>
+                                  <span className="font-bold text-lg text-gradient">${addon.price}</span>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  </TabsContent>
+
+                  <TabsContent value="reviews" className="mt-8 space-y-10">
+                    {/* Write a Review Section */}
+                    <TourReviewSection
+                      tourId={tour.id}
                       tourSlug={tour.slug}
-                      initialReviews={tour.reviews.map((review) => ({
-                        id: review.id,
-                        rating: review.rating,
-                        title: review.title || undefined,
-                        content: review.content,
-                        images: review.images || [],
-                        createdAt: review.createdAt || new Date().toISOString(),
-                        helpfulCount: review.helpfulCount || 0,
-                        isVerified: review.isVerified ?? true,
-                        user: {
-                          name: review.user.name || "Anonymous",
-                          avatar: review.user.avatar || undefined,
-                        },
-                      }))}
-                      initialMeta={{
-                        total: tour.reviewCount,
-                        totalPages: Math.ceil(tour.reviewCount / 10),
-                        page: 1,
+                      tourTitle={tour.title}
+                    />
+
+                    {/* Review Stats */}
+                    <ReviewStats
+                      averageRating={tour.rating}
+                      totalReviews={tour.reviewCount}
+                      ratingBreakdown={{
+                        5: 0,
+                        4: 0,
+                        3: 0,
+                        2: 0,
+                        1: 0,
                       }}
                     />
-                  </div>
-                </TabsContent>
-              </Tabs>
+
+                    {/* Reviews List */}
+                    <div>
+                      <h3 className="text-xl font-bold mb-6">Customer Reviews</h3>
+                      <ReviewList
+                        tourSlug={tour.slug}
+                        initialReviews={tour.reviews.map((review) => ({
+                          id: review.id,
+                          rating: review.rating,
+                          title: review.title || undefined,
+                          content: review.content,
+                          images: review.images || [],
+                          createdAt: review.createdAt || new Date().toISOString(),
+                          helpfulCount: review.helpfulCount || 0,
+                          isVerified: review.isVerified ?? true,
+                          user: {
+                            name: review.user.name || "Anonymous",
+                            avatar: review.user.avatar || undefined,
+                          },
+                        }))}
+                        initialMeta={{
+                          total: tour.reviewCount,
+                          totalPages: Math.ceil(tour.reviewCount / 10),
+                          page: 1,
+                        }}
+                      />
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </motion.div>
 
               {/* Tour Operator Card */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">About the Tour Operator</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-start gap-4">
-                    <Avatar className="h-16 w-16">
-                      <AvatarFallback className="text-lg bg-primary text-primary-foreground">
-                        {tour.agent.businessName[0]}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold">{tour.agent.businessName}</h3>
-                        {tour.agent.isVerified && (
-                          <Badge variant="secondary" className="text-xs">
-                            <Shield className="h-3 w-3 mr-1" />
-                            Verified
-                          </Badge>
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {tour.agent.description}
-                      </p>
-                      <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                          <span className="font-medium text-foreground">
-                            {tour.agent.rating}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+              >
+                <Card className="border-border/50 overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-secondary/10 to-transparent">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Award className="h-5 w-5 text-secondary" />
+                      About the Tour Operator
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-6">
+                    <div className="flex items-start gap-4">
+                      <Avatar className="h-16 w-16 border-2 border-primary/20">
+                        <AvatarFallback className="text-lg bg-gradient-to-br from-primary to-secondary text-primary-foreground font-bold">
+                          {tour.agent.businessName[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-bold text-lg">{tour.agent.businessName}</h3>
+                          {tour.agent.isVerified && (
+                            <Badge className="bg-secondary/10 text-secondary border-0 text-xs">
+                              <Shield className="h-3 w-3 mr-1" />
+                              Verified
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                          {tour.agent.description}
+                        </p>
+                        <div className="flex flex-wrap items-center gap-4 mt-4 text-sm">
+                          <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 dark:bg-amber-900/20">
+                            <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                            <span className="font-semibold">
+                              {tour.agent.rating}
+                            </span>
+                            <span className="text-muted-foreground">({tour.agent.reviewCount})</span>
                           </span>
-                          ({tour.agent.reviewCount} reviews)
-                        </span>
-                        {tour.agent.toursConducted && (
-                          <span>{tour.agent.toursConducted}+ tours</span>
-                        )}
-                        {tour.agent.yearsInBusiness && (
-                          <span>{tour.agent.yearsInBusiness} years</span>
-                        )}
-                      </div>
-                      <div className="flex gap-2 mt-4">
-                        <Button variant="outline" size="sm">
-                          <MessageSquare className="h-4 w-4 mr-2" />
-                          Contact
-                        </Button>
-                        <Button variant="outline" size="sm" asChild>
-                          <Link href={`/agents/${tour.agent.id}`}>View Profile</Link>
-                        </Button>
+                          {tour.agent.toursConducted && (
+                            <span className="px-3 py-1.5 rounded-full bg-muted/50 text-muted-foreground">
+                              {tour.agent.toursConducted}+ tours
+                            </span>
+                          )}
+                          {tour.agent.yearsInBusiness && (
+                            <span className="px-3 py-1.5 rounded-full bg-muted/50 text-muted-foreground">
+                              {tour.agent.yearsInBusiness} years experience
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex gap-3 mt-5">
+                          <Button variant="outline" size="sm" className="h-10 border-border/50 hover:bg-primary/5 hover:text-primary hover:border-primary/30">
+                            <MessageSquare className="h-4 w-4 mr-2" />
+                            Contact
+                          </Button>
+                          <Button variant="outline" size="sm" className="h-10 border-border/50 hover:bg-secondary/5 hover:text-secondary hover:border-secondary/30" asChild>
+                            <Link href={`/agents/${tour.agent.id}`}>View Profile</Link>
+                          </Button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </motion.div>
             </div>
 
             {/* Right Column - Booking Card (Sticky) */}
             <div className="lg:w-96 shrink-0">
-              <BookingCard
-                basePrice={tour.basePrice}
-                durationNights={tour.durationNights}
-                maxGroupSize={tour.maxGroupSize}
-                bookingState={bookingState}
-                pricing={pricing}
-                activityAddons={tour.activityAddons}
-                onAdultsChange={setAdults}
-                onChildrenChange={setChildren}
-                onStartDateChange={setStartDate}
-                onAddonToggle={toggleAddon}
-                onBooking={handleBooking}
-                isLoading={isLoading}
-                endDate={endDate}
-                bookNowButtonRef={bookNowButtonRef}
-              />
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
+                <BookingCard
+                  basePrice={tour.basePrice}
+                  durationNights={tour.durationNights}
+                  maxGroupSize={tour.maxGroupSize}
+                  bookingState={bookingState}
+                  pricing={pricing}
+                  activityAddons={tour.activityAddons}
+                  onAdultsChange={setAdults}
+                  onChildrenChange={setChildren}
+                  onStartDateChange={setStartDate}
+                  onAddonToggle={toggleAddon}
+                  onBooking={handleBooking}
+                  isLoading={isLoading}
+                  endDate={endDate}
+                  bookNowButtonRef={bookNowButtonRef}
+                />
+              </motion.div>
             </div>
           </div>
         </div>
 
-        {/* Floating Book Now Button - shows when card's Book Now button is out of view */}
-        <div
-          className={`fixed bottom-6 right-6 z-50 transition-all duration-300 ease-out ${
-            showFloatingButton
-              ? "translate-y-0 opacity-100"
-              : "translate-y-16 opacity-0 pointer-events-none"
-          }`}
-        >
-          <button
-            onClick={handleBooking}
-            disabled={!bookingState.startDate || isLoading}
-            className="group flex items-center gap-3 bg-primary hover:bg-primary/90 text-primary-foreground pl-5 pr-6 py-3.5 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
-          >
-            {/* Price Badge */}
-            <span className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-bold">
-              ${pricing.total.toLocaleString()}
-            </span>
-
-            {/* Button Text */}
-            <span className="font-semibold text-base">
-              {isLoading ? "Processing..." : "Book Now"}
-            </span>
-
-            {/* Arrow Icon */}
-            <svg
-              className="w-4 h-4 transition-transform group-hover:translate-x-0.5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+        {/* Floating Book Now Button */}
+        <AnimatePresence>
+          {showFloatingButton && (
+            <motion.div
+              initial={{ y: 100, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 100, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              className="fixed bottom-6 right-6 z-50"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-        </div>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleBooking}
+                disabled={!bookingState.startDate || isLoading}
+                className="group flex items-center gap-3 bg-gradient-to-r from-primary to-orange-500 hover:from-primary/90 hover:to-orange-500/90 text-primary-foreground pl-5 pr-6 py-4 rounded-full shadow-2xl hover:shadow-glow transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed"
+              >
+                {/* Price Badge */}
+                <span className="bg-white/20 backdrop-blur-sm px-4 py-1.5 rounded-full text-sm font-bold">
+                  ${pricing.total.toLocaleString()}
+                </span>
+
+                {/* Button Text */}
+                <span className="font-bold text-base">
+                  {isLoading ? "Processing..." : "Book Now"}
+                </span>
+
+                {/* Arrow Icon */}
+                <ChevronRight className="w-5 h-5 transition-transform group-hover:translate-x-0.5" />
+              </motion.button>
+            </motion.div>
+          )}
+        </AnimatePresence>
         </>
       )}
     </TourCustomizer>

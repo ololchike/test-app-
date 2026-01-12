@@ -59,7 +59,16 @@ export async function GET(request: NextRequest) {
     // Fetch booking with payment details
     const booking = await prisma.booking.findUnique({
       where: { id: bookingId },
-      include: {
+      select: {
+        id: true,
+        userId: true,
+        agentId: true,
+        status: true,
+        paymentStatus: true,
+        totalAmount: true,
+        currency: true,
+        bookingReference: true,
+        agentEarnings: true,
         payments: {
           orderBy: {
             createdAt: "desc",
@@ -124,13 +133,80 @@ export async function GET(request: NextRequest) {
           statusCode: transactionStatus.status_code,
         })
 
-        // Return the latest status from Pesapal
-        // Note: The webhook will update our database, but this gives immediate feedback
+        // Map Pesapal status code to our status
+        // Status codes: 0 = INVALID, 1 = COMPLETED, 2 = FAILED, 3 = REVERSED
+        let newPaymentStatus = payment.status
+        let newBookingStatus = booking.status
+        let newPaymentBookingStatus = booking.paymentStatus
+
+        if (transactionStatus.status_code === 1) {
+          newPaymentStatus = "COMPLETED"
+          newBookingStatus = "CONFIRMED"
+          newPaymentBookingStatus = "COMPLETED"
+        } else if (transactionStatus.status_code === 2) {
+          newPaymentStatus = "FAILED"
+          newPaymentBookingStatus = "FAILED"
+        } else if (transactionStatus.status_code === 3) {
+          newPaymentStatus = "REFUNDED"
+          newBookingStatus = "REFUNDED"
+          newPaymentBookingStatus = "REFUNDED"
+        }
+
+        // Update database if status changed
+        if (newPaymentStatus !== payment.status) {
+          log.info("Updating payment status from Pesapal refresh", {
+            paymentId: payment.id,
+            oldStatus: payment.status,
+            newStatus: newPaymentStatus,
+          })
+
+          // Update payment
+          await prisma.payment.update({
+            where: { id: payment.id },
+            data: {
+              status: newPaymentStatus,
+              statusMessage: transactionStatus.payment_status_description,
+              pesapalTrackingId: transactionStatus.confirmation_code || payment.pesapalTrackingId,
+              completedAt: newPaymentStatus === "COMPLETED" ? new Date() : payment.completedAt,
+              failedAt: newPaymentStatus === "FAILED" ? new Date() : payment.failedAt,
+            },
+          })
+
+          // Update booking
+          await prisma.booking.update({
+            where: { id: booking.id },
+            data: {
+              status: newBookingStatus,
+              paymentStatus: newPaymentBookingStatus,
+            },
+          })
+
+          // Create agent earning if payment completed
+          if (newPaymentStatus === "COMPLETED" && payment.status !== "COMPLETED") {
+            try {
+              await prisma.agentEarning.create({
+                data: {
+                  agentId: booking.agentId,
+                  bookingId: booking.id,
+                  amount: booking.agentEarnings,
+                  currency: booking.currency,
+                  description: `Earnings from booking ${booking.bookingReference}`,
+                  type: "booking",
+                },
+              })
+            } catch (earningError) {
+              // Earning might already exist, ignore duplicate error
+              log.debug("Agent earning creation skipped (may already exist)", earningError)
+            }
+          }
+        }
+
+        // Return the updated status
         return NextResponse.json({
           bookingId: booking.id,
           bookingReference: booking.bookingReference,
           paymentId: payment.id,
-          paymentStatus: payment.status,
+          paymentStatus: newPaymentStatus,
           pesapalStatus: {
             statusCode: transactionStatus.status_code,
             description: transactionStatus.payment_status_description,
@@ -146,13 +222,16 @@ export async function GET(request: NextRequest) {
           createdAt: payment.createdAt,
           updatedAt: payment.updatedAt,
           booking: {
-            status: booking.status,
-            paymentStatus: booking.paymentStatus,
+            status: newBookingStatus,
+            paymentStatus: newPaymentBookingStatus,
             totalAmount: booking.totalAmount,
             currency: booking.currency,
             tour: booking.tour,
           },
-          message: "Payment status refreshed from Pesapal",
+          message: newPaymentStatus !== payment.status
+            ? "Payment status updated from Pesapal"
+            : "Payment status refreshed from Pesapal",
+          updated: newPaymentStatus !== payment.status,
         })
       } catch (pesapalError) {
         console.error("[Payment Status] Error fetching from Pesapal:", pesapalError)

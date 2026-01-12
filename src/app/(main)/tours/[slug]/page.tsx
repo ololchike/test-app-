@@ -1,8 +1,11 @@
-import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
+import { Metadata } from "next"
 import { ChevronRight } from "lucide-react"
 import { TourDetailContent, TourDetailData } from "@/components/tours/tour-detail-content"
+import { TourCard } from "@/components/tours/tour-card"
+import { TourStructuredData } from "@/components/seo/tour-structured-data"
+import { TourGallery } from "@/components/tours/tour-gallery"
 import { prisma } from "@/lib/prisma"
 
 async function getTour(slug: string) {
@@ -114,79 +117,229 @@ async function getTour(slug: string) {
   }
 }
 
+async function getSimilarTours(slug: string) {
+  try {
+    // Get current tour details
+    const currentTour = await prisma.tour.findUnique({
+      where: { slug, status: "ACTIVE" },
+      select: {
+        id: true,
+        destination: true,
+        country: true,
+        tourType: true,
+      },
+    })
+
+    if (!currentTour) return []
+
+    // Find similar tours
+    const similarTours = await prisma.tour.findMany({
+      where: {
+        AND: [
+          { status: "ACTIVE" },
+          { id: { not: currentTour.id } },
+          {
+            OR: [
+              { destination: currentTour.destination },
+              { country: currentTour.country },
+            ],
+          },
+        ],
+      },
+      include: {
+        agent: {
+          select: {
+            businessName: true,
+            isVerified: true,
+          },
+        },
+        reviews: {
+          where: { isApproved: true },
+          select: { rating: true },
+        },
+        _count: {
+          select: { reviews: true },
+        },
+      },
+      take: 12,
+    })
+
+    // Calculate rating and similarity score
+    const toursWithScore = similarTours.map((tour) => {
+      const avgRating =
+        tour.reviews.length > 0
+          ? tour.reviews.reduce((sum, r) => sum + r.rating, 0) / tour.reviews.length
+          : 0
+
+      const tourTypes = JSON.parse(tour.tourType as string) as string[]
+      const currentTourTypes = JSON.parse(currentTour.tourType as string) as string[]
+
+      // Calculate similarity score
+      let score = 0
+      if (tour.destination === currentTour.destination) score += 10
+      if (tour.country === currentTour.country) score += 5
+
+      const matchingTypes = tourTypes.filter(type => currentTourTypes.includes(type))
+      score += matchingTypes.length * 2
+
+      return {
+        id: tour.id,
+        slug: tour.slug,
+        title: tour.title,
+        destination: tour.destination,
+        country: tour.country,
+        coverImage: tour.coverImage || "",
+        basePrice: tour.basePrice,
+        durationDays: tour.durationDays,
+        durationNights: tour.durationNights,
+        tourType: tourTypes,
+        rating: Math.round(avgRating * 10) / 10,
+        reviewCount: tour._count.reviews,
+        agent: tour.agent,
+        featured: tour.featured,
+        similarityScore: score,
+      }
+    })
+
+    // Sort by similarity score and take top 4
+    return toursWithScore
+      .sort((a, b) => b.similarityScore - a.similarityScore)
+      .slice(0, 4)
+  } catch (error) {
+    console.error("Error fetching similar tours:", error)
+    return []
+  }
+}
+
 interface TourDetailPageProps {
   params: Promise<{ slug: string }>
+}
+
+export async function generateMetadata({ params }: TourDetailPageProps): Promise<Metadata> {
+  const { slug } = await params
+  const tour = await getTour(slug)
+
+  if (!tour) {
+    return {
+      title: "Tour Not Found",
+      description: "The requested tour could not be found.",
+    }
+  }
+
+  // Strip HTML from description
+  const plainDescription = tour.description.replace(/<[^>]*>/g, "").substring(0, 160)
+
+  return {
+    title: `${tour.title} | SafariPlus`,
+    description: plainDescription,
+    keywords: [
+      ...tour.tourType,
+      tour.destination,
+      tour.country,
+      "safari",
+      "tour",
+      "travel",
+      "Africa",
+      "booking",
+    ],
+    openGraph: {
+      title: tour.title,
+      description: plainDescription,
+      type: "website",
+      url: `${process.env.NEXT_PUBLIC_APP_URL}/tours/${slug}`,
+      images: [
+        {
+          url: tour.images[0] || "",
+          width: 1200,
+          height: 630,
+          alt: tour.title,
+        },
+      ],
+      siteName: "SafariPlus",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: tour.title,
+      description: plainDescription,
+      images: [tour.images[0] || ""],
+    },
+    alternates: {
+      canonical: `${process.env.NEXT_PUBLIC_APP_URL}/tours/${slug}`,
+    },
+  }
 }
 
 export default async function TourDetailPage({ params }: TourDetailPageProps) {
   const { slug } = await params
 
-  // Fetch tour from database
-  const tour = await getTour(slug)
+  // Fetch tour and similar tours from database
+  const [tour, similarTours] = await Promise.all([
+    getTour(slug),
+    getSimilarTours(slug),
+  ])
 
   if (!tour) {
     notFound()
   }
 
   return (
-    <div className="pt-16">
-      {/* Breadcrumb */}
-      <div className="bg-muted/50 py-3">
+    <>
+      <TourStructuredData tour={tour} slug={slug} />
+      <div className="pt-16">
+        {/* Breadcrumb */}
+        <div className="bg-gradient-to-r from-muted/50 to-transparent py-4 border-b border-border/30">
         <div className="container mx-auto px-4 lg:px-8">
-          <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Link href="/" className="hover:text-foreground">
+          <nav className="flex items-center gap-2 text-sm">
+            <Link href="/" className="text-muted-foreground hover:text-primary transition-colors">
               Home
             </Link>
-            <ChevronRight className="h-4 w-4" />
-            <Link href="/tours" className="hover:text-foreground">
+            <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
+            <Link href="/tours" className="text-muted-foreground hover:text-primary transition-colors">
               Tours
             </Link>
-            <ChevronRight className="h-4 w-4" />
-            <Link href={`/destinations/${tour.country.toLowerCase()}`} className="hover:text-foreground">
+            <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
+            <Link href={`/destinations/${tour.country.toLowerCase()}`} className="text-muted-foreground hover:text-primary transition-colors">
               {tour.country}
             </Link>
-            <ChevronRight className="h-4 w-4" />
-            <span className="text-foreground truncate">{tour.title}</span>
+            <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
+            <span className="text-foreground font-medium truncate max-w-xs">{tour.title}</span>
           </nav>
         </div>
       </div>
 
       {/* Image Gallery */}
       <div className="container mx-auto px-4 lg:px-8 py-6">
-        <div className="grid grid-cols-4 gap-4 h-[400px] lg:h-[500px]">
-          <div className="col-span-4 lg:col-span-2 relative rounded-xl overflow-hidden">
-            <Image
-              src={tour.images[0]}
-              alt={tour.title}
-              fill
-              className="object-cover"
-              priority
-            />
-          </div>
-          <div className="hidden lg:grid col-span-2 grid-cols-2 gap-4">
-            {tour.images.slice(1, 5).map((image: string, index: number) => (
-              <div key={index} className="relative rounded-xl overflow-hidden">
-                <Image
-                  src={image}
-                  alt={`${tour.title} ${index + 2}`}
-                  fill
-                  className="object-cover"
-                />
-                {index === 3 && tour.images.length > 5 && (
-                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                    <span className="text-white font-semibold">
-                      +{tour.images.length - 5} photos
-                    </span>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
+        <TourGallery images={tour.images} title={tour.title} />
       </div>
 
       {/* Main Content - Client Component for Interactivity */}
       <TourDetailContent tour={tour} />
-    </div>
+
+      {/* Similar Tours Section */}
+      {similarTours.length > 0 && (
+        <section className="py-16 bg-gradient-to-b from-muted/30 to-transparent">
+          <div className="container mx-auto px-4 lg:px-8">
+            <div className="mb-10">
+              <span className="text-primary font-semibold text-sm uppercase tracking-wider">
+                Discover More
+              </span>
+              <h2 className="mt-2 text-3xl font-bold tracking-tight">
+                You might also like
+              </h2>
+              <p className="text-muted-foreground mt-2 max-w-2xl">
+                Similar tours in {tour.destination} and nearby destinations
+              </p>
+            </div>
+
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {similarTours.map((similarTour, index) => (
+                <TourCard key={similarTour.id} tour={similarTour} index={index} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+      </div>
+    </>
   )
 }

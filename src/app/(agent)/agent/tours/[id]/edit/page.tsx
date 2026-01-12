@@ -68,6 +68,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { ImageUploader } from "@/components/ui/image-uploader"
 
 const COUNTRIES = ["Kenya", "Tanzania", "Uganda", "Rwanda"]
 const TOUR_TYPES = [
@@ -367,7 +368,8 @@ export default function EditTourPage({ params }: EditTourPageProps) {
 
   const updateField = (field: keyof Tour, value: unknown) => {
     if (!tour) return
-    setTour({ ...tour, [field]: value })
+    // Use functional update to avoid stale state issues
+    setTour((prev) => prev ? { ...prev, [field]: value } : prev)
     if (errors[field]) {
       setErrors((prev) => {
         const newErrors = { ...prev }
@@ -378,27 +380,33 @@ export default function EditTourPage({ params }: EditTourPageProps) {
   }
 
   const toggleArrayItem = (field: keyof Tour, item: string) => {
-    if (!tour) return
-    const currentArray = tour[field] as string[]
-    const newArray = currentArray.includes(item)
-      ? currentArray.filter((i) => i !== item)
-      : [...currentArray, item]
-    updateField(field, newArray)
+    setTour((prev) => {
+      if (!prev) return prev
+      const currentArray = prev[field] as string[]
+      const newArray = currentArray.includes(item)
+        ? currentArray.filter((i) => i !== item)
+        : [...currentArray, item]
+      return { ...prev, [field]: newArray }
+    })
   }
 
   const addListItem = (field: keyof Tour, value: string, setter: (val: string) => void) => {
-    if (!tour || !value.trim()) return
-    const currentArray = tour[field] as string[]
-    if (!currentArray.includes(value.trim())) {
-      updateField(field, [...currentArray, value.trim()])
-    }
+    if (!value.trim()) return
+    setTour((prev) => {
+      if (!prev) return prev
+      const currentArray = prev[field] as string[]
+      if (currentArray.includes(value.trim())) return prev
+      return { ...prev, [field]: [...currentArray, value.trim()] }
+    })
     setter("")
   }
 
   const removeListItem = (field: keyof Tour, index: number) => {
-    if (!tour) return
-    const currentArray = tour[field] as string[]
-    updateField(field, currentArray.filter((_, i) => i !== index))
+    setTour((prev) => {
+      if (!prev) return prev
+      const currentArray = prev[field] as string[]
+      return { ...prev, [field]: currentArray.filter((_, i) => i !== index) }
+    })
   }
 
   const handleSave = async () => {
@@ -1478,69 +1486,31 @@ export default function EditTourPage({ params }: EditTourPageProps) {
         <TabsContent value="images" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Cover Image</CardTitle>
-              <CardDescription>The main image displayed on tour cards</CardDescription>
+              <CardTitle>Tour Images</CardTitle>
+              <CardDescription>
+                Upload images for your tour. The first image will be used as the cover image.
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Input
-                placeholder="https://example.com/image.jpg"
-                value={tour.coverImage || ""}
-                onChange={(e) => updateField("coverImage", e.target.value || null)}
+              <ImageUploader
+                value={tour.images}
+                onChange={(urls) => {
+                  updateField("images", urls)
+                  // Set first image as cover if not already set or if cover was first image
+                  if (urls.length > 0) {
+                    updateField("coverImage", urls[0])
+                  } else {
+                    updateField("coverImage", null)
+                  }
+                }}
+                maxFiles={10}
               />
-              {tour.coverImage && (
-                <div className="relative aspect-video rounded-lg overflow-hidden border max-w-md">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={tour.coverImage}
-                    alt="Cover preview"
-                    className="object-cover w-full h-full"
-                  />
-                </div>
-              )}
-            </CardContent>
-          </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Gallery Images</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex gap-2">
-                <Input
-                  placeholder="https://example.com/gallery-image.jpg"
-                  value={imageInput}
-                  onChange={(e) => setImageInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault()
-                      addListItem("images", imageInput, setImageInput)
-                    }
-                  }}
-                />
-                <Button
-                  variant="outline"
-                  onClick={() => addListItem("images", imageInput, setImageInput)}
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-3">
-                {tour.images.map((url, index) => (
-                  <div key={index} className="relative group">
-                    <div className="aspect-video rounded-lg overflow-hidden border">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={url} alt={`Gallery ${index + 1}`} className="object-cover w-full h-full" />
-                    </div>
-                    <Button
-                      variant="destructive"
-                      size="icon"
-                      className="absolute top-2 right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={() => removeListItem("images", index)}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </div>
-                ))}
+              <div className="rounded-lg bg-muted p-4">
+                <p className="text-sm text-muted-foreground">
+                  <strong>Tip:</strong> Upload high-quality images that showcase your tour.
+                  The first image will be displayed as the cover on tour listings.
+                </p>
               </div>
             </CardContent>
           </Card>

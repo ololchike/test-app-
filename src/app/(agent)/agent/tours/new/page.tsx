@@ -48,6 +48,7 @@ import {
 } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { ImageUploader } from "@/components/ui/image-uploader"
 
 // Dynamic import for RichTextEditor to avoid SSR issues
 const RichTextEditor = dynamic(
@@ -1261,90 +1262,27 @@ export default function CreateTourPage() {
           {currentStep === 6 && (
             <div className="space-y-6">
               <div className="space-y-3">
-                <Label>Cover Image URL</Label>
+                <Label>Tour Images</Label>
                 <p className="text-sm text-muted-foreground">
-                  Enter a URL for your main tour image
+                  Upload images for your tour. The first image will be used as the cover image.
                 </p>
-                <Input
-                  placeholder="https://example.com/image.jpg"
-                  value={formData.coverImage}
-                  onChange={(e) => updateFormData("coverImage", e.target.value)}
+                <ImageUploader
+                  value={formData.images}
+                  onChange={(urls) => {
+                    updateFormData("images", urls)
+                    // Set first image as cover if not already set
+                    if (urls.length > 0 && !formData.coverImage) {
+                      updateFormData("coverImage", urls[0])
+                    }
+                  }}
+                  maxFiles={10}
                 />
-                {formData.coverImage && (
-                  <div className="mt-2 relative aspect-video rounded-lg overflow-hidden border">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={formData.coverImage}
-                      alt="Cover preview"
-                      className="object-cover w-full h-full"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = "none"
-                      }}
-                    />
-                  </div>
-                )}
               </div>
 
-              <div className="space-y-3">
-                <Label>Gallery Images</Label>
+              <div className="rounded-lg bg-muted p-4">
                 <p className="text-sm text-muted-foreground">
-                  Add URLs for additional tour images
-                </p>
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="https://example.com/gallery-image.jpg"
-                    value={imageInput}
-                    onChange={(e) => setImageInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault()
-                        addListItem("images", imageInput, setImageInput)
-                      }
-                    }}
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => addListItem("images", imageInput, setImageInput)}
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </div>
-                <div className="grid gap-4 sm:grid-cols-3">
-                  {formData.images.map((url, index) => (
-                    <div key={index} className="relative group">
-                      <div className="aspect-video rounded-lg overflow-hidden border">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={url}
-                          alt={`Gallery ${index + 1}`}
-                          className="object-cover w-full h-full"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Crect width='18' height='18' x='3' y='3' rx='2' ry='2'/%3E%3Ccircle cx='9' cy='9' r='2'/%3E%3Cpath d='m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21'/%3E%3C/svg%3E"
-                          }}
-                        />
-                      </div>
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="icon"
-                        className="absolute top-2 right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() => removeListItem("images", index)}
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="rounded-lg border-2 border-dashed p-8 text-center">
-                <ImageIcon className="h-10 w-10 mx-auto text-muted-foreground mb-4" />
-                <p className="text-sm text-muted-foreground mb-2">
-                  File upload coming soon
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  For now, please use image URLs from services like Unsplash or Cloudinary
+                  <strong>Tip:</strong> Upload high-quality images that showcase your tour.
+                  The first image will be displayed as the cover on tour listings.
                 </p>
               </div>
             </div>

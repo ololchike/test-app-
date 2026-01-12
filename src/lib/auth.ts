@@ -74,6 +74,7 @@ export const authConfig: NextAuthConfig = {
           image: user.avatar,
           role: user.role,
           agentId: user.agent?.id,
+          phone: user.phone,
         }
       },
     }),
@@ -98,12 +99,14 @@ export const authConfig: NextAuthConfig = {
         token.id = user.id
         token.role = user.role
         token.agentId = user.agentId
+        token.phone = user.phone
       }
 
       // Handle session update
       if (trigger === "update" && session) {
         token.name = session.name
         token.email = session.email
+        if (session.phone) token.phone = session.phone
       }
 
       return token
@@ -113,6 +116,7 @@ export const authConfig: NextAuthConfig = {
         session.user.id = token.id as string
         session.user.role = token.role as string
         session.user.agentId = token.agentId as string | undefined
+        session.user.phone = token.phone as string | undefined
       }
 
       return session

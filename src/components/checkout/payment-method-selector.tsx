@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { CreditCardIcon, SmartphoneIcon } from "lucide-react"
+import { CreditCardIcon, SmartphoneIcon, Shield, Lock, CheckCircle } from "lucide-react"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -16,6 +16,33 @@ interface PaymentMethodSelectorProps {
   onPhoneNumberChange: (phone: string) => void
   phoneNumberError?: string
 }
+
+const paymentMethods = [
+  {
+    id: "MPESA" as const,
+    name: "M-Pesa",
+    description: "Pay with M-Pesa mobile money",
+    icon: SmartphoneIcon,
+    color: "emerald",
+    bgGradient: "from-emerald-500/10 to-teal-500/10",
+    iconBg: "bg-emerald-500/10",
+    iconColor: "text-emerald-600",
+    borderColor: "border-emerald-500/30",
+    ringColor: "ring-emerald-500/20",
+  },
+  {
+    id: "CARD" as const,
+    name: "Credit / Debit Card",
+    description: "Visa, Mastercard, and more",
+    icon: CreditCardIcon,
+    color: "blue",
+    bgGradient: "from-blue-500/10 to-indigo-500/10",
+    iconBg: "bg-blue-500/10",
+    iconColor: "text-blue-600",
+    borderColor: "border-blue-500/30",
+    ringColor: "ring-blue-500/20",
+  },
+]
 
 export function PaymentMethodSelector({
   selectedMethod,
@@ -55,119 +82,120 @@ export function PaymentMethodSelector({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <RadioGroup value={selectedMethod} onValueChange={(value) => onMethodChange(value as PaymentMethod)}>
-        {/* M-Pesa Option */}
-        <div
-          className={cn(
-            "relative flex items-start space-x-3 rounded-lg border p-4 transition-all hover:bg-accent/50",
-            selectedMethod === "MPESA" && "border-primary bg-accent/50 ring-2 ring-primary/20"
-          )}
-        >
-          <RadioGroupItem value="MPESA" id="mpesa" className="mt-1" />
-          <div className="flex-1 space-y-3">
-            <Label
-              htmlFor="mpesa"
-              className="flex items-center gap-3 cursor-pointer text-base font-medium"
-            >
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/20">
-                <SmartphoneIcon className="h-5 w-5 text-green-600 dark:text-green-400" />
-              </div>
-              <div>
-                <div>M-Pesa</div>
-                <div className="text-xs text-muted-foreground font-normal">
-                  Pay with M-Pesa mobile money
-                </div>
-              </div>
-            </Label>
+        {paymentMethods.map((method) => {
+          const Icon = method.icon
+          const isSelected = selectedMethod === method.id
 
-            {selectedMethod === "MPESA" && (
-              <div className="space-y-2 pt-2">
-                <Label htmlFor="phone" className="text-sm">
-                  M-Pesa Phone Number
-                </Label>
-                <div className="relative">
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-2 text-sm text-muted-foreground">
-                    <span className="font-medium">+254</span>
-                    <span className="text-muted-foreground/50">|</span>
+          return (
+            <div
+              key={method.id}
+              className={cn(
+                "relative flex items-start space-x-4 rounded-xl border-2 p-5 transition-all duration-300",
+                isSelected
+                  ? `${method.borderColor} bg-gradient-to-r ${method.bgGradient} ring-4 ${method.ringColor}`
+                  : "border-border/50 hover:border-primary/30 hover:bg-muted/30"
+              )}
+            >
+              <RadioGroupItem value={method.id} id={method.id} className="mt-1" />
+              <div className="flex-1 space-y-3">
+                <Label
+                  htmlFor={method.id}
+                  className="flex items-center gap-3 cursor-pointer text-base font-medium"
+                >
+                  <div className={cn(
+                    "flex h-12 w-12 items-center justify-center rounded-xl transition-all duration-300",
+                    isSelected ? method.iconBg : "bg-muted/50"
+                  )}>
+                    <Icon className={cn(
+                      "h-6 w-6 transition-colors duration-300",
+                      isSelected ? method.iconColor : "text-muted-foreground"
+                    )} />
                   </div>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="712 345 678"
-                    value={phoneNumber.startsWith("254") ? phoneNumber.slice(3) : phoneNumber}
-                    onChange={handlePhoneChange}
-                    onFocus={() => setIsFocused(true)}
-                    onBlur={() => setIsFocused(false)}
-                    className={cn(
-                      "pl-20",
-                      phoneNumberError && "border-destructive focus-visible:ring-destructive/20"
+                  <div>
+                    <div className="flex items-center gap-2">
+                      {method.name}
+                      {isSelected && (
+                        <CheckCircle className="h-4 w-4 text-emerald-600" />
+                      )}
+                    </div>
+                    <div className="text-xs text-muted-foreground font-normal">
+                      {method.description}
+                    </div>
+                  </div>
+                </Label>
+
+                {/* M-Pesa Phone Input */}
+                {isSelected && method.id === "MPESA" && (
+                  <div className="space-y-3 pt-3 border-t border-border/50">
+                    <Label htmlFor="phone" className="text-sm font-medium">
+                      M-Pesa Phone Number
+                    </Label>
+                    <div className="relative">
+                      <div className={cn(
+                        "absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-2 text-sm transition-colors",
+                        isFocused ? "text-foreground" : "text-muted-foreground"
+                      )}>
+                        <span className="font-semibold">+254</span>
+                        <span className="text-border">|</span>
+                      </div>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        placeholder="712 345 678"
+                        value={phoneNumber.startsWith("254") ? phoneNumber.slice(3) : phoneNumber}
+                        onChange={handlePhoneChange}
+                        onFocus={() => setIsFocused(true)}
+                        onBlur={() => setIsFocused(false)}
+                        className={cn(
+                          "pl-24 h-12 rounded-xl border-border/50 focus:border-primary/50 transition-all duration-300",
+                          phoneNumberError && "border-destructive focus-visible:ring-destructive/20"
+                        )}
+                        aria-invalid={!!phoneNumberError}
+                      />
+                    </div>
+                    {phoneNumberError && (
+                      <p className="text-xs text-destructive flex items-center gap-1">
+                        <span className="h-1 w-1 rounded-full bg-destructive" />
+                        {phoneNumberError}
+                      </p>
                     )}
-                    aria-invalid={!!phoneNumberError}
-                  />
-                </div>
-                {phoneNumberError && (
-                  <p className="text-xs text-destructive">{phoneNumberError}</p>
+                    <p className="text-xs text-muted-foreground flex items-center gap-2">
+                      <SmartphoneIcon className="h-3 w-3" />
+                      You&apos;ll receive an M-Pesa prompt to complete payment
+                    </p>
+                  </div>
                 )}
-                <p className="text-xs text-muted-foreground">
-                  You'll receive an M-Pesa prompt to complete payment
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
 
-        {/* Card Option */}
-        <div
-          className={cn(
-            "relative flex items-start space-x-3 rounded-lg border p-4 transition-all hover:bg-accent/50",
-            selectedMethod === "CARD" && "border-primary bg-accent/50 ring-2 ring-primary/20"
-          )}
-        >
-          <RadioGroupItem value="CARD" id="card" className="mt-1" />
-          <div className="flex-1">
-            <Label
-              htmlFor="card"
-              className="flex items-center gap-3 cursor-pointer text-base font-medium"
-            >
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/20">
-                <CreditCardIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                {/* Card Redirect Notice */}
+                {isSelected && method.id === "CARD" && (
+                  <div className="mt-3 p-4 rounded-xl bg-muted/50 border border-border/50">
+                    <p className="text-sm text-muted-foreground">
+                      You&apos;ll be redirected to our secure payment partner to complete your card payment.
+                    </p>
+                  </div>
+                )}
               </div>
-              <div>
-                <div>Credit / Debit Card</div>
-                <div className="text-xs text-muted-foreground font-normal">
-                  Visa, Mastercard, and more
-                </div>
-              </div>
-            </Label>
-
-            {selectedMethod === "CARD" && (
-              <div className="mt-3 rounded-md bg-muted/50 p-3">
-                <p className="text-sm text-muted-foreground">
-                  You'll be redirected to our secure payment partner to complete your card payment.
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
+            </div>
+          )
+        })}
       </RadioGroup>
 
       {/* Payment Security Notice */}
-      <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-        <svg
-          className="h-4 w-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-          />
-        </svg>
-        <span>Secured by Pesapal - Your payment information is encrypted</span>
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 border-t border-border/50">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <div className="h-6 w-6 rounded-full bg-emerald-500/10 flex items-center justify-center">
+            <Lock className="h-3 w-3 text-emerald-600" />
+          </div>
+          <span>256-bit SSL Encryption</span>
+        </div>
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <div className="h-6 w-6 rounded-full bg-emerald-500/10 flex items-center justify-center">
+            <Shield className="h-3 w-3 text-emerald-600" />
+          </div>
+          <span>Secured by Pesapal</span>
+        </div>
       </div>
     </div>
   )

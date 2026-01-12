@@ -13,12 +13,17 @@ import {
   AlertTriangle,
   CheckCircle,
   Clock,
+  Sparkles,
+  ArrowUpRight,
+  Settings,
+  BarChart3,
 } from "lucide-react"
 import Link from "next/link"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
+import { cn } from "@/lib/utils"
 
 // Force dynamic rendering for this page
 export const dynamic = "force-dynamic"
@@ -269,7 +274,7 @@ async function getDashboardData() {
         type = "booking"
         message = `New booking ${log.resourceId ? `#${log.resourceId}` : ""} confirmed`
         icon = "CheckCircle"
-        iconColor = "text-green-500"
+        iconColor = "text-emerald-500"
         break
       case "booking_cancelled":
         type = "booking"
@@ -310,7 +315,7 @@ async function getDashboardData() {
         const paymentAmount = (log.metadata as Record<string, unknown>)?.amount || 0
         message = `Payment completed - $${(paymentAmount as number).toLocaleString()}`
         icon = "CheckCircle"
-        iconColor = "text-green-500"
+        iconColor = "text-emerald-500"
         break
       case "tour_published":
         type = "booking"
@@ -323,7 +328,7 @@ async function getDashboardData() {
         type = "booking"
         message = `New user registered`
         icon = "CheckCircle"
-        iconColor = "text-green-500"
+        iconColor = "text-emerald-500"
         break
       default:
         type = "booking"
@@ -386,6 +391,33 @@ function getIconComponent(iconName: string) {
   return icons[iconName] || Clock
 }
 
+const statsConfig = [
+  {
+    key: "revenue",
+    title: "Total Revenue",
+    icon: DollarSign,
+    color: "from-emerald-500 to-teal-600",
+  },
+  {
+    key: "agents",
+    title: "Active Agents",
+    icon: Shield,
+    color: "from-blue-500 to-indigo-600",
+  },
+  {
+    key: "bookings",
+    title: "Total Bookings",
+    icon: Calendar,
+    color: "from-amber-500 to-orange-600",
+  },
+  {
+    key: "users",
+    title: "Total Users",
+    icon: Users,
+    color: "from-purple-500 to-pink-600",
+  },
+]
+
 /**
  * Admin Dashboard Page - Server Component
  */
@@ -397,134 +429,131 @@ export default async function AdminDashboardPage() {
   }
 
   const { stats, agents, withdrawals, activity, topAgents } = await getDashboardData()
-
-  const platformStats = [
-    {
-      title: "Total Revenue",
-      value: stats.revenue.formatted,
-      icon: DollarSign,
-      change: stats.revenue.change,
-      trend: stats.revenue.trend,
-      description: stats.revenue.description,
-    },
-    {
-      title: "Active Agents",
-      value: stats.agents.formatted,
-      icon: Shield,
-      change: stats.agents.change,
-      trend: stats.agents.trend,
-      description: stats.agents.description,
-    },
-    {
-      title: "Total Bookings",
-      value: stats.bookings.formatted,
-      icon: Calendar,
-      change: stats.bookings.change,
-      trend: stats.bookings.trend,
-      description: stats.bookings.description,
-    },
-    {
-      title: "Total Users",
-      value: stats.users.formatted,
-      icon: Users,
-      change: stats.users.change,
-      trend: stats.users.trend,
-      description: stats.users.description,
-    },
-  ]
+  const firstName = session?.user?.name?.split(" ")[0] || "Admin"
 
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-in slide-in-from-top duration-500">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 mb-3">
+            <Shield className="h-3.5 w-3.5 text-primary" />
+            <span className="text-xs font-medium text-primary">Admin Dashboard</span>
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Welcome back, <span className="text-gradient">{firstName}</span>!
+          </h1>
           <p className="text-muted-foreground mt-1">
             Platform overview and management
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" asChild>
-            <Link href="/admin/reports">View Reports</Link>
+          <Button variant="outline" className="border-border/50 hover:border-primary/30" asChild>
+            <Link href="/admin/reports">
+              <BarChart3 className="h-4 w-4 mr-2" />
+              View Reports
+            </Link>
           </Button>
-          <Button asChild>
-            <Link href="/admin/settings">Platform Settings</Link>
+          <Button className="shadow-glow" asChild>
+            <Link href="/admin/settings">
+              <Settings className="h-4 w-4 mr-2" />
+              Platform Settings
+            </Link>
           </Button>
         </div>
       </div>
 
       {/* Platform Stats */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {platformStats.map((stat) => (
-          <Card key={stat.title}>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {stat.title}
-              </CardTitle>
-              <stat.icon className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
-              <div className="flex items-center gap-2 mt-1">
-                <div
-                  className={`flex items-center text-xs ${
-                    stat.trend === "up" ? "text-green-600" : "text-red-600"
-                  }`}
-                >
-                  {stat.trend === "up" ? (
-                    <TrendingUp className="h-3 w-3 mr-1" />
-                  ) : (
-                    <TrendingDown className="h-3 w-3 mr-1" />
-                  )}
-                  {stat.change}
+        {statsConfig.map((statConfig, index) => {
+          const stat = stats[statConfig.key as keyof typeof stats]
+          const Icon = statConfig.icon
+          return (
+            <Card
+              key={statConfig.title}
+              className="border-border/50 hover:border-primary/30 hover:shadow-premium transition-all duration-300"
+              style={{ animationDelay: `${index * 100}ms` }}
+            >
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  {statConfig.title}
+                </CardTitle>
+                <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center bg-gradient-to-br", statConfig.color)}>
+                  <Icon className="h-5 w-5 text-white" />
                 </div>
-                <span className="text-xs text-muted-foreground">
-                  {stat.description}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stat.formatted}</div>
+                <div className="flex items-center gap-2 mt-1">
+                  <div
+                    className={cn(
+                      "flex items-center text-xs px-2 py-0.5 rounded-full",
+                      stat.trend === "up"
+                        ? "text-emerald-600 bg-emerald-500/10"
+                        : "text-red-600 bg-red-500/10"
+                    )}
+                  >
+                    {stat.trend === "up" ? (
+                      <TrendingUp className="h-3 w-3 mr-1" />
+                    ) : (
+                      <TrendingDown className="h-3 w-3 mr-1" />
+                    )}
+                    {stat.change}
+                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    {stat.description}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          )
+        })}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Pending Agent Approvals */}
-        <Card>
+        <Card className="border-border/50 hover:shadow-premium transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
+                <Shield className="h-5 w-5 text-primary" />
                 Pending Agent Approvals
                 {agents.length > 0 && (
-                  <Badge variant="destructive">{agents.length}</Badge>
+                  <Badge variant="destructive" className="ml-2">{agents.length}</Badge>
                 )}
               </CardTitle>
               <CardDescription>Agents awaiting verification</CardDescription>
             </div>
-            <Button variant="ghost" size="sm" asChild>
+            <Button variant="ghost" size="sm" className="group" asChild>
               <Link href="/admin/agents?status=pending">
-                View all <ArrowRight className="ml-1 h-4 w-4" />
+                View all
+                <ArrowRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Link>
             </Button>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3">
             {agents.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <Shield className="h-12 w-12 mx-auto mb-2 opacity-20" />
-                <p>No pending agent approvals</p>
+              <div className="text-center py-10">
+                <div className="mx-auto h-16 w-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-4">
+                  <Shield className="h-8 w-8 text-primary" />
+                </div>
+                <p className="font-medium">All caught up!</p>
+                <p className="text-sm text-muted-foreground">No pending agent approvals</p>
               </div>
             ) : (
-              agents.map((agent) => (
+              agents.map((agent, index) => (
                 <div
                   key={agent.id}
-                  className="flex items-center gap-4 p-3 rounded-lg border"
+                  className="flex items-center gap-4 p-4 rounded-xl border border-border/50 hover:border-primary/30 hover:bg-primary/5 transition-all duration-200 group"
+                  style={{ animationDelay: `${index * 50}ms` }}
                 >
-                  <Avatar className="h-10 w-10">
-                    <AvatarFallback className="bg-primary/10 text-primary">
+                  <Avatar className="h-12 w-12 ring-2 ring-primary/20">
+                    <AvatarFallback className="bg-gradient-to-br from-primary to-orange-500 text-primary-foreground font-semibold">
                       {agent.businessName[0]}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-medium text-sm truncate">
+                    <h4 className="font-semibold truncate group-hover:text-primary transition-colors">
                       {agent.businessName}
                     </h4>
                     <p className="text-xs text-muted-foreground">
@@ -534,11 +563,9 @@ export default async function AdminDashboardPage() {
                       Submitted {agent.submittedAt}
                     </p>
                   </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" asChild>
-                      <Link href={`/admin/agents/${agent.id}`}>Review</Link>
-                    </Button>
-                  </div>
+                  <Button size="sm" className="shadow-glow" asChild>
+                    <Link href={`/admin/agents/${agent.id}`}>Review</Link>
+                  </Button>
                 </div>
               ))
             )}
@@ -546,41 +573,47 @@ export default async function AdminDashboardPage() {
         </Card>
 
         {/* Pending Withdrawals */}
-        <Card>
+        <Card className="border-border/50 hover:shadow-premium transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
+                <CreditCard className="h-5 w-5 text-primary" />
                 Pending Withdrawals
                 {withdrawals.length > 0 && (
-                  <Badge variant="destructive">{withdrawals.length}</Badge>
+                  <Badge variant="destructive" className="ml-2">{withdrawals.length}</Badge>
                 )}
               </CardTitle>
               <CardDescription>Withdrawal requests to process</CardDescription>
             </div>
-            <Button variant="ghost" size="sm" asChild>
+            <Button variant="ghost" size="sm" className="group" asChild>
               <Link href="/admin/withdrawals">
-                View all <ArrowRight className="ml-1 h-4 w-4" />
+                View all
+                <ArrowRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Link>
             </Button>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3">
             {withdrawals.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <CreditCard className="h-12 w-12 mx-auto mb-2 opacity-20" />
-                <p>No pending withdrawals</p>
+              <div className="text-center py-10">
+                <div className="mx-auto h-16 w-16 rounded-2xl bg-gradient-to-br from-amber-500/20 to-amber-500/5 flex items-center justify-center mb-4">
+                  <CreditCard className="h-8 w-8 text-amber-600" />
+                </div>
+                <p className="font-medium">All caught up!</p>
+                <p className="text-sm text-muted-foreground">No pending withdrawals</p>
               </div>
             ) : (
               <>
-                {withdrawals.map((withdrawal) => (
+                {withdrawals.map((withdrawal, index) => (
                   <div
                     key={withdrawal.id}
-                    className="flex items-center gap-4 p-3 rounded-lg border"
+                    className="flex items-center gap-4 p-4 rounded-xl border border-border/50 hover:border-primary/30 hover:bg-primary/5 transition-all duration-200 group"
+                    style={{ animationDelay: `${index * 50}ms` }}
                   >
-                    <div className="h-10 w-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-                      <CreditCard className="h-5 w-5 text-amber-600" />
+                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
+                      <CreditCard className="h-6 w-6 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-sm truncate">
+                      <h4 className="font-semibold truncate group-hover:text-primary transition-colors">
                         {withdrawal.agentName}
                       </h4>
                       <p className="text-xs text-muted-foreground">
@@ -588,18 +621,19 @@ export default async function AdminDashboardPage() {
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold">
+                      <p className="font-bold text-lg">
                         ${withdrawal.amount.toLocaleString()}
                       </p>
-                      <Badge variant="secondary" className="text-[10px]">
+                      <Badge variant="secondary" className="text-[10px] font-mono">
                         {withdrawal.id.substring(0, 8)}
                       </Badge>
                     </div>
                   </div>
                 ))}
-                <Button className="w-full" variant="outline" asChild>
+                <Button className="w-full shadow-glow mt-2" asChild>
                   <Link href="/admin/withdrawals">
                     Process Withdrawals
+                    <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
               </>
@@ -610,26 +644,42 @@ export default async function AdminDashboardPage() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Recent Activity */}
-        <Card className="lg:col-span-1">
+        <Card className="lg:col-span-1 border-border/50 hover:shadow-premium transition-all duration-300">
           <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Clock className="h-5 w-5 text-primary" />
+              Recent Activity
+            </CardTitle>
             <CardDescription>Latest platform events</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {activity.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <Clock className="h-12 w-12 mx-auto mb-2 opacity-20" />
-                <p>No recent activity</p>
+              <div className="text-center py-10">
+                <div className="mx-auto h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-3">
+                  <Clock className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <p className="text-muted-foreground">No recent activity</p>
               </div>
             ) : (
-              activity.map((item) => {
+              activity.map((item, index) => {
                 const IconComponent = getIconComponent(item.icon)
                 return (
-                  <div key={item.id} className="flex items-start gap-3">
-                    <IconComponent className={`h-5 w-5 mt-0.5 ${item.iconColor}`} />
+                  <div
+                    key={item.id}
+                    className="flex items-start gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors"
+                    style={{ animationDelay: `${index * 30}ms` }}
+                  >
+                    <div className={cn("h-8 w-8 rounded-full flex items-center justify-center shrink-0",
+                      item.iconColor.includes("emerald") ? "bg-emerald-500/10" :
+                      item.iconColor.includes("blue") ? "bg-blue-500/10" :
+                      item.iconColor.includes("amber") ? "bg-amber-500/10" :
+                      item.iconColor.includes("purple") ? "bg-purple-500/10" : "bg-muted"
+                    )}>
+                      <IconComponent className={cn("h-4 w-4", item.iconColor)} />
+                    </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm">{item.message}</p>
-                      <p className="text-xs text-muted-foreground">{item.time}</p>
+                      <p className="text-sm leading-tight">{item.message}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{item.time}</p>
                     </div>
                   </div>
                 )
@@ -639,41 +689,52 @@ export default async function AdminDashboardPage() {
         </Card>
 
         {/* Top Performing Agents */}
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-2 border-border/50 hover:shadow-premium transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>Top Performing Agents</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+                Top Performing Agents
+              </CardTitle>
               <CardDescription>Best performing agents this month</CardDescription>
             </div>
-            <Button variant="ghost" size="sm" asChild>
+            <Button variant="ghost" size="sm" className="group" asChild>
               <Link href="/admin/analytics">
-                View analytics <ArrowRight className="ml-1 h-4 w-4" />
+                View analytics
+                <ArrowRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Link>
             </Button>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-3">
               {topAgents.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Users className="h-12 w-12 mx-auto mb-2 opacity-20" />
-                  <p>No agent data available</p>
+                <div className="text-center py-10">
+                  <div className="mx-auto h-16 w-16 rounded-2xl bg-muted flex items-center justify-center mb-4">
+                    <Users className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                  <p className="font-medium">No data yet</p>
+                  <p className="text-sm text-muted-foreground">Agent performance data will appear here</p>
                 </div>
               ) : (
                 topAgents.map((agent, index) => (
                   <div
                     key={agent.id}
-                    className="flex items-center gap-4 p-3 rounded-lg border"
+                    className="flex items-center gap-4 p-4 rounded-xl border border-border/50 hover:border-primary/30 hover:bg-primary/5 transition-all duration-200 group"
+                    style={{ animationDelay: `${index * 50}ms` }}
                   >
-                    <div className="font-bold text-2xl text-muted-foreground w-8">
+                    <div className={cn(
+                      "font-bold text-2xl w-10 text-center",
+                      index === 0 ? "text-amber-500" : index === 1 ? "text-slate-400" : index === 2 ? "text-amber-700" : "text-muted-foreground"
+                    )}>
                       #{index + 1}
                     </div>
-                    <Avatar className="h-10 w-10">
-                      <AvatarFallback className="bg-primary text-primary-foreground">
+                    <Avatar className="h-12 w-12 ring-2 ring-primary/20">
+                      <AvatarFallback className="bg-gradient-to-br from-primary to-orange-500 text-primary-foreground font-semibold">
                         {agent.name[0]}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold truncate">{agent.name}</h4>
+                      <h4 className="font-semibold truncate group-hover:text-primary transition-colors">{agent.name}</h4>
                       <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
                         <span>{agent.bookings} bookings</span>
                         {agent.rating > 0 && (
@@ -685,11 +746,12 @@ export default async function AdminDashboardPage() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold text-lg">
+                      <p className="font-bold text-xl">
                         ${agent.revenue.toLocaleString()}
                       </p>
                       <p className="text-xs text-muted-foreground">Revenue</p>
                     </div>
+                    <ArrowUpRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
                 ))
               )}

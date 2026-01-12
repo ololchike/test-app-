@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { Suspense, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Loader2 } from "lucide-react"
 
@@ -8,7 +8,7 @@ import { Loader2 } from "lucide-react"
  * Redirect handler for Pesapal callbacks with query parameters
  * Redirects from /booking/confirmation?bookingId=xxx to /booking/confirmation/xxx
  */
-export default function ConfirmationRedirect() {
+function ConfirmationRedirectContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -43,5 +43,20 @@ export default function ConfirmationRedirect() {
         <p className="text-muted-foreground">Redirecting to your booking...</p>
       </div>
     </div>
+  )
+}
+
+export default function ConfirmationRedirect() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    }>
+      <ConfirmationRedirectContent />
+    </Suspense>
   )
 }

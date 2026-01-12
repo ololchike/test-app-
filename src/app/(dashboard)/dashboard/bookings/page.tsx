@@ -14,6 +14,9 @@ import {
   XCircle,
   AlertCircle,
   Loader2,
+  RefreshCw,
+  Star,
+  MessageSquare,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -27,6 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { toast } from "sonner"
 
 interface Booking {
   id: string
@@ -39,6 +43,7 @@ interface Booking {
   children: number
   totalAmount: number
   createdAt: string
+  hasReview: boolean
   tour: {
     title: string
     slug: string
@@ -48,6 +53,7 @@ interface Booking {
     durationNights: number
   }
   agent: {
+    id: string
     businessName: string
   }
 }
@@ -57,6 +63,7 @@ export default function BookingsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [activeTab, setActiveTab] = useState("all")
   const [downloadingId, setDownloadingId] = useState<string | null>(null)
+  const [refreshingId, setRefreshingId] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchBookings() {
@@ -94,6 +101,44 @@ export default function BookingsPage() {
       console.error("Error downloading itinerary:", error)
     } finally {
       setDownloadingId(null)
+    }
+  }
+
+  const handleRefreshStatus = async (bookingId: string) => {
+    setRefreshingId(bookingId)
+    try {
+      const response = await fetch(
+        `/api/payments/status?bookingId=${bookingId}&refreshFromPesapal=true`
+      )
+      const data = await response.json()
+
+      if (!response.ok) {
+        toast.error(data.error || "Failed to refresh status")
+        return
+      }
+
+      if (data.updated) {
+        toast.success("Payment status updated!")
+        // Update the booking in the list
+        setBookings((prev) =>
+          prev.map((b) =>
+            b.id === bookingId
+              ? {
+                  ...b,
+                  status: data.booking.status,
+                  paymentStatus: data.booking.paymentStatus,
+                }
+              : b
+          )
+        )
+      } else {
+        toast.info(data.message || "Status is up to date")
+      }
+    } catch (error) {
+      console.error("Error refreshing status:", error)
+      toast.error("Failed to refresh payment status")
+    } finally {
+      setRefreshingId(null)
     }
   }
 
@@ -326,6 +371,49 @@ export default function BookingsPage() {
                                   ) : (
                                     <Download className="h-4 w-4" />
                                   )}
+                                </Button>
+                              )}
+                              {booking.paymentStatus !== "COMPLETED" && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleRefreshStatus(booking.id)}
+                                  disabled={refreshingId === booking.id}
+                                  title="Refresh payment status"
+                                >
+                                  {refreshingId === booking.id ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <RefreshCw className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              )}
+                              {/* Write Review - show for completed paid bookings that don't have a review yet */}
+                              {booking.paymentStatus === "COMPLETED" &&
+                                new Date(booking.endDate) < now &&
+                                !booking.hasReview && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    asChild
+                                    title="Write a review"
+                                  >
+                                    <Link href={`/tours/${booking.tour.slug}#reviews`}>
+                                      <Star className="h-4 w-4" />
+                                    </Link>
+                                  </Button>
+                                )}
+                              {/* Contact Agent */}
+                              {booking.paymentStatus === "COMPLETED" && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  asChild
+                                  title={`Contact ${booking.agent.businessName}`}
+                                >
+                                  <Link href={`/dashboard/messages?agentId=${booking.agent.id}&bookingRef=${booking.bookingReference}`}>
+                                    <MessageSquare className="h-4 w-4" />
+                                  </Link>
                                 </Button>
                               )}
                             </div>

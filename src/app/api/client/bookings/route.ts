@@ -27,7 +27,13 @@ export async function GET() {
         },
         agent: {
           select: {
+            id: true,
             businessName: true,
+          },
+        },
+        review: {
+          select: {
+            id: true,
           },
         },
       },
@@ -36,7 +42,14 @@ export async function GET() {
       },
     })
 
-    return NextResponse.json({ bookings })
+    // Map bookings to include hasReview flag
+    const mappedBookings = bookings.map((booking) => ({
+      ...booking,
+      hasReview: !!booking.review,
+      review: undefined, // Don't expose full review object
+    }))
+
+    return NextResponse.json({ bookings: mappedBookings })
   } catch (error) {
     console.error("Error fetching client bookings:", error)
     return NextResponse.json(

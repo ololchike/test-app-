@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import {
   User,
   Mail,
@@ -13,6 +13,7 @@ import {
   Loader2,
   Camera,
   Edit,
+  Trash2,
 } from "lucide-react"
 import {
   Card,
@@ -54,12 +55,15 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
+  const [isDeletingAvatar, setIsDeletingAvatar] = useState(false)
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     phone: "",
   })
   const { toast } = useToast()
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     fetchProfile()
@@ -111,6 +115,104 @@ export default function ProfilePage() {
       })
     } finally {
       setIsSaving(false)
+    }
+  }
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    const validTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"]
+    if (!validTypes.includes(file.type)) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload a JPG, PNG, WebP, or GIF image.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    // Validate file size (2MB max)
+    if (file.size > 2 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please upload an image smaller than 2MB.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setIsUploadingAvatar(true)
+
+    try {
+      const formData = new FormData()
+      formData.append("file", file)
+
+      const response = await fetch("/api/client/profile/avatar", {
+        method: "POST",
+        body: formData,
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        setProfile((prev) => prev ? { ...prev, avatar: data.url } : null)
+        toast({
+          title: "Avatar updated",
+          description: "Your profile picture has been updated.",
+        })
+      } else {
+        throw new Error(data.error)
+      }
+    } catch (error) {
+      toast({
+        title: "Upload failed",
+        description: error instanceof Error ? error.message : "Failed to upload avatar. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsUploadingAvatar(false)
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ""
+      }
+    }
+  }
+
+  const handleDeleteAvatar = async () => {
+    if (!profile?.avatar) return
+
+    setIsDeletingAvatar(true)
+
+    try {
+      const response = await fetch("/api/client/profile/avatar", {
+        method: "DELETE",
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        setProfile((prev) => prev ? { ...prev, avatar: null } : null)
+        toast({
+          title: "Avatar removed",
+          description: "Your profile picture has been removed.",
+        })
+      } else {
+        throw new Error(data.error)
+      }
+    } catch (error) {
+      toast({
+        title: "Delete failed",
+        description: "Failed to remove avatar. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsDeletingAvatar(false)
     }
   }
 
@@ -175,13 +277,44 @@ export default function ProfilePage() {
                     )}
                   </AvatarFallback>
                 </Avatar>
+                {/* Hidden file input */}
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleAvatarChange}
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  className="hidden"
+                />
+                {/* Upload button */}
                 <Button
                   size="icon"
                   variant="secondary"
                   className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full"
+                  onClick={handleAvatarClick}
+                  disabled={isUploadingAvatar}
                 >
-                  <Camera className="h-4 w-4" />
+                  {isUploadingAvatar ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Camera className="h-4 w-4" />
+                  )}
                 </Button>
+                {/* Delete button - show only when avatar exists */}
+                {profile.avatar && (
+                  <Button
+                    size="icon"
+                    variant="destructive"
+                    className="absolute -bottom-1 -left-1 h-8 w-8 rounded-full"
+                    onClick={handleDeleteAvatar}
+                    disabled={isDeletingAvatar}
+                  >
+                    {isDeletingAvatar ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
+                  </Button>
+                )}
               </div>
               <h2 className="text-xl font-semibold mt-4">
                 {profile.name || "Traveler"}

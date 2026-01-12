@@ -281,14 +281,21 @@ Features explicitly excluded from current planning.
 
 > **Note**: See [implementation-guide.md](./implementation-guide.md) for detailed task breakdowns and acceptance criteria for each milestone item.
 
-- [ ] Clients and Agents can message in real-time
-- [ ] Clients can leave verified reviews
-- [ ] Agents can build detailed itineraries
-- [ ] Agents can request withdrawals
-- [ ] Admin can approve/reject withdrawals
-- [ ] Map-based tour search available
-- [ ] Featured tour placements working
-- [ ] Comprehensive analytics for all roles
+- [x] Clients and Agents can message in real-time
+- [x] Clients can leave verified reviews
+- [x] Agents can build detailed itineraries
+- [x] Agents can request withdrawals
+- [x] Admin can approve/reject withdrawals
+- [x] Map-based tour search available
+- [x] Featured tour placements working
+- [x] Comprehensive analytics for all roles
+- [x] All admin management pages (Tours, Users, Agents, Bookings, Reviews, Notifications)
+- [x] Contact system with admin-agent forwarding and chat
+- [x] All frontend pages (About, FAQ, Privacy, Terms, 404)
+- [x] Landing page with real database data
+- [x] Availability calendar for agents
+- [x] Client wishlist and profile
+- [x] Destinations pages
 
 ---
 
@@ -460,3 +467,11 @@ Features explicitly excluded from current planning.
 | 1.17 | Jan 2026 | Admin Dashboard with Real Data: Implemented admin dashboard (`/admin`) with platform statistics, revenue metrics, pending actions, agent management page, and real API integration (`/api/admin/stats`, `/api/admin/agents`). |
 | 1.18 | Jan 2026 | Tour Reviews & Ratings System: Implemented complete review system with API endpoints (`/api/reviews`, `/api/tours/[slug]/reviews`, `/api/reviews/[id]/helpful`, `/api/reviews/[id]/respond`, `/api/agent/reviews`), frontend components (`ReviewStats`, `ReviewList`, `ReviewForm`), Reviews tab on tour detail page, and agent review management page (`/agent/reviews`). Includes rating distribution, helpful voting, verified purchase badges, and agent response functionality. |
 | 1.19 | Jan 2026 | Complete Withdrawal Request System: Implemented full withdrawal system for agents to request payouts and admins to process them. Includes API endpoints (`/api/agent/withdrawals`, `/api/agent/balance`, `/api/admin/withdrawals/*`), frontend components (WithdrawalForm, WithdrawalHistory), updated Agent Earnings page with balance tracking, and Admin Withdrawals Management page with approve/reject/process actions. Features M-Pesa and Bank Transfer support, comprehensive validation, audit logging, and security measures. |
+| 1.20 | Jan 2026 | Availability Calendar: Added TourAvailability model, agent availability management API (`/api/agent/tours/[id]/availability`), and calendar UI component for agents to manage tour dates. |
+| 1.21 | Jan 2026 | Map-based Tour Search: Added latitude/longitude to Tour model, Leaflet integration, tour map component with price markers, and map search page (`/tours/map`). |
+| 1.22 | Jan 2026 | Frontend Pages: Created About, Contact, FAQ, Privacy Policy, Terms of Service pages. Implemented beautiful 404 page with safari theme. |
+| 1.23 | Jan 2026 | Contact System: Created ContactMessage model, contact form with validation, admin contact management with agent forwarding, agent contact management page, and admin-agent chat functionality. |
+| 1.24 | Jan 2026 | Admin Dashboard Overhaul: Implemented all admin management pages (Tours, Users, Agents, Bookings, Reviews, Notifications) with real database data, search/filter functionality, pagination, and proper confirmation dialogs. |
+| 1.25 | Jan 2026 | Landing Page: Updated to use real database data for featured tours, destinations with tour counts, testimonials from approved reviews, and platform statistics. |
+| 1.26 | Jan 2026 | Destinations Pages: Created destinations index and individual country pages (Kenya, Tanzania, Uganda, Rwanda) with tour filtering. |
+| 1.27 | Jan 2026 | Phase 2 Complete: All Phase 2 growth features implemented including messaging, reviews, withdrawals, availability calendar, map search, admin tools, contact system, and frontend pages. |

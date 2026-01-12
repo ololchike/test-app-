@@ -30,15 +30,17 @@ export default async function AgentLayout({
   })
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden bg-gradient-to-br from-background via-background to-muted/30">
       <AgentSidebar
         user={session.user}
         agent={agent || undefined}
       />
       <div className="flex-1 flex flex-col min-w-0">
         <AgentHeader user={session.user} />
-        <main className="flex-1 overflow-y-auto bg-muted/30 p-6">
-          {children}
+        <main className="flex-1 overflow-y-auto bg-gradient-to-b from-transparent to-muted/20 p-6">
+          <div className="animate-in fade-in duration-500">
+            {children}
+          </div>
         </main>
       </div>
     </div>

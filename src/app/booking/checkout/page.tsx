@@ -2,6 +2,7 @@
 
 import { useSearchParams } from "next/navigation"
 import { useEffect, useState, Suspense } from "react"
+import { useSession } from "next-auth/react"
 import Link from "next/link"
 import { ChevronLeft, Shield, Clock, CreditCard, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -59,9 +60,11 @@ interface CheckoutData {
 
 function CheckoutContent() {
   const searchParams = useSearchParams()
+  const { data: session } = useSession()
   const [checkoutData, setCheckoutData] = useState<CheckoutData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [userDataPrefilled, setUserDataPrefilled] = useState(false)
 
   // Form state
   const [travelers, setTravelers] = useState<Array<{
@@ -79,6 +82,40 @@ function CheckoutContent() {
     phone: "",
     specialRequests: "",
   })
+
+  // Prefill user data from session
+  useEffect(() => {
+    if (session?.user && !userDataPrefilled) {
+      const userName = session.user.name || ""
+      const userEmail = session.user.email || ""
+      const userPhone = session.user.phone || ""
+
+      // Prefill contact form
+      setContact((prev) => ({
+        ...prev,
+        name: prev.name || userName,
+        email: prev.email || userEmail,
+        phone: prev.phone || userPhone,
+      }))
+
+      // Prefill first adult traveler with user's name
+      setTravelers((prev) => {
+        if (prev.length > 0 && !prev[0].firstName && !prev[0].lastName) {
+          const nameParts = userName.split(" ")
+          const firstName = nameParts[0] || ""
+          const lastName = nameParts.slice(1).join(" ") || ""
+
+          return [
+            { ...prev[0], firstName, lastName },
+            ...prev.slice(1),
+          ]
+        }
+        return prev
+      })
+
+      setUserDataPrefilled(true)
+    }
+  }, [session, userDataPrefilled])
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formErrors, setFormErrors] = useState<{
