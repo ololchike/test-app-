@@ -33,6 +33,35 @@ export interface PasswordChangedEmailData {
   name: string
 }
 
+export interface BookingReminderEmailData {
+  to: string
+  customerName: string
+  bookingReference: string
+  tourTitle: string
+  startDate: string
+  daysUntilTrip: number
+  agentName: string
+  agentPhone?: string
+}
+
+export interface ReviewRequestEmailData {
+  to: string
+  customerName: string
+  bookingReference: string
+  tourTitle: string
+  reviewUrl: string
+}
+
+export interface WithdrawalStatusEmailData {
+  to: string
+  agentName: string
+  amount: number
+  currency: string
+  status: "APPROVED" | "COMPLETED" | "REJECTED"
+  rejectionReason?: string
+  transactionReference?: string
+}
+
 export async function sendBookingConfirmationEmail(data: BookingEmailData) {
   const {
     to,
@@ -553,6 +582,310 @@ export async function sendPasswordChangedEmail(data: PasswordChangedEmailData) {
     return { success: true, data: result }
   } catch (error) {
     console.error("Error sending password changed email:", error)
+    return { success: false, error }
+  }
+}
+
+/**
+ * Sends a booking reminder email before the trip
+ */
+export async function sendBookingReminderEmail(data: BookingReminderEmailData) {
+  const { to, customerName, bookingReference, tourTitle, startDate, daysUntilTrip, agentName, agentPhone } = data
+
+  try {
+    const result = await resend.emails.send({
+      from: "SafariPlus <bookings@safariplus.com>",
+      to: [to],
+      subject: `${daysUntilTrip} Days Until Your Safari - ${tourTitle}`,
+      html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f5;">
+  <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
+      <h1 style="color: white; margin: 0; font-size: 28px;">SafariPlus</h1>
+      <p style="color: rgba(255,255,255,0.9); margin: 5px 0 0 0; font-size: 14px;">Your Adventure is Almost Here!</p>
+    </div>
+
+    <div style="background: white; padding: 30px; border-radius: 0 0 12px 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+      <div style="text-align: center; margin-bottom: 25px;">
+        <div style="display: inline-block; background: #fef3c7; color: #92400e; padding: 12px 25px; border-radius: 30px; font-weight: 700; font-size: 18px;">
+          ${daysUntilTrip} DAYS TO GO!
+        </div>
+      </div>
+
+      <p style="color: #374151; font-size: 16px; line-height: 1.6;">Hi ${customerName},</p>
+
+      <p style="color: #374151; font-size: 16px; line-height: 1.6;">
+        Your safari adventure is just around the corner! Here's a quick reminder about your upcoming trip.
+      </p>
+
+      <div style="background: #f0fdf4; border: 2px solid #bbf7d0; border-radius: 8px; padding: 20px; margin: 25px 0;">
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Tour</td>
+            <td style="padding: 8px 0; color: #1f2937; font-size: 14px; font-weight: 600; text-align: right;">${tourTitle}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Start Date</td>
+            <td style="padding: 8px 0; color: #1f2937; font-size: 14px; font-weight: 600; text-align: right;">${startDate}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Reference</td>
+            <td style="padding: 8px 0; color: #16a34a; font-size: 14px; font-weight: 600; text-align: right; font-family: monospace;">${bookingReference}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Tour Operator</td>
+            <td style="padding: 8px 0; color: #1f2937; font-size: 14px; font-weight: 600; text-align: right;">${agentName}</td>
+          </tr>
+          ${agentPhone ? `
+          <tr>
+            <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Contact</td>
+            <td style="padding: 8px 0; color: #1f2937; font-size: 14px; font-weight: 600; text-align: right;">${agentPhone}</td>
+          </tr>
+          ` : ""}
+        </table>
+      </div>
+
+      <h3 style="color: #1f2937; font-size: 16px; margin: 25px 0 15px 0;">Pre-Trip Checklist:</h3>
+      <ul style="color: #4b5563; font-size: 14px; line-height: 1.8; padding-left: 20px; margin: 0;">
+        <li>Passport valid for at least 6 months</li>
+        <li>Visa requirements checked and obtained</li>
+        <li>Travel insurance arranged</li>
+        <li>Yellow fever vaccination (if required)</li>
+        <li>Safari-appropriate clothing packed</li>
+        <li>Camera and binoculars ready</li>
+      </ul>
+
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${process.env.NEXT_PUBLIC_APP_URL}/booking/confirmation/${bookingReference}" style="display: inline-block; background: #16a34a; color: white; padding: 14px 30px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px;">View Full Itinerary</a>
+      </div>
+
+      <div style="text-align: center; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+        <p style="color: #6b7280; font-size: 14px; margin: 0;">Questions? Contact <a href="mailto:support@safariplus.com" style="color: #16a34a; text-decoration: none; font-weight: 600;">support@safariplus.com</a></p>
+      </div>
+    </div>
+
+    <div style="text-align: center; padding: 20px;">
+      <p style="color: #9ca3af; font-size: 12px; margin: 0;">SafariPlus - Your Trusted Safari Partner</p>
+    </div>
+  </div>
+</body>
+</html>
+      `,
+    })
+
+    return { success: true, data: result }
+  } catch (error) {
+    console.error("Error sending booking reminder email:", error)
+    return { success: false, error }
+  }
+}
+
+/**
+ * Sends a review request email after trip completion
+ */
+export async function sendReviewRequestEmail(data: ReviewRequestEmailData) {
+  const { to, customerName, bookingReference, tourTitle, reviewUrl } = data
+
+  try {
+    const result = await resend.emails.send({
+      from: "SafariPlus <feedback@safariplus.com>",
+      to: [to],
+      subject: `How was your ${tourTitle} experience?`,
+      html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f5;">
+  <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
+      <h1 style="color: white; margin: 0; font-size: 28px;">SafariPlus</h1>
+      <p style="color: rgba(255,255,255,0.9); margin: 5px 0 0 0; font-size: 14px;">We'd Love Your Feedback</p>
+    </div>
+
+    <div style="background: white; padding: 30px; border-radius: 0 0 12px 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+      <div style="text-align: center; margin-bottom: 25px;">
+        <div style="font-size: 48px;">⭐⭐⭐⭐⭐</div>
+      </div>
+
+      <p style="color: #374151; font-size: 16px; line-height: 1.6;">Hi ${customerName},</p>
+
+      <p style="color: #374151; font-size: 16px; line-height: 1.6;">
+        Thank you for choosing SafariPlus for your safari adventure! We hope you had an amazing time on your <strong>${tourTitle}</strong> tour.
+      </p>
+
+      <p style="color: #374151; font-size: 16px; line-height: 1.6;">
+        Your feedback helps other travelers discover great experiences and helps our tour operators improve their services. Would you take a moment to share your experience?
+      </p>
+
+      <div style="background: #f0fdf4; border-radius: 8px; padding: 20px; margin: 25px 0; text-align: center;">
+        <p style="color: #15803d; font-size: 14px; margin: 0 0 5px 0;">Booking Reference</p>
+        <p style="color: #16a34a; font-size: 20px; font-weight: bold; margin: 0; font-family: monospace;">${bookingReference}</p>
+      </div>
+
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${reviewUrl}" style="display: inline-block; background: #16a34a; color: white; padding: 16px 40px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px;">Write a Review</a>
+      </div>
+
+      <p style="color: #6b7280; font-size: 14px; text-align: center; line-height: 1.6;">
+        It only takes 2 minutes and means the world to our community!
+      </p>
+
+      <div style="text-align: center; padding-top: 20px; border-top: 1px solid #e5e7eb; margin-top: 25px;">
+        <p style="color: #6b7280; font-size: 14px; margin: 0;">Questions? <a href="mailto:support@safariplus.com" style="color: #16a34a; text-decoration: none; font-weight: 600;">support@safariplus.com</a></p>
+      </div>
+    </div>
+
+    <div style="text-align: center; padding: 20px;">
+      <p style="color: #9ca3af; font-size: 12px; margin: 0;">SafariPlus - Your Trusted Safari Partner</p>
+    </div>
+  </div>
+</body>
+</html>
+      `,
+    })
+
+    return { success: true, data: result }
+  } catch (error) {
+    console.error("Error sending review request email:", error)
+    return { success: false, error }
+  }
+}
+
+/**
+ * Sends withdrawal status notification to agent
+ */
+export async function sendWithdrawalStatusEmail(data: WithdrawalStatusEmailData) {
+  const { to, agentName, amount, currency, status, rejectionReason, transactionReference } = data
+
+  const statusConfig = {
+    APPROVED: {
+      title: "Withdrawal Approved",
+      badge: "APPROVED",
+      badgeColor: "#16a34a",
+      badgeBg: "#dcfce7",
+      message: "Great news! Your withdrawal request has been approved and is being processed.",
+      icon: "✓"
+    },
+    COMPLETED: {
+      title: "Withdrawal Completed",
+      badge: "COMPLETED",
+      badgeColor: "#16a34a",
+      badgeBg: "#dcfce7",
+      message: "Your withdrawal has been successfully processed and the funds have been transferred.",
+      icon: "✓"
+    },
+    REJECTED: {
+      title: "Withdrawal Rejected",
+      badge: "REJECTED",
+      badgeColor: "#dc2626",
+      badgeBg: "#fee2e2",
+      message: "Unfortunately, your withdrawal request could not be processed.",
+      icon: "✕"
+    }
+  }
+
+  const config = statusConfig[status]
+
+  try {
+    const result = await resend.emails.send({
+      from: "SafariPlus <payments@safariplus.com>",
+      to: [to],
+      subject: `${config.title} - ${currency} ${amount.toLocaleString()}`,
+      html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f5;">
+  <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
+      <h1 style="color: white; margin: 0; font-size: 28px;">SafariPlus</h1>
+      <p style="color: rgba(255,255,255,0.9); margin: 5px 0 0 0; font-size: 14px;">Agent Portal</p>
+    </div>
+
+    <div style="background: white; padding: 30px; border-radius: 0 0 12px 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+      <div style="text-align: center; margin-bottom: 25px;">
+        <div style="display: inline-block; background: ${config.badgeBg}; color: ${config.badgeColor}; padding: 10px 25px; border-radius: 20px; font-weight: 700; font-size: 14px;">
+          ${config.badge}
+        </div>
+      </div>
+
+      <h2 style="color: #1f2937; font-size: 24px; text-align: center; margin: 0 0 20px 0;">${config.title}</h2>
+
+      <p style="color: #374151; font-size: 16px; line-height: 1.6;">Hi ${agentName},</p>
+
+      <p style="color: #374151; font-size: 16px; line-height: 1.6;">${config.message}</p>
+
+      <div style="background: #f9fafb; border-radius: 8px; padding: 20px; margin: 25px 0;">
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 10px 0; color: #6b7280; font-size: 14px;">Amount</td>
+            <td style="padding: 10px 0; color: #1f2937; font-size: 18px; font-weight: 700; text-align: right;">${currency} ${amount.toLocaleString()}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px 0; color: #6b7280; font-size: 14px;">Status</td>
+            <td style="padding: 10px 0; color: ${config.badgeColor}; font-size: 14px; font-weight: 600; text-align: right;">${status}</td>
+          </tr>
+          ${transactionReference ? `
+          <tr>
+            <td style="padding: 10px 0; color: #6b7280; font-size: 14px;">Reference</td>
+            <td style="padding: 10px 0; color: #1f2937; font-size: 14px; font-weight: 600; text-align: right; font-family: monospace;">${transactionReference}</td>
+          </tr>
+          ` : ""}
+        </table>
+      </div>
+
+      ${status === "REJECTED" && rejectionReason ? `
+      <div style="background: #fee2e2; border-radius: 8px; padding: 15px; margin: 25px 0;">
+        <p style="color: #991b1b; font-size: 14px; margin: 0;">
+          <strong>Reason:</strong> ${rejectionReason}
+        </p>
+      </div>
+      <p style="color: #6b7280; font-size: 14px; line-height: 1.6;">
+        If you believe this is an error or have questions, please contact our support team.
+      </p>
+      ` : ""}
+
+      ${status === "COMPLETED" ? `
+      <div style="background: #dcfce7; border-radius: 8px; padding: 15px; margin: 25px 0;">
+        <p style="color: #15803d; font-size: 14px; margin: 0;">
+          <strong>Note:</strong> Please allow 1-3 business days for the funds to reflect in your account, depending on your bank.
+        </p>
+      </div>
+      ` : ""}
+
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${process.env.NEXT_PUBLIC_APP_URL}/agent/earnings" style="display: inline-block; background: #16a34a; color: white; padding: 14px 30px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px;">View Earnings Dashboard</a>
+      </div>
+
+      <div style="text-align: center; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+        <p style="color: #6b7280; font-size: 14px; margin: 0;">Questions? <a href="mailto:support@safariplus.com" style="color: #16a34a; text-decoration: none; font-weight: 600;">support@safariplus.com</a></p>
+      </div>
+    </div>
+
+    <div style="text-align: center; padding: 20px;">
+      <p style="color: #9ca3af; font-size: 12px; margin: 0;">SafariPlus - Your Trusted Safari Partner</p>
+    </div>
+  </div>
+</body>
+</html>
+      `,
+    })
+
+    return { success: true, data: result }
+  } catch (error) {
+    console.error("Error sending withdrawal status email:", error)
     return { success: false, error }
   }
 }

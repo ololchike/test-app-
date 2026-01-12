@@ -78,7 +78,7 @@ export default function AgentAnalyticsPage() {
         <CardHeader>
           <CardTitle>Business Analytics</CardTitle>
           <CardDescription>
-            This feature is coming soon. You'll get detailed insights about your business performance.
+            This feature is coming soon. You&apos;ll get detailed insights about your business performance.
           </CardDescription>
         </CardHeader>
         <CardContent>

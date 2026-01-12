@@ -1,7 +1,6 @@
 import { MessageSquare, Send, Search } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
 
 export default function AgentMessagesPage() {
   return (
@@ -64,7 +63,7 @@ export default function AgentMessagesPage() {
         <CardHeader>
           <CardTitle>Messages</CardTitle>
           <CardDescription>
-            This feature is coming soon. You'll be able to message customers directly.
+            This feature is coming soon. You&apos;ll be able to message customers directly.
           </CardDescription>
         </CardHeader>
         <CardContent>

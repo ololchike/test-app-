@@ -5,15 +5,19 @@
 - [x] Design Complete
 - [x] Implementation Started
 - [x] Implementation Complete (Email Verification & Password Reset)
+- [x] Core Features Complete (Registration, Login, Email Verification, Password Reset)
 - [ ] Testing Complete
 - [ ] Deployed
 
 ## Recent Updates (2026-01-08)
-- Created email verification endpoint
-- Created password reset endpoints (forgot & reset)
-- Created resend verification endpoint
-- Added email service functions for all auth flows
+- Created email verification endpoint (`/api/auth/verify-email`)
+- Created password reset endpoints (`/api/auth/forgot-password`, `/api/auth/reset-password`)
+- Created resend verification endpoint (`/api/auth/resend-verification`)
+- Added email service functions for all auth flows (Resend API integration)
 - All endpoints include comprehensive security measures
+- Token expiration: 24 hours for verification, 1 hour for password reset
+- Single-use tokens with database cleanup
+- Professional HTML email templates with SafariPlus branding
 
 ## Overview
 

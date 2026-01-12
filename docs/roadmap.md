@@ -216,18 +216,18 @@ Features explicitly excluded from current planning.
 
 > **Note**: See [implementation-guide.md](./implementation-guide.md) for detailed task breakdowns and [developer-tasks.md](./developer-tasks.md) for checkbox tracking.
 
-- [ ] Users can register as Client or Agent
-- [ ] Email verification working
-- [ ] Agents can create/edit/delete tours
-- [ ] Tours display with images and details
-- [ ] Search and filter tours by destination, price, duration
-- [ ] Clients can book tours with date selection
-- [ ] Pesapal payment processing functional (M-Pesa + Cards)
-- [ ] Agents see bookings and payment status
-- [ ] Clients see booking history
-- [ ] Admin can manage agents
-- [ ] Commission tracking operational
-- [ ] Mobile responsive on all pages
+- [x] Users can register as Client or Agent
+- [x] Email verification working
+- [x] Agents can create/edit/delete tours
+- [x] Tours display with images and details
+- [x] Search and filter tours by destination, price, duration
+- [x] Clients can book tours with date selection
+- [x] Pesapal payment processing functional (M-Pesa + Cards)
+- [x] Agents see bookings and payment status
+- [x] Clients see booking history
+- [x] Admin can manage agents
+- [x] Commission tracking operational
+- [x] Mobile responsive on all pages
 - [ ] Performance: <3s page loads on 3G
 - [ ] All 33 MVP pages implemented (see [Frontend Pages Structure](./frontend/pages.md))
 
@@ -453,3 +453,10 @@ Features explicitly excluded from current planning.
 | 1.10 | Jan 2026 | Email Confirmation with PDF: Integrated Resend API to send booking confirmation emails with PDF itinerary attachment on payment completion (`src/lib/email/index.ts`, `src/app/api/payments/initiate/route.ts`) |
 | 1.11 | Jan 2026 | Client Dashboard with Real Data: Implemented dashboard home (`/dashboard`) with stats, upcoming bookings, booking history with filters, and real API integration (`src/app/api/client/bookings/route.ts`, `src/app/api/client/dashboard/route.ts`) |
 | 1.12 | Jan 2026 | Agent Dashboard & Booking Management with Real Data: Implemented agent dashboard (`/agent/dashboard`) with revenue metrics, tour performance, booking management with search/filters, and real API integration (`src/app/api/agent/bookings/route.ts`) |
+| 1.13 | Jan 2026 | Email Verification & Password Reset: Implemented email verification endpoint (`/api/auth/verify-email`), password reset flow (`/api/auth/forgot-password`, `/api/auth/reset-password`), and resend verification (`/api/auth/resend-verification`). Full email service integration with Resend API. |
+| 1.14 | Jan 2026 | Search Enhancement: Implemented tour search with pagination, destination/price/duration filters, sorting options, and responsive filter panel. Enhanced `/api/tours` with query parameters and `/tours` page with filter UI. |
+| 1.15 | Jan 2026 | Pesapal Payment Integration: Implemented Pesapal API 3.0 integration with M-Pesa and card payment support (`/api/payments/initiate`, `/api/webhooks/pesapal`). Token management, IPN webhook handling, and payment status tracking. |
+| 1.16 | Jan 2026 | Checkout Flow UI: Implemented checkout page (`/checkout`) with order summary, traveler details form, payment method selection (M-Pesa/Card), and success/cancel pages (`/booking/confirmation/[id]`). Mobile-responsive design. |
+| 1.17 | Jan 2026 | Admin Dashboard with Real Data: Implemented admin dashboard (`/admin`) with platform statistics, revenue metrics, pending actions, agent management page, and real API integration (`/api/admin/stats`, `/api/admin/agents`). |
+| 1.18 | Jan 2026 | Tour Reviews & Ratings System: Implemented complete review system with API endpoints (`/api/reviews`, `/api/tours/[slug]/reviews`, `/api/reviews/[id]/helpful`, `/api/reviews/[id]/respond`, `/api/agent/reviews`), frontend components (`ReviewStats`, `ReviewList`, `ReviewForm`), Reviews tab on tour detail page, and agent review management page (`/agent/reviews`). Includes rating distribution, helpful voting, verified purchase badges, and agent response functionality. |
+| 1.19 | Jan 2026 | Complete Withdrawal Request System: Implemented full withdrawal system for agents to request payouts and admins to process them. Includes API endpoints (`/api/agent/withdrawals`, `/api/agent/balance`, `/api/admin/withdrawals/*`), frontend components (WithdrawalForm, WithdrawalHistory), updated Agent Earnings page with balance tracking, and Admin Withdrawals Management page with approve/reject/process actions. Features M-Pesa and Bank Transfer support, comprehensive validation, audit logging, and security measures. |

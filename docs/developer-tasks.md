@@ -52,19 +52,19 @@ This document provides a checkbox-based task list for developers to track implem
   - [x] Set Agent status to PENDING
   - [x] Validate business name and phone
 
-- [ ] **Implement email verification**
-  - [ ] Set up Resend email service
-  - [ ] Create verification token generation
-  - [ ] Send verification email on registration
-  - [ ] Create verification endpoint
-  - [ ] Update emailVerified on success
+- [x] **Implement email verification** (COMPLETE - Jan 2026)
+  - [x] Set up Resend email service
+  - [x] Create verification token generation
+  - [x] Send verification email on registration
+  - [x] Create verification endpoint (`/api/auth/verify-email`)
+  - [x] Update emailVerified on success
 
-- [ ] **Implement password reset**
-  - [ ] Create forgot password endpoint
-  - [ ] Generate time-limited reset token
-  - [ ] Send reset email with link
-  - [ ] Create reset password endpoint
-  - [ ] Validate token and update password
+- [x] **Implement password reset** (COMPLETE - Jan 2026)
+  - [x] Create forgot password endpoint (`/api/auth/forgot-password`)
+  - [x] Generate time-limited reset token (1 hour expiry)
+  - [x] Send reset email with link
+  - [x] Create reset password endpoint (`/api/auth/reset-password`)
+  - [x] Validate token and update password
 
 - [x] **Configure route protection middleware**
   - [x] Define public routes list
@@ -91,18 +91,18 @@ This document provides a checkbox-based task list for developers to track implem
   - [x] Terms acceptance checkbox
   - [x] Conditional business fields for agents
 
-- [ ] **Create Forgot Password page** (`/forgot-password`)
-  - [ ] Email input
-  - [ ] Submit button
-  - [ ] Success state
-  - [ ] Back to login link
+- [x] **Create Forgot Password page** (`/forgot-password`) (COMPLETE - Jan 2026)
+  - [x] Email input
+  - [x] Submit button
+  - [x] Success state
+  - [x] Back to login link
 
-- [ ] **Create Reset Password page** (`/reset-password`)
-  - [ ] New password input
-  - [ ] Confirm password input
-  - [ ] Submit button
-  - [ ] Token validation
-  - [ ] Redirect to login on success
+- [x] **Create Reset Password page** (`/reset-password`) (COMPLETE - Jan 2026)
+  - [x] New password input
+  - [x] Confirm password input
+  - [x] Submit button
+  - [x] Token validation
+  - [x] Redirect to login on success
 
 #### Layout Components
 
@@ -316,24 +316,24 @@ This document provides a checkbox-based task list for developers to track implem
 
 #### Booking Frontend
 
-- [ ] **Create Checkout page** (`/checkout/[bookingId]`)
-  - [ ] Order summary sidebar
-  - [ ] Traveler details form (lead traveler)
-  - [ ] Additional travelers form (expandable)
-  - [ ] Special requests textarea
-  - [ ] Payment method placeholder
-  - [ ] Terms acceptance
-  - [ ] Submit button
-  - [ ] Mobile responsive layout
+- [x] **Create Checkout page** (`/checkout/[bookingId]`) (COMPLETE - Jan 2026)
+  - [x] Order summary sidebar
+  - [x] Traveler details form (lead traveler)
+  - [x] Additional travelers form (expandable)
+  - [x] Special requests textarea
+  - [x] Payment method selection (M-Pesa, Card)
+  - [x] Terms acceptance
+  - [x] Submit button
+  - [x] Mobile responsive layout
 
-- [ ] **Create Booking confirmation page** (`/booking/confirmation/[id]`)
-  - [ ] Success animation/icon
-  - [ ] Booking reference number
-  - [ ] What happens next steps
-  - [ ] Booking summary card
-  - [ ] Download PDF button (placeholder)
-  - [ ] Add to calendar button
-  - [ ] Continue browsing CTA
+- [x] **Create Booking confirmation page** (`/booking/confirmation/[id]`) (COMPLETE - Jan 2026)
+  - [x] Success animation/icon
+  - [x] Booking reference number
+  - [x] What happens next steps
+  - [x] Booking summary card
+  - [x] Download PDF button
+  - [x] Add to calendar button
+  - [x] Continue browsing CTA
 
 - [x] **Create Client Dashboard** (`/dashboard`)
   - [x] Welcome message
@@ -343,22 +343,22 @@ This document provides a checkbox-based task list for developers to track implem
   - [x] Recommended tours
   - [x] Quick actions
 
-- [ ] **Create My Bookings page** (`/dashboard/bookings`)
-  - [ ] Status filter tabs
-  - [ ] Search input
-  - [ ] Booking cards list
-  - [ ] Empty state per tab
-  - [ ] Load more/pagination
+- [x] **Create My Bookings page** (`/dashboard/bookings`) (COMPLETE - Jan 2026)
+  - [x] Status filter tabs
+  - [x] Search input
+  - [x] Booking cards list
+  - [x] Empty state per tab
+  - [x] Load more/pagination
 
-- [ ] **Create Booking detail page** (`/dashboard/bookings/[id]`)
-  - [ ] Status banner
-  - [ ] Booking reference
-  - [ ] Tour summary card
-  - [ ] Travel details section
-  - [ ] Payment details section
-  - [ ] Operator contact card
-  - [ ] Actions (Download, Cancel)
-  - [ ] Cancellation policy
+- [x] **Create Booking detail page** (`/dashboard/bookings/[id]`) (COMPLETE - Jan 2026)
+  - [x] Status banner
+  - [x] Booking reference
+  - [x] Tour summary card
+  - [x] Travel details section
+  - [x] Payment details section
+  - [x] Operator contact card
+  - [x] Actions (Download, Cancel)
+  - [x] Cancellation policy
 
 - [x] **Create Agent Dashboard** (`/agent`)
   - [x] Welcome message
@@ -368,22 +368,22 @@ This document provides a checkbox-based task list for developers to track implem
   - [x] Activity feed
   - [x] Quick actions
 
-- [ ] **Create Agent Bookings page** (`/agent/bookings`)
-  - [ ] Stats bar
-  - [ ] Filter controls
-  - [ ] Bookings data table
-  - [ ] Actions column
-  - [ ] Export button
-  - [ ] Pagination
+- [x] **Create Agent Bookings page** (`/agent/bookings`) (COMPLETE - Jan 2026)
+  - [x] Stats bar
+  - [x] Filter controls
+  - [x] Bookings data table
+  - [x] Actions column
+  - [x] Export button
+  - [x] Pagination
 
-- [ ] **Create Agent Booking detail** (`/agent/bookings/[id]`)
-  - [ ] Booking header with status
-  - [ ] Client information card
-  - [ ] Traveler details list
-  - [ ] Payment breakdown
-  - [ ] Status update dropdown
-  - [ ] Internal notes section
-  - [ ] Action buttons
+- [x] **Create Agent Booking detail** (`/agent/bookings/[id]`) (COMPLETE - Jan 2026)
+  - [x] Booking header with status
+  - [x] Client information card
+  - [x] Traveler details list
+  - [x] Payment breakdown
+  - [x] Status update dropdown
+  - [x] Internal notes section
+  - [x] Action buttons
 
 ---
 
@@ -391,80 +391,80 @@ This document provides a checkbox-based task list for developers to track implem
 
 #### Payment Backend
 
-- [ ] **Create Payment database model**
-  - [ ] Add all required fields
-  - [ ] Set up unique indexes
-  - [ ] Run migration
+- [x] **Create Payment database model** (COMPLETE - Jan 2026)
+  - [x] Add all required fields
+  - [x] Set up unique indexes
+  - [x] Run migration
 
-- [ ] **Implement Pesapal client class**
-  - [ ] Token management with caching
-  - [ ] Submit order method
-  - [ ] Get transaction status method
-  - [ ] IPN signature verification
+- [x] **Implement Pesapal client class** (COMPLETE - Jan 2026)
+  - [x] Token management with caching
+  - [x] Submit order method
+  - [x] Get transaction status method
+  - [x] IPN signature verification
 
-- [ ] **Implement Payment initiation** (`POST /api/payments/initiate`)
-  - [ ] Verify client authentication
-  - [ ] Verify booking ownership
-  - [ ] Check no existing payment
-  - [ ] Validate payment method
-  - [ ] Generate merchant reference
-  - [ ] Submit to Pesapal
-  - [ ] Create/update payment record
-  - [ ] Return redirect URL
+- [x] **Implement Payment initiation** (`POST /api/payments/initiate`) (COMPLETE - Jan 2026)
+  - [x] Verify client authentication
+  - [x] Verify booking ownership
+  - [x] Check no existing payment
+  - [x] Validate payment method
+  - [x] Generate merchant reference
+  - [x] Submit to Pesapal
+  - [x] Create/update payment record
+  - [x] Return redirect URL
 
-- [ ] **Implement Pesapal webhook** (`POST /api/webhooks/pesapal`)
-  - [ ] Parse IPN payload
-  - [ ] Get transaction status from Pesapal
-  - [ ] Find payment by order ID
-  - [ ] Update payment status
-  - [ ] Update booking to CONFIRMED
-  - [ ] Update agent pending balance
-  - [ ] Increment tour booking count
-  - [ ] Send confirmation email
-  - [ ] Handle idempotency
+- [x] **Implement Pesapal webhook** (`POST /api/webhooks/pesapal`) (COMPLETE - Jan 2026)
+  - [x] Parse IPN payload
+  - [x] Get transaction status from Pesapal
+  - [x] Find payment by order ID
+  - [x] Update payment status
+  - [x] Update booking to CONFIRMED
+  - [x] Update agent pending balance
+  - [x] Increment tour booking count
+  - [x] Send confirmation email
+  - [x] Handle idempotency
 
-- [ ] **Implement Payment status check** (`GET /api/payments/status`)
-  - [ ] Verify access
-  - [ ] Return current status
-  - [ ] Poll Pesapal if PROCESSING
+- [x] **Implement Payment status check** (`GET /api/payments/status`) (COMPLETE - Jan 2026)
+  - [x] Verify access
+  - [x] Return current status
+  - [x] Poll Pesapal if PROCESSING
 
 #### Agent & Admin Backend
 
-- [ ] **Implement Agent profile API** (`GET/PUT /api/agents/[id]`)
-  - [ ] Get agent profile
-  - [ ] Update profile (verify ownership)
-  - [ ] Calculate profile completion
+- [x] **Implement Agent profile API** (`GET/PUT /api/agents/[id]`) (COMPLETE - Jan 2026)
+  - [x] Get agent profile
+  - [x] Update profile (verify ownership)
+  - [x] Calculate profile completion
 
-- [ ] **Implement Agent earnings API** (`GET /api/agents/[id]/earnings`)
-  - [ ] Verify ownership
-  - [ ] Return balance summary
-  - [ ] Return monthly breakdown
-  - [ ] Return recent transactions
+- [x] **Implement Agent earnings API** (`GET /api/agents/[id]/earnings`) (COMPLETE - Jan 2026)
+  - [x] Verify ownership
+  - [x] Return balance summary
+  - [x] Return monthly breakdown
+  - [x] Return recent transactions
 
-- [ ] **Implement Admin agents list** (`GET /api/admin/agents`)
-  - [ ] Verify admin role
-  - [ ] Filter by status
-  - [ ] Search by name/email
-  - [ ] Return with counts
-  - [ ] Paginate
+- [x] **Implement Admin agents list** (`GET /api/admin/agents`) (COMPLETE - Jan 2026)
+  - [x] Verify admin role
+  - [x] Filter by status
+  - [x] Search by name/email
+  - [x] Return with counts
+  - [x] Paginate
 
-- [ ] **Implement Agent status update** (`PUT /api/admin/agents/[id]/status`)
-  - [ ] Verify admin role
-  - [ ] Approve agent
-  - [ ] Suspend agent (unpublish tours)
-  - [ ] Send notification email
-  - [ ] Create audit log
+- [x] **Implement Agent status update** (`PUT /api/admin/agents/[id]/status`) (COMPLETE - Jan 2026)
+  - [x] Verify admin role
+  - [x] Approve agent
+  - [x] Suspend agent (unpublish tours)
+  - [x] Send notification email
+  - [x] Create audit log
 
-- [ ] **Implement Commission rate update** (`PUT /api/admin/agents/[id]/commission`)
-  - [ ] Verify admin role
-  - [ ] Update commission rate
-  - [ ] Create audit log
+- [x] **Implement Commission rate update** (`PUT /api/admin/agents/[id]/commission`) (COMPLETE - Jan 2026)
+  - [x] Verify admin role
+  - [x] Update commission rate
+  - [x] Create audit log
 
-- [ ] **Implement Admin dashboard stats** (`GET /api/admin/stats`)
-  - [ ] Revenue metrics
-  - [ ] Booking counts
-  - [ ] User counts
-  - [ ] Pending actions
+- [x] **Implement Admin dashboard stats** (`GET /api/admin/stats`) (COMPLETE - Jan 2026)
+  - [x] Revenue metrics
+  - [x] Booking counts
+  - [x] User counts
+  - [x] Pending actions
 
 - [ ] **Implement Commission config** (`GET/POST /api/admin/commission`)
   - [ ] List commission tiers
@@ -472,45 +472,45 @@ This document provides a checkbox-based task list for developers to track implem
 
 #### Payment & Admin Frontend
 
-- [ ] **Enhance Checkout with payment**
-  - [ ] Payment method selector
-  - [ ] M-Pesa phone number input
-  - [ ] Card payment redirect info
-  - [ ] Submit and redirect flow
-  - [ ] Payment processing state
+- [x] **Enhance Checkout with payment** (COMPLETE - Jan 2026)
+  - [x] Payment method selector
+  - [x] M-Pesa phone number input
+  - [x] Card payment redirect info
+  - [x] Submit and redirect flow
+  - [x] Payment processing state
 
-- [ ] **Create payment status display**
-  - [ ] Processing indicator
-  - [ ] Success state
-  - [ ] Failure state with retry
+- [x] **Create payment status display** (COMPLETE - Jan 2026)
+  - [x] Processing indicator
+  - [x] Success state
+  - [x] Failure state with retry
 
-- [ ] **Create Agent Earnings page** (`/agent/earnings`)
-  - [ ] Balance cards (available, pending)
-  - [ ] Commission rate display
-  - [ ] Earnings chart
-  - [ ] Transaction table
-  - [ ] Withdrawal history (placeholder)
+- [x] **Create Agent Earnings page** (`/agent/earnings`) (COMPLETE - Jan 2026)
+  - [x] Balance cards (available, pending)
+  - [x] Commission rate display
+  - [x] Earnings chart
+  - [x] Transaction table
+  - [ ] Withdrawal history (Phase 2)
 
-- [ ] **Create Agent Profile page** (`/agent/profile`)
-  - [ ] Profile completion bar
-  - [ ] Business information form
-  - [ ] Contact information form
-  - [ ] Payment details form
-  - [ ] Save changes button
+- [x] **Create Agent Profile page** (`/agent/profile`) (COMPLETE - Jan 2026)
+  - [x] Profile completion bar
+  - [x] Business information form
+  - [x] Contact information form
+  - [x] Payment details form
+  - [x] Save changes button
 
-- [x] **Create Admin Dashboard** (`/admin`)
+- [x] **Create Admin Dashboard** (`/admin`) (COMPLETE - Jan 2026)
   - [x] Stats grid
   - [x] Revenue chart placeholder
   - [x] Pending actions cards
   - [x] Activity feed
 
-- [ ] **Create Admin Agents page** (`/admin/agents`)
-  - [ ] Stats bar
-  - [ ] Filters
-  - [ ] Agents data table
-  - [ ] Action menu
-  - [ ] Approval modal
-  - [ ] Suspension modal
+- [x] **Create Admin Agents page** (`/admin/agents`) (COMPLETE - Jan 2026)
+  - [x] Stats bar
+  - [x] Filters
+  - [x] Agents data table
+  - [x] Action menu
+  - [x] Approval modal
+  - [x] Suspension modal
 
 - [ ] **Create Admin Commission page** (`/admin/settings/commission`)
   - [ ] Current tiers table
@@ -648,10 +648,10 @@ This document provides a checkbox-based task list for developers to track implem
 
 | Sprint | Start | End | Status |
 |--------|-------|-----|--------|
-| Sprint 1-2 | Week 1 | Week 4 | [ ] Not Started |
-| Sprint 3-4 | Week 5 | Week 8 | [ ] Not Started |
-| Sprint 5-6 | Week 9 | Week 12 | [ ] Not Started |
-| Sprint 7-8 | Week 13 | Week 16 | [ ] Not Started |
+| Sprint 1-2 | Week 1 | Week 4 | [x] Complete (Jan 2026) |
+| Sprint 3-4 | Week 5 | Week 8 | [x] Complete (Jan 2026) |
+| Sprint 5-6 | Week 9 | Week 12 | [x] Complete (Jan 2026) |
+| Sprint 7-8 | Week 13 | Week 16 | [x] Complete (Jan 2026) |
 | Sprint 9-10 | Week 17 | Week 20 | [ ] Not Started |
 | Sprint 11-12 | Week 21 | Week 24 | [ ] Not Started |
 | Sprint 13-14 | Week 25 | Week 28 | [ ] Not Started |
@@ -660,9 +660,9 @@ This document provides a checkbox-based task list for developers to track implem
 
 | Milestone | Target | Status |
 |-----------|--------|--------|
-| Alpha | Week 12 | [ ] Not Started |
-| Beta | Week 16 | [ ] Not Started |
-| v1.0 | Week 20 | [ ] Not Started |
+| Alpha | Week 12 | [x] Complete (Jan 2026) |
+| Beta | Week 16 | [x] Complete - MVP Features (Jan 2026) |
+| v1.0 | Week 20 | [ ] In Progress |
 | v1.5 | Week 28 | [ ] Not Started |
 
 ---

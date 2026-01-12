@@ -9,12 +9,11 @@ import {
   MapPin,
   Clock,
   ArrowRight,
-  Star,
   DollarSign,
 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
-import { format, formatDistanceToNow } from "date-fns"
+import { format } from "date-fns"
 
 async function getDashboardData(userId: string) {
   const now = new Date()

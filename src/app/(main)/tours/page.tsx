@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { TourCard } from "@/components/tours/tour-card"
 import { TourFilters, TourFiltersSidebar } from "@/components/tours/tour-filters"
@@ -61,7 +61,36 @@ function ToursGridSkeleton() {
   )
 }
 
+function ToursPageSkeleton() {
+  return (
+    <div className="pt-20">
+      <div className="bg-muted/50 py-12">
+        <div className="container mx-auto px-4 lg:px-8">
+          <Skeleton className="h-10 w-80" />
+          <Skeleton className="h-5 w-96 mt-2" />
+        </div>
+      </div>
+      <div className="container mx-auto px-4 lg:px-8 py-8">
+        <div className="flex gap-4 mb-8">
+          <Skeleton className="h-10 w-40" />
+          <Skeleton className="h-10 w-40" />
+          <Skeleton className="h-10 w-40" />
+        </div>
+        <ToursGridSkeleton />
+      </div>
+    </div>
+  )
+}
+
 export default function ToursPage() {
+  return (
+    <Suspense fallback={<ToursPageSkeleton />}>
+      <ToursContent />
+    </Suspense>
+  )
+}
+
+function ToursContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [tours, setTours] = useState<Tour[]>([])

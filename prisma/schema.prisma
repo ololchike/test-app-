@@ -551,6 +551,10 @@ model WithdrawalRequest {
   method        String           // "mpesa" | "bank"
   status        WithdrawalStatus @default(PENDING)
 
+  // Payment details (JSON)
+  mpesaPhone    String?          // M-Pesa phone number
+  bankDetails   String?          // JSON: { bankName, accountNumber, accountName, branchCode, swiftCode }
+
   // Processing
   processedBy   String?
   processedAt   DateTime?
@@ -584,6 +588,9 @@ model Review {
   agentResponse String?
   respondedAt   DateTime?
 
+  // Helpful tracking
+  helpfulCount Int      @default(0)
+
   // Moderation
   isApproved  Boolean  @default(false)
   isVerified  Boolean  @default(true) // Verified purchase
@@ -594,10 +601,24 @@ model Review {
   user        User     @relation(fields: [userId], references: [id])
   tour        Tour     @relation(fields: [tourId], references: [id])
   booking     Booking  @relation(fields: [bookingId], references: [id])
+  helpfulMarks ReviewHelpful[]
 
   @@index([tourId])
   @@index([userId])
   @@index([rating])
+}
+
+model ReviewHelpful {
+  id        String   @id @default(cuid())
+  reviewId  String
+  userId    String
+  createdAt DateTime @default(now())
+
+  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@unique([reviewId, userId])
+  @@index([reviewId])
+  @@index([userId])
 }
 
 // ============================================================================

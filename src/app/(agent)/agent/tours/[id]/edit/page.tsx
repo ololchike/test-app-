@@ -12,7 +12,6 @@ import {
   Eye,
   Globe,
   GlobeLock,
-  MapPin,
   DollarSign,
   X,
   Plus,
@@ -22,10 +21,8 @@ import {
   Star,
   Clock,
   Users,
-  Pencil,
   Calendar,
   Utensils,
-  Bed,
   Check,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"

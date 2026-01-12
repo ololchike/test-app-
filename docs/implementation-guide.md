@@ -243,6 +243,96 @@ This document provides a complete, sprint-by-sprint implementation guide for Saf
 
 ## Recently Completed Features (January 2026)
 
+### Email Verification & Password Reset
+**Status**: COMPLETE
+
+**Implementation Files**:
+- Verify email: `src/app/api/auth/verify-email/route.ts`
+- Forgot password: `src/app/api/auth/forgot-password/route.ts`
+- Reset password: `src/app/api/auth/reset-password/route.ts`
+- Resend verification: `src/app/api/auth/resend-verification/route.ts`
+- Email service: `src/lib/email/index.ts`
+
+**Features**:
+- Email verification with 24-hour token expiration
+- Password reset with 1-hour token expiration
+- Resend verification email for authenticated users
+- Professional HTML email templates
+- Security: tokens are single-use, bcrypt password hashing (cost 12)
+- Rate limiting recommendations at infrastructure level
+
+### Tour Search Enhancement
+**Status**: COMPLETE
+
+**Implementation Files**:
+- Tours API: `src/app/api/tours/route.ts`
+- Tours page: `src/app/(main)/tours/page.tsx`
+
+**Features**:
+- Full-text search by title and description
+- Filter by destination, price range, duration
+- Multiple sort options (newest, price low/high, rating, popular)
+- Pagination with configurable page size
+- Responsive filter panel (sidebar desktop, sheet mobile)
+- Results count and empty state handling
+
+### Pesapal Payment Integration
+**Status**: COMPLETE
+
+**Implementation Files**:
+- Pesapal client: `src/lib/pesapal.ts`
+- Payment initiation: `src/app/api/payments/initiate/route.ts`
+- Webhook handler: `src/app/api/webhooks/pesapal/route.ts`
+- Payment status: `src/app/api/payments/status/route.ts`
+
+**Features**:
+- Pesapal API 3.0 integration
+- M-Pesa and card payment support
+- Token management with caching
+- IPN webhook handling with signature verification
+- Payment status tracking and polling
+- Automatic booking confirmation on successful payment
+- Commission calculation on payment completion
+
+### Checkout Flow UI
+**Status**: COMPLETE
+
+**Implementation Files**:
+- Checkout page: `src/app/checkout/page.tsx`
+- Payment page: `src/app/booking/payment/page.tsx`
+- Confirmation page: `src/app/booking/confirmation/[id]/page.tsx`
+- Order summary component: `src/components/checkout/order-summary.tsx`
+- Traveler form component: `src/components/checkout/traveler-form.tsx`
+
+**Features**:
+- Order summary sidebar with tour details
+- Lead traveler details form with validation
+- Additional travelers form (expandable)
+- Payment method selection (M-Pesa, Card)
+- M-Pesa phone number input with formatting
+- Terms and conditions acceptance
+- Success page with booking reference
+- Cancel/error page handling
+- Mobile-responsive design
+
+### Admin Dashboard with Real Data
+**Status**: COMPLETE
+
+**Implementation Files**:
+- Admin dashboard: `src/app/(admin)/admin/page.tsx`
+- Agent management: `src/app/(admin)/admin/agents/page.tsx`
+- Admin stats API: `src/app/api/admin/stats/route.ts`
+- Admin agents API: `src/app/api/admin/agents/route.ts`
+
+**Features**:
+- Platform statistics (total revenue, bookings, users, agents)
+- Revenue chart with monthly breakdown
+- Pending actions cards (agent approvals, withdrawals)
+- Activity feed with recent events
+- Agent list with search and status filters
+- Agent approval/suspension actions
+- Commission rate display per agent
+
 ### PDF Itinerary Generation
 **Status**: COMPLETE
 
@@ -311,24 +401,26 @@ This document provides a complete, sprint-by-sprint implementation guide for Saf
 ## Phase 1 MVP Completion Checklist
 
 ### Functional Requirements
-- [ ] Users can register as Client or Agent
-- [ ] Email verification working
-- [ ] Agents can create/edit/delete tours
-- [ ] Tours display with images and details
-- [ ] Search and filter tours by destination, price, duration
-- [ ] Clients can book tours with date selection
-- [ ] Pesapal payment processing functional (M-Pesa + Cards)
+- [x] Users can register as Client or Agent (COMPLETE)
+- [x] Email verification working (COMPLETE - `/api/auth/verify-email`)
+- [x] Agents can create/edit/delete tours (COMPLETE)
+- [x] Tours display with images and details (COMPLETE)
+- [x] Search and filter tours by destination, price, duration (COMPLETE - `/tours`)
+- [x] Clients can book tours with date selection (COMPLETE)
+- [x] Pesapal payment processing functional (M-Pesa + Cards) (COMPLETE - `/api/payments/*`)
 - [x] Agents see bookings and payment status (COMPLETE - `/agent/bookings`)
 - [x] Clients see booking history (COMPLETE - `/dashboard/bookings`)
-- [ ] Admin can manage agents
-- [ ] Commission tracking operational
-- [ ] Mobile responsive on all pages
+- [x] Admin can manage agents (COMPLETE - `/admin/agents`)
+- [x] Commission tracking operational (COMPLETE)
+- [x] Mobile responsive on all pages (COMPLETE)
 - [x] PDF itinerary generation (COMPLETE - `/api/bookings/[id]/itinerary`)
 - [x] Email confirmation with PDF attachment (COMPLETE - via Resend API)
+- [x] Checkout flow UI (COMPLETE - `/checkout`, `/booking/payment`, `/booking/confirmation`)
+- [x] Password reset flow (COMPLETE - `/api/auth/forgot-password`, `/api/auth/reset-password`)
 
 ### Non-Functional Requirements
 - [ ] Performance: <3s page loads on 3G
-- [ ] Security: All endpoints authenticated
+- [x] Security: All endpoints authenticated (COMPLETE - middleware protection)
 - [ ] Testing: Core flows have test coverage
 - [ ] Monitoring: Error tracking (Sentry)
 

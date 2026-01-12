@@ -18,7 +18,6 @@ import {
   AlertCircle,
   Clock,
   Loader2,
-  DollarSign,
   Mail,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"

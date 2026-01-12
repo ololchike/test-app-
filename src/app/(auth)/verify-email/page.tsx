@@ -1,15 +1,37 @@
 "use client"
 
 import * as React from "react"
+import { Suspense } from "react"
 import Link from "next/link"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 import { Loader2, CheckCircle, AlertCircle, Mail } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
+
+function VerifyEmailSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="space-y-2 flex flex-col items-center">
+        <Skeleton className="h-16 w-16 rounded-full" />
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-4 w-64" />
+      </div>
+      <Skeleton className="h-10 w-full" />
+    </div>
+  )
+}
 
 export default function VerifyEmailPage() {
-  const router = useRouter()
+  return (
+    <Suspense fallback={<VerifyEmailSkeleton />}>
+      <VerifyEmailForm />
+    </Suspense>
+  )
+}
+
+function VerifyEmailForm() {
   const searchParams = useSearchParams()
   const token = searchParams.get("token")
 

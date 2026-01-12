@@ -22,6 +22,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { TourCustomizer, TourData } from "./tour-customizer"
 import { InteractiveItinerary } from "./interactive-itinerary"
 import { BookingCard } from "./booking-card"
+import { ReviewStats } from "@/components/reviews/review-stats"
+import { ReviewList } from "@/components/reviews/review-list"
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface TourDetailContentProps {
@@ -376,67 +378,33 @@ export function TourDetailContent({ tour }: TourDetailContentProps) {
                 </TabsContent>
 
                 <TabsContent value="reviews" className="mt-6">
-                  <div className="flex items-center justify-between mb-6">
-                    <div>
-                      <h2 className="text-xl font-semibold">Guest Reviews</h2>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Star className="h-5 w-5 fill-amber-400 text-amber-400" />
-                        <span className="font-semibold text-lg">{tour.rating}</span>
-                        <span className="text-muted-foreground">
-                          ({tour.reviewCount} reviews)
-                        </span>
-                      </div>
-                    </div>
-                    <Button variant="outline">Write a Review</Button>
+                  <ReviewStats
+                    averageRating={tour.rating}
+                    totalReviews={tour.reviewCount}
+                    ratingBreakdown={{
+                      5: 0,
+                      4: 0,
+                      3: 0,
+                      2: 0,
+                      1: 0,
+                    }}
+                  />
+                  <div className="mt-6">
+                    <ReviewList
+                      tourSlug={tour.slug}
+                      initialReviews={tour.reviews.map((review) => ({
+                        ...review,
+                        createdAt: new Date().toISOString(),
+                        helpfulCount: 0,
+                        isVerified: true,
+                      }))}
+                      initialMeta={{
+                        total: tour.reviewCount,
+                        totalPages: Math.ceil(tour.reviewCount / 10),
+                        page: 1,
+                      }}
+                    />
                   </div>
-
-                  <div className="space-y-6">
-                    {tour.reviews.map((review) => (
-                      <div key={review.id} className="border-b pb-6 last:border-0">
-                        <div className="flex items-start gap-4">
-                          <Avatar>
-                            <AvatarImage src={review.user.avatar || undefined} />
-                            <AvatarFallback>
-                              {(review.user.name || "U")
-                                .split(" ")
-                                .map((n: string) => n[0])
-                                .join("")}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between">
-                              <h4 className="font-semibold">{review.user.name}</h4>
-                              <span className="text-sm text-muted-foreground">
-                                {review.date}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-1 mt-1">
-                              {[...Array(5)].map((_, i) => (
-                                <Star
-                                  key={i}
-                                  className={`h-4 w-4 ${
-                                    i < review.rating
-                                      ? "fill-amber-400 text-amber-400"
-                                      : "text-gray-300"
-                                  }`}
-                                />
-                              ))}
-                            </div>
-                            {review.title && (
-                              <h5 className="font-medium mt-2">{review.title}</h5>
-                            )}
-                            <p className="text-muted-foreground mt-1">
-                              {review.content}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <Button variant="outline" className="w-full mt-6">
-                    Load More Reviews
-                  </Button>
                 </TabsContent>
               </Tabs>
 

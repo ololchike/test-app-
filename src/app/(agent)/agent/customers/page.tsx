@@ -63,7 +63,7 @@ export default function AgentCustomersPage() {
         <CardHeader>
           <CardTitle>Customer List</CardTitle>
           <CardDescription>
-            This feature is coming soon. You'll be able to view and manage all your customers.
+            This feature is coming soon. You&apos;ll be able to view and manage all your customers.
           </CardDescription>
         </CardHeader>
         <CardContent>

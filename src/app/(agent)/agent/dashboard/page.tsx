@@ -10,7 +10,6 @@ import {
   ArrowRight,
   Users,
   Map,
-  Clock,
   Package,
 } from "lucide-react"
 import Link from "next/link"
