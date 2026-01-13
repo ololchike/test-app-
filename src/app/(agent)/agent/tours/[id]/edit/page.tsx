@@ -69,18 +69,36 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { ImageUploader } from "@/components/ui/image-uploader"
+import {
+  TourType,
+  TourTypeLabels,
+  DifficultyLevel,
+  DifficultyLevelLabels,
+  AccommodationTier,
+  AccommodationTierLabels,
+  MealType,
+  MealTypeLabels,
+  getEnumValues,
+} from "@/lib/constants"
 
 const COUNTRIES = ["Kenya", "Tanzania", "Uganda", "Rwanda"]
-const TOUR_TYPES = [
-  "Safari", "Beach", "Mountain", "Cultural", "Adventure", "Wildlife",
-  "Gorilla Trekking", "Bird Watching", "Photography", "Honeymoon", "Family", "Luxury", "Budget",
-]
+const TOUR_TYPES = getEnumValues(TourType).map((value) => ({
+  value,
+  label: TourTypeLabels[value],
+}))
 const SEASONS = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December",
 ]
-const DIFFICULTIES = ["Easy", "Moderate", "Challenging"]
-const MEAL_OPTIONS = ["Breakfast", "Lunch", "Dinner"]
+const DIFFICULTIES = getEnumValues(DifficultyLevel).map((value) => ({
+  value,
+  label: DifficultyLevelLabels[value],
+}))
+const MEAL_OPTIONS = getEnumValues(MealType).map((value) => MealTypeLabels[value])
+const ACCOMMODATION_TIERS = getEnumValues(AccommodationTier).map((value) => ({
+  value,
+  label: AccommodationTierLabels[value],
+}))
 
 interface Tour {
   id: string
@@ -746,8 +764,8 @@ export default function EditTourPage({ params }: EditTourPageProps) {
                     </SelectTrigger>
                     <SelectContent>
                       {DIFFICULTIES.map((level) => (
-                        <SelectItem key={level} value={level}>
-                          {level}
+                        <SelectItem key={level.value} value={level.value}>
+                          {level.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -823,17 +841,17 @@ export default function EditTourPage({ params }: EditTourPageProps) {
               <div className="flex flex-wrap gap-2">
                 {TOUR_TYPES.map((type) => (
                   <Badge
-                    key={type}
-                    variant={tour.tourType.includes(type) ? "default" : "outline"}
+                    key={type.value}
+                    variant={tour.tourType.includes(type.value) ? "default" : "outline"}
                     className="cursor-pointer"
-                    onClick={() => toggleArrayItem("tourType", type)}
+                    onClick={() => toggleArrayItem("tourType", type.value)}
                   >
-                    {type}
+                    {type.label}
                   </Badge>
                 ))}
                 {/* Show custom types that aren't in the predefined list */}
                 {tour.tourType
-                  .filter((type) => !TOUR_TYPES.includes(type))
+                  .filter((type) => !TOUR_TYPES.some((t) => t.value === type))
                   .map((type) => (
                     <Badge
                       key={type}
@@ -1718,19 +1736,20 @@ export default function EditTourPage({ params }: EditTourPageProps) {
 }
 
 // Accommodation Form Component
-const ACCOMMODATION_TIERS = [
-  { value: "budget", label: "Budget" },
-  { value: "mid-range", label: "Mid-Range" },
-  { value: "luxury", label: "Luxury" },
-  { value: "ultra-luxury", label: "Ultra Luxury" },
-]
-
 function AccommodationForm({ tourId, onSuccess }: { tourId: string; onSuccess: () => void }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<{
+    name: string
+    description: string
+    tier: AccommodationTier
+    pricePerNight: number
+    location: string
+    rating: string
+    amenities: string
+  }>({
     name: "",
     description: "",
-    tier: "mid-range",
+    tier: AccommodationTier.MID_RANGE,
     pricePerNight: 0,
     location: "",
     rating: "",
@@ -1789,7 +1808,7 @@ function AccommodationForm({ tourId, onSuccess }: { tourId: string; onSuccess: (
           <Label htmlFor="acc-tier">Tier *</Label>
           <Select
             value={form.tier}
-            onValueChange={(value) => setForm({ ...form, tier: value })}
+            onValueChange={(value) => setForm({ ...form, tier: value as AccommodationTier })}
           >
             <SelectTrigger>
               <SelectValue />

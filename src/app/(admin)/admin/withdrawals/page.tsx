@@ -33,6 +33,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { Loader2, Download, Check, X, ExternalLink } from "lucide-react"
 import { format } from "date-fns"
+import { WithdrawalMethod, WithdrawalMethodLabels } from "@/lib/constants"
 
 interface Withdrawal {
   id: string
@@ -353,14 +354,14 @@ export default function AdminWithdrawalsPage() {
                           {withdrawal.currency} {withdrawal.amount.toFixed(2)}
                         </TableCell>
                         <TableCell>
-                          {withdrawal.method === "mpesa" ? "M-Pesa" : "Bank Transfer"}
+                          {WithdrawalMethodLabels[withdrawal.method as WithdrawalMethod] || withdrawal.method}
                           <br />
-                          {withdrawal.method === "mpesa" && withdrawal.mpesaPhone && (
+                          {withdrawal.method === WithdrawalMethod.MPESA && withdrawal.mpesaPhone && (
                             <span className="text-xs text-muted-foreground">
                               {withdrawal.mpesaPhone}
                             </span>
                           )}
-                          {withdrawal.method === "bank" && withdrawal.bankDetails && (
+                          {withdrawal.method === WithdrawalMethod.BANK && withdrawal.bankDetails && (
                             <span className="text-xs text-muted-foreground">
                               {withdrawal.bankDetails.bankName}
                             </span>
@@ -468,7 +469,7 @@ export default function AdminWithdrawalsPage() {
               <div>
                 <Label>Method</Label>
                 <p className="font-medium">
-                  {approveDialog.method === "mpesa" ? "M-Pesa" : "Bank Transfer"}
+                  {WithdrawalMethodLabels[approveDialog.method as WithdrawalMethod] || approveDialog.method}
                 </p>
               </div>
             </div>

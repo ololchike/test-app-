@@ -13,6 +13,12 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Loader2, FileText } from "lucide-react"
 import { format } from "date-fns"
+import {
+  WithdrawalStatus,
+  WithdrawalStatusLabels,
+  WithdrawalMethod,
+  WithdrawalMethodLabels,
+} from "@/lib/constants"
 
 interface Withdrawal {
   id: string
@@ -69,11 +75,11 @@ export function WithdrawalHistory({ refreshTrigger }: WithdrawalHistoryProps) {
       string,
       { variant: "default" | "secondary" | "destructive" | "outline"; label: string }
     > = {
-      PENDING: { variant: "secondary", label: "Pending" },
-      APPROVED: { variant: "default", label: "Approved" },
-      PROCESSING: { variant: "default", label: "Processing" },
-      COMPLETED: { variant: "default", label: "Completed" },
-      REJECTED: { variant: "destructive", label: "Rejected" },
+      [WithdrawalStatus.PENDING]: { variant: "secondary", label: WithdrawalStatusLabels[WithdrawalStatus.PENDING] },
+      [WithdrawalStatus.APPROVED]: { variant: "default", label: WithdrawalStatusLabels[WithdrawalStatus.APPROVED] },
+      [WithdrawalStatus.PROCESSING]: { variant: "default", label: WithdrawalStatusLabels[WithdrawalStatus.PROCESSING] },
+      [WithdrawalStatus.COMPLETED]: { variant: "default", label: WithdrawalStatusLabels[WithdrawalStatus.COMPLETED] },
+      [WithdrawalStatus.REJECTED]: { variant: "destructive", label: WithdrawalStatusLabels[WithdrawalStatus.REJECTED] },
     }
 
     const config = statusConfig[status] || { variant: "outline", label: status }
@@ -82,7 +88,7 @@ export function WithdrawalHistory({ refreshTrigger }: WithdrawalHistoryProps) {
   }
 
   const getMethodLabel = (method: string) => {
-    return method === "mpesa" ? "M-Pesa" : "Bank Transfer"
+    return WithdrawalMethodLabels[method as WithdrawalMethod] || method
   }
 
   if (loading && withdrawals.length === 0) {

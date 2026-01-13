@@ -82,7 +82,7 @@ const statsConfig = [
     title: "Total Views",
     icon: Eye,
     color: "from-blue-500 to-indigo-600",
-    format: (val: number) => val.toLocaleString(),
+    format: (val: string | number) => Number(val).toLocaleString(),
     description: "All tour page views",
   },
   {
@@ -90,7 +90,7 @@ const statsConfig = [
     title: "Conversion Rate",
     icon: BarChart3,
     color: "from-emerald-500 to-teal-600",
-    format: (val: string) => `${val}%`,
+    format: (val: string | number) => `${val}%`,
     description: "Views to bookings",
   },
   {
@@ -98,7 +98,7 @@ const statsConfig = [
     title: "Avg. Booking Value",
     icon: DollarSign,
     color: "from-amber-500 to-orange-600",
-    format: (val: string) => `$${parseFloat(val).toLocaleString()}`,
+    format: (val: string | number) => `$${parseFloat(String(val)).toLocaleString()}`,
     description: "Per booking",
   },
   {
@@ -106,7 +106,7 @@ const statsConfig = [
     title: "Return Customers",
     icon: Users,
     color: "from-purple-500 to-pink-600",
-    format: (val: string) => `${val}%`,
+    format: (val: string | number) => `${val}%`,
     description: "Repeat booking rate",
   },
 ]
@@ -241,7 +241,7 @@ export default function AgentAnalyticsPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    {stat.format(value as any)}
+                    {stat.format(value)}
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">
                     {stat.description}

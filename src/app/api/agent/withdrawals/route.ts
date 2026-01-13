@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 import { WithdrawalMethod, getEnumValues } from "@/lib/constants"
+import { WithdrawalMethod as PrismaWithdrawalMethod } from "@prisma/client"
 
 /**
  * Withdrawal Request Schema
@@ -258,7 +259,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate payment method details
-    if (data.method === "mpesa") {
+    if (data.method === WithdrawalMethod.MPESA) {
       if (!data.mpesaPhone) {
         return NextResponse.json(
           { error: "M-Pesa phone number is required" },
@@ -273,7 +274,7 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         )
       }
-    } else if (data.method === "bank") {
+    } else if (data.method === WithdrawalMethod.BANK) {
       if (!data.bankDetails) {
         return NextResponse.json(
           { error: "Bank details are required for bank transfer" },
@@ -300,10 +301,10 @@ export async function POST(request: NextRequest) {
         agentId: agent.id,
         amount: data.amount,
         currency: data.currency,
-        method: data.method,
-        mpesaPhone: data.method === "mpesa" ? data.mpesaPhone : null,
+        method: data.method as PrismaWithdrawalMethod,
+        mpesaPhone: data.method === WithdrawalMethod.MPESA ? data.mpesaPhone : null,
         bankDetails:
-          data.method === "bank" && data.bankDetails
+          data.method === WithdrawalMethod.BANK && data.bankDetails
             ? JSON.stringify(data.bankDetails)
             : null,
         status: "PENDING",

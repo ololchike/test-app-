@@ -163,7 +163,7 @@ export async function PATCH(request: NextRequest) {
     const [updatedUser, updatedAgent] = await prisma.$transaction([
       prisma.user.update({
         where: { id: session.user.id },
-        data: Object.keys(userFields).length > 0 ? userFields : undefined,
+        data: Object.keys(userFields).length > 0 ? userFields : {},
         select: {
           id: true,
           name: true,
@@ -176,7 +176,7 @@ export async function PATCH(request: NextRequest) {
       }),
       prisma.agent.update({
         where: { id: agent.id },
-        data: Object.keys(agentFields).length > 0 ? agentFields : undefined,
+        data: Object.keys(agentFields).length > 0 ? agentFields : {},
         select: {
           id: true,
           businessName: true,
@@ -213,7 +213,7 @@ export async function PATCH(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Validation error", details: error.errors },
+        { error: "Validation error", details: error.issues },
         { status: 400 }
       )
     }

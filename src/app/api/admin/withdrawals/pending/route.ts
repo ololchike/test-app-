@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { WithdrawalMethod, WithdrawalMethodLabels } from "@/lib/constants"
 
 /**
  * GET /api/admin/withdrawals/pending
@@ -74,7 +75,7 @@ export async function GET(req: NextRequest) {
         agentId: withdrawal.agentId,
         amount: withdrawal.amount,
         currency: withdrawal.currency,
-        method: withdrawal.method === "mpesa" ? "M-Pesa" : "Bank Transfer",
+        method: WithdrawalMethodLabels[withdrawal.method as WithdrawalMethod] || withdrawal.method,
         requestedAt: timeAgo,
         status: withdrawal.status.toLowerCase(),
         createdAt: withdrawal.createdAt,

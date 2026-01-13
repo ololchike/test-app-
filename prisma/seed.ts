@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client"
+import { PrismaClient, AccommodationTier } from "@prisma/client"
 import bcrypt from "bcryptjs"
 
 const prisma = new PrismaClient()
@@ -168,7 +168,7 @@ This tour is perfect for wildlife enthusiasts, photographers, and anyone seeking
       {
         tourId: tour1.id,
         name: "Mara Explorer Camp",
-        tier: "budget",
+        tier: AccommodationTier.BUDGET,
         description: "Comfortable tented camps with shared facilities",
         pricePerNight: 150,
         amenities: JSON.stringify(["Shared bathroom", "Hot water", "Restaurant", "Campfire"]),
@@ -176,7 +176,7 @@ This tour is perfect for wildlife enthusiasts, photographers, and anyone seeking
       {
         tourId: tour1.id,
         name: "Mara Serena Safari Lodge",
-        tier: "mid-range",
+        tier: AccommodationTier.MID_RANGE,
         description: "Well-appointed rooms with private facilities and pool",
         pricePerNight: 280,
         amenities: JSON.stringify(["Private bathroom", "Pool", "Restaurant", "Bar", "WiFi"]),
@@ -184,7 +184,7 @@ This tour is perfect for wildlife enthusiasts, photographers, and anyone seeking
       {
         tourId: tour1.id,
         name: "Angama Mara",
-        tier: "luxury",
+        tier: AccommodationTier.LUXURY,
         description: "Exclusive luxury tents with panoramic views",
         pricePerNight: 650,
         amenities: JSON.stringify([

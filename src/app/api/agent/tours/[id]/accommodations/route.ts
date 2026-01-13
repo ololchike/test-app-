@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 import { AccommodationTier, getEnumValues } from "@/lib/constants"
+import { AccommodationTier as PrismaAccommodationTier } from "@prisma/client"
 
 const accommodationSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -152,7 +153,7 @@ export async function POST(
         tourId,
         name: data.name,
         description: data.description || null,
-        tier: data.tier,
+        tier: data.tier as PrismaAccommodationTier,
         pricePerNight: data.pricePerNight,
         images: JSON.stringify(data.images || []),
         amenities: JSON.stringify(data.amenities || []),

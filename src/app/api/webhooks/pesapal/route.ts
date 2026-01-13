@@ -7,6 +7,7 @@ import { sendBookingConfirmationEmail } from "@/lib/email"
 import { createLogger } from "@/lib/logger"
 import { format } from "date-fns"
 import React from "react"
+import { EarningType } from "@/lib/constants"
 
 const log = createLogger("Pesapal IPN")
 
@@ -37,6 +38,9 @@ interface BookingWithRelations {
   specialRequests: string | null
   userId: string
   agentId: string
+  status: string
+  paymentStatus: string
+  paymentType: string
   tour: {
     id: string
     title: string
@@ -311,7 +315,7 @@ export async function POST(request: NextRequest) {
             amount: payment.booking.agentEarnings,
             currency: payment.booking.currency,
             description: `Earnings from booking ${payment.booking.bookingReference}`,
-            type: "booking",
+            type: EarningType.BOOKING,
           },
         })
 
@@ -494,6 +498,9 @@ async function sendConfirmationEmailWithPDF(booking: BookingWithRelations) {
         contactEmail: booking.contactEmail,
         contactPhone: booking.contactPhone,
         specialRequests: booking.specialRequests,
+        status: booking.status,
+        paymentStatus: booking.paymentStatus,
+        paymentType: booking.paymentType,
         tour: {
           title: booking.tour.title,
           destination: booking.tour.destination,

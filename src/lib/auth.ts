@@ -74,7 +74,7 @@ export const authConfig: NextAuthConfig = {
           image: user.avatar,
           role: user.role,
           agentId: user.agent?.id,
-          phone: user.phone,
+          phone: user.phone ?? undefined,
         }
       },
     }),

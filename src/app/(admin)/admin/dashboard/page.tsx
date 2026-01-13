@@ -24,6 +24,7 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import { cn } from "@/lib/utils"
+import { WithdrawalMethod, WithdrawalMethodLabels } from "@/lib/constants"
 
 // Force dynamic rendering for this page
 export const dynamic = "force-dynamic"
@@ -257,7 +258,7 @@ async function getDashboardData() {
     agentName: withdrawal.agent.businessName,
     amount: withdrawal.amount,
     currency: withdrawal.currency,
-    method: withdrawal.method === "mpesa" ? "M-Pesa" : "Bank Transfer",
+    method: WithdrawalMethodLabels[withdrawal.method as WithdrawalMethod] || withdrawal.method,
     requestedAt: getTimeAgo(withdrawal.createdAt),
   }))
 

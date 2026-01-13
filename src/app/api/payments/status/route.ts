@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma"
 import { getPesapalClient } from "@/lib/pesapal"
 import { createLogger } from "@/lib/logger"
 import { z } from "zod"
+import { PaymentStatus, BookingStatus, PaymentStatus as BookingPaymentStatus } from "@prisma/client"
+import { EarningType } from "@/lib/constants"
 
 const log = createLogger("Payment Status")
 
@@ -135,21 +137,21 @@ export async function GET(request: NextRequest) {
 
         // Map Pesapal status code to our status
         // Status codes: 0 = INVALID, 1 = COMPLETED, 2 = FAILED, 3 = REVERSED
-        let newPaymentStatus = payment.status
-        let newBookingStatus = booking.status
-        let newPaymentBookingStatus = booking.paymentStatus
+        let newPaymentStatus: PaymentStatus = payment.status
+        let newBookingStatus: BookingStatus = booking.status
+        let newPaymentBookingStatus: BookingPaymentStatus = booking.paymentStatus
 
         if (transactionStatus.status_code === 1) {
-          newPaymentStatus = "COMPLETED"
-          newBookingStatus = "CONFIRMED"
-          newPaymentBookingStatus = "COMPLETED"
+          newPaymentStatus = PaymentStatus.COMPLETED
+          newBookingStatus = BookingStatus.CONFIRMED
+          newPaymentBookingStatus = BookingPaymentStatus.COMPLETED
         } else if (transactionStatus.status_code === 2) {
-          newPaymentStatus = "FAILED"
-          newPaymentBookingStatus = "FAILED"
+          newPaymentStatus = PaymentStatus.FAILED
+          newPaymentBookingStatus = BookingPaymentStatus.FAILED
         } else if (transactionStatus.status_code === 3) {
-          newPaymentStatus = "REFUNDED"
-          newBookingStatus = "REFUNDED"
-          newPaymentBookingStatus = "REFUNDED"
+          newPaymentStatus = PaymentStatus.REFUNDED
+          newBookingStatus = BookingStatus.REFUNDED
+          newPaymentBookingStatus = BookingPaymentStatus.REFUNDED
         }
 
         // Update database if status changed
@@ -167,8 +169,8 @@ export async function GET(request: NextRequest) {
               status: newPaymentStatus,
               statusMessage: transactionStatus.payment_status_description,
               pesapalTrackingId: transactionStatus.confirmation_code || payment.pesapalTrackingId,
-              completedAt: newPaymentStatus === "COMPLETED" ? new Date() : payment.completedAt,
-              failedAt: newPaymentStatus === "FAILED" ? new Date() : payment.failedAt,
+              completedAt: newPaymentStatus === PaymentStatus.COMPLETED ? new Date() : payment.completedAt,
+              failedAt: newPaymentStatus === PaymentStatus.FAILED ? new Date() : payment.failedAt,
             },
           })
 
@@ -182,7 +184,7 @@ export async function GET(request: NextRequest) {
           })
 
           // Create agent earning if payment completed
-          if (newPaymentStatus === "COMPLETED" && payment.status !== "COMPLETED") {
+          if (newPaymentStatus === PaymentStatus.COMPLETED && (payment.status as PaymentStatus) !== PaymentStatus.COMPLETED) {
             try {
               await prisma.agentEarning.create({
                 data: {
@@ -191,12 +193,12 @@ export async function GET(request: NextRequest) {
                   amount: booking.agentEarnings,
                   currency: booking.currency,
                   description: `Earnings from booking ${booking.bookingReference}`,
-                  type: "booking",
+                  type: EarningType.BOOKING,
                 },
               })
             } catch (earningError) {
               // Earning might already exist, ignore duplicate error
-              log.debug("Agent earning creation skipped (may already exist)", earningError)
+              log.debug("Agent earning creation skipped (may already exist)", { error: earningError })
             }
           }
         }

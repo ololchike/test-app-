@@ -11,8 +11,12 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
+    "db:seed:dev": "tsx prisma/seed.ts",
+    "db:seed:prod": "tsx prisma/seed.prod.ts",
     "db:studio": "prisma studio",
-    "db:reset": "prisma migrate reset --force"
+    "db:reset": "prisma migrate reset --force",
+    "vercel:env:pull:dev": "vercel env pull .env.development --environment=preview",
+    "vercel:env:pull:prod": "vercel env pull .env.production --environment=production"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 import { DifficultyLevel, getEnumValues } from "@/lib/constants"
+import { DifficultyLevel as PrismaDifficultyLevel } from "@prisma/client"
 
 // Validation schema for tour creation
 const createTourSchema = z.object({
@@ -186,7 +187,7 @@ export async function POST(request: NextRequest) {
         infantPrice: data.infantPrice ?? null,
         singleSupplement: data.singleSupplement ?? null,
         maxGroupSize: data.maxGroupSize,
-        difficulty: data.difficulty,
+        difficulty: data.difficulty as PrismaDifficultyLevel,
         tourType: JSON.stringify(data.tourType),
         highlights: JSON.stringify(data.highlights || []),
         included: JSON.stringify(data.included || []),

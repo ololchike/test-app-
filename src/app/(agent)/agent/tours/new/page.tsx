@@ -49,6 +49,17 @@ import {
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { ImageUploader } from "@/components/ui/image-uploader"
+import {
+  TourType,
+  TourTypeLabels,
+  DifficultyLevel,
+  DifficultyLevelLabels,
+  AccommodationTier,
+  AccommodationTierLabels,
+  MealType,
+  MealTypeLabels,
+  getEnumValues,
+} from "@/lib/constants"
 
 // Dynamic import for RichTextEditor to avoid SSR issues
 const RichTextEditor = dynamic(
@@ -67,24 +78,14 @@ const STEPS = [
   { id: 7, title: "Review", icon: MapPin },
 ]
 
-const MEAL_OPTIONS = ["Breakfast", "Lunch", "Dinner"]
+// Using shared enums for consistent values across FE and BE
+const MEAL_OPTIONS = getEnumValues(MealType).map((value) => MealTypeLabels[value])
 
 const COUNTRIES = ["Kenya", "Tanzania", "Uganda", "Rwanda"]
-const TOUR_TYPES = [
-  "Safari",
-  "Beach",
-  "Mountain",
-  "Cultural",
-  "Adventure",
-  "Wildlife",
-  "Gorilla Trekking",
-  "Bird Watching",
-  "Photography",
-  "Honeymoon",
-  "Family",
-  "Luxury",
-  "Budget",
-]
+const TOUR_TYPES = getEnumValues(TourType).map((value) => ({
+  value,
+  label: TourTypeLabels[value],
+}))
 const SEASONS = [
   "January",
   "February",
@@ -99,13 +100,14 @@ const SEASONS = [
   "November",
   "December",
 ]
-const DIFFICULTIES = ["Easy", "Moderate", "Challenging"]
-const ACCOMMODATION_TIERS = [
-  { value: "budget", label: "Budget" },
-  { value: "mid-range", label: "Mid-Range" },
-  { value: "luxury", label: "Luxury" },
-  { value: "ultra-luxury", label: "Ultra Luxury" },
-]
+const DIFFICULTIES = getEnumValues(DifficultyLevel).map((value) => ({
+  value,
+  label: DifficultyLevelLabels[value],
+}))
+const ACCOMMODATION_TIERS = getEnumValues(AccommodationTier).map((value) => ({
+  value,
+  label: AccommodationTierLabels[value],
+}))
 
 interface ItineraryData {
   id: string // temporary id for UI
@@ -751,8 +753,8 @@ export default function CreateTourPage() {
                     </SelectTrigger>
                     <SelectContent>
                       {DIFFICULTIES.map((level) => (
-                        <SelectItem key={level} value={level}>
-                          {level}
+                        <SelectItem key={level.value} value={level.value}>
+                          {level.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -883,17 +885,17 @@ export default function CreateTourPage() {
                 <div className="flex flex-wrap gap-2">
                   {TOUR_TYPES.map((type) => (
                     <Badge
-                      key={type}
-                      variant={formData.tourType.includes(type) ? "default" : "outline"}
+                      key={type.value}
+                      variant={formData.tourType.includes(type.value) ? "default" : "outline"}
                       className="cursor-pointer"
-                      onClick={() => toggleArrayItem("tourType", type)}
+                      onClick={() => toggleArrayItem("tourType", type.value)}
                     >
-                      {type}
+                      {type.label}
                     </Badge>
                   ))}
                   {/* Show custom types that aren't in the predefined list */}
                   {formData.tourType
-                    .filter((type) => !TOUR_TYPES.includes(type))
+                    .filter((type) => !TOUR_TYPES.some((t) => t.value === type))
                     .map((type) => (
                       <Badge
                         key={type}
