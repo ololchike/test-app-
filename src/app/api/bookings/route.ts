@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
+import { z } from "zod"
+import { rateLimiters, getClientIdentifier } from "@/lib/rate-limit"
+import { sanitizeInput } from "@/lib/security"
 
 // Generate a unique booking reference
 function generateBookingReference(): string {
@@ -10,11 +13,78 @@ function generateBookingReference(): string {
   return `${prefix}${timestamp}${random}`
 }
 
+// SECURITY: Comprehensive input validation schema
+const bookingSchema = z.object({
+  tourId: z.string().uuid("Invalid tour ID"),
+  startDate: z.string().datetime("Invalid start date"),
+  endDate: z.string().datetime("Invalid end date"),
+  adults: z.number().int().min(1).max(20, "Too many adults"),
+  children: z.number().int().min(0).max(20, "Too many children").optional(),
+  accommodations: z.record(z.string(), z.string()).optional(),
+  addons: z.array(z.string().uuid()).optional(),
+  travelers: z.array(z.object({
+    firstName: z.string().min(1).max(100),
+    lastName: z.string().min(1).max(100),
+    email: z.string().email().optional(),
+    phone: z.string().optional(),
+    dateOfBirth: z.string().optional(),
+    nationality: z.string().optional(),
+    passportNumber: z.string().optional(),
+  })).optional(),
+  contact: z.object({
+    name: z.string().min(1, "Name is required").max(200),
+    email: z.string().email("Valid email is required"),
+    phone: z.string().min(1, "Phone is required").max(50),
+    specialRequests: z.string().max(2000).optional(),
+  }),
+  pricing: z.object({
+    baseTotal: z.number().min(0),
+    childTotal: z.number().min(0),
+    accommodationTotal: z.number().min(0),
+    addonsTotal: z.number().min(0),
+    serviceFee: z.number().min(0),
+    total: z.number().min(1, "Total must be greater than 0"),
+  }),
+  paymentType: z.enum(["FULL", "DEPOSIT"]).optional(),
+  depositAmount: z.number().min(0).optional(),
+  balanceAmount: z.number().min(0).optional(),
+})
+
 export async function POST(request: NextRequest) {
   try {
     const session = await auth()
 
+    // SECURITY: Rate limiting - 10 bookings per minute per user
+    const clientId = getClientIdentifier(request, session?.user?.id)
+    const rateLimitResult = rateLimiters.api.check(clientId)
+
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(Math.ceil((rateLimitResult.reset - Date.now()) / 1000)),
+          },
+        }
+      )
+    }
+
+    // SECURITY: Validate and sanitize input
     const body = await request.json()
+    const validationResult = bookingSchema.safeParse(body)
+
+    if (!validationResult.success) {
+      return NextResponse.json(
+        {
+          error: "Invalid booking data",
+          details: validationResult.error.flatten().fieldErrors,
+        },
+        { status: 400 }
+      )
+    }
+
+    const data = validationResult.data
     const {
       tourId,
       startDate,
@@ -23,19 +93,37 @@ export async function POST(request: NextRequest) {
       children,
       accommodations,
       addons,
-      travelers,
+      travelers: _travelers, // Reserved for future traveler details feature
       contact,
       pricing,
-      // Payment type fields
       paymentType = "FULL",
       depositAmount,
       balanceAmount,
-    } = body
+    } = data
 
-    // Validate required fields
-    if (!tourId || !startDate || !adults || !contact?.name || !contact?.email || !contact?.phone) {
+    // SECURITY: Sanitize text inputs to prevent XSS
+    const sanitizedContact = {
+      name: sanitizeInput(contact.name),
+      email: contact.email, // Email already validated by Zod
+      phone: sanitizeInput(contact.phone),
+      specialRequests: contact.specialRequests ? sanitizeInput(contact.specialRequests) : null,
+    }
+
+    // SECURITY: Validate date range
+    const startDateTime = new Date(startDate)
+    const endDateTime = new Date(endDate)
+    const now = new Date()
+
+    if (startDateTime < now) {
       return NextResponse.json(
-        { error: "Missing required booking information" },
+        { error: "Start date cannot be in the past" },
+        { status: 400 }
+      )
+    }
+
+    if (endDateTime <= startDateTime) {
+      return NextResponse.json(
+        { error: "End date must be after start date" },
         { status: 400 }
       )
     }
@@ -117,10 +205,10 @@ export async function POST(request: NextRequest) {
         totalAmount: pricing.total,
         platformCommission,
         agentEarnings,
-        contactName: contact.name,
-        contactEmail: contact.email,
-        contactPhone: contact.phone,
-        specialRequests: contact.specialRequests || null,
+        contactName: sanitizedContact.name,
+        contactEmail: sanitizedContact.email,
+        contactPhone: sanitizedContact.phone,
+        specialRequests: sanitizedContact.specialRequests,
         status: "PENDING",
         paymentStatus: "PENDING",
         // Payment type fields

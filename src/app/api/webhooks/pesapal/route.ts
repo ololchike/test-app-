@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { getPesapalClient, mapPaymentMethod, mapPaymentStatus, validateIPNNotification } from "@/lib/pesapal"
+import { getPesapalClient, mapPaymentMethod, mapPaymentStatus, validateIPNNotification, validatePesapalIP } from "@/lib/pesapal"
 import { renderToBuffer } from "@react-pdf/renderer"
 import { ItineraryPDF } from "@/lib/pdf/itinerary-template"
 import { sendBookingConfirmationEmail } from "@/lib/email"
@@ -8,6 +8,8 @@ import { createLogger } from "@/lib/logger"
 import { format } from "date-fns"
 import React from "react"
 import { EarningType } from "@/lib/constants"
+import { rateLimiters, getClientIdentifier } from "@/lib/rate-limit"
+import { getRealIp } from "@/lib/security"
 
 const log = createLogger("Pesapal IPN")
 
@@ -117,6 +119,37 @@ export async function POST(request: NextRequest) {
   let notificationData: PesapalNotification | null = null
 
   try {
+    // SECURITY: Rate limiting for webhook endpoint
+    const clientIp = getRealIp(request)
+    const rateLimitResult = rateLimiters.webhook.check(clientIp)
+
+    if (!rateLimitResult.success) {
+      log.warn("Rate limit exceeded for webhook", { ip: clientIp })
+      return NextResponse.json(
+        { error: "Too many requests" },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(Math.ceil((rateLimitResult.reset - Date.now()) / 1000)),
+            "X-RateLimit-Limit": String(rateLimitResult.limit),
+            "X-RateLimit-Remaining": String(rateLimitResult.remaining),
+            "X-RateLimit-Reset": String(rateLimitResult.reset),
+          },
+        }
+      )
+    }
+
+    // SECURITY: Validate source IP (Pesapal IPs only)
+    // Note: This is commented out because Pesapal may use dynamic IPs
+    // Enable this if Pesapal provides a stable IP range
+    // if (!validatePesapalIP(clientIp)) {
+    //   log.error("Invalid source IP for webhook", { ip: clientIp })
+    //   return NextResponse.json(
+    //     { error: "Unauthorized source" },
+    //     { status: 403 }
+    //   )
+    // }
+
     // Parse request body
     const body = await request.json() as PesapalNotification
     notificationData = body
@@ -132,9 +165,10 @@ export async function POST(request: NextRequest) {
       OrderMerchantReference,
       OrderNotificationType,
       timestamp: new Date().toISOString(),
+      sourceIp: clientIp,
     })
 
-    // Validate notification structure
+    // SECURITY: Validate notification structure
     if (!validateIPNNotification(body)) {
       log.error("Invalid notification structure:", body)
       return NextResponse.json(

@@ -14,6 +14,52 @@ const loginSchema = z.object({
   password: z.string().min(1, "Password is required"),
 })
 
+// SECURITY: Brute force protection - Track failed login attempts
+const failedLoginAttempts = new Map<string, { count: number; lastAttempt: number }>()
+const MAX_FAILED_ATTEMPTS = 5
+const LOCKOUT_DURATION = 15 * 60 * 1000 // 15 minutes
+
+// Clean up old failed attempts every hour
+if (typeof setInterval !== 'undefined') {
+  setInterval(() => {
+    const now = Date.now()
+    for (const [key, value] of failedLoginAttempts.entries()) {
+      if (now - value.lastAttempt > LOCKOUT_DURATION) {
+        failedLoginAttempts.delete(key)
+      }
+    }
+  }, 60 * 60 * 1000)
+}
+
+function checkBruteForce(email: string): boolean {
+  const attempts = failedLoginAttempts.get(email)
+  if (!attempts) return false
+
+  const now = Date.now()
+  if (now - attempts.lastAttempt > LOCKOUT_DURATION) {
+    failedLoginAttempts.delete(email)
+    return false
+  }
+
+  return attempts.count >= MAX_FAILED_ATTEMPTS
+}
+
+function recordFailedAttempt(email: string): void {
+  const attempts = failedLoginAttempts.get(email)
+  const now = Date.now()
+
+  if (!attempts) {
+    failedLoginAttempts.set(email, { count: 1, lastAttempt: now })
+  } else {
+    attempts.count++
+    attempts.lastAttempt = now
+  }
+}
+
+function clearFailedAttempts(email: string): void {
+  failedLoginAttempts.delete(email)
+}
+
 const useSecureCookies = process.env.NODE_ENV === "production"
 const cookiePrefix = useSecureCookies ? "__Secure-" : ""
 
@@ -79,21 +125,40 @@ export const authConfig: NextAuthConfig = {
         }
 
         const { email, password } = parsed.data
+        const normalizedEmail = email.toLowerCase()
+
+        // SECURITY: Check for brute force attacks
+        if (checkBruteForce(normalizedEmail)) {
+          throw new Error(
+            `Too many failed login attempts. Account temporarily locked. Please try again in ${Math.ceil(LOCKOUT_DURATION / 60000)} minutes.`
+          )
+        }
 
         const user = await prisma.user.findUnique({
-          where: { email: email.toLowerCase() },
+          where: { email: normalizedEmail },
           include: { agent: true },
         })
 
         if (!user || !user.password) {
+          // SECURITY: Record failed attempt
+          recordFailedAttempt(normalizedEmail)
+          // Use constant-time delay to prevent user enumeration
+          await new Promise(resolve => setTimeout(resolve, 1000))
           return null
         }
 
         const passwordMatch = await bcrypt.compare(password, user.password)
 
         if (!passwordMatch) {
+          // SECURITY: Record failed attempt
+          recordFailedAttempt(normalizedEmail)
+          // Use constant-time delay to prevent timing attacks
+          await new Promise(resolve => setTimeout(resolve, 1000))
           return null
         }
+
+        // SECURITY: Clear failed attempts on successful login
+        clearFailedAttempts(normalizedEmail)
 
         // Check if user account is active
         if (user.status !== "ACTIVE") {
