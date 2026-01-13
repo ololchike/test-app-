@@ -95,9 +95,14 @@ export const authConfig: NextAuthConfig = {
           return null
         }
 
-        // Check if account is active
+        // Check if user account is active
         if (user.status !== "ACTIVE") {
           throw new Error("Account is not active. Please contact support.")
+        }
+
+        // Check if agent is suspended
+        if (user.agent && user.agent.status === "SUSPENDED") {
+          throw new Error("Your agent account has been suspended. Please contact support.")
         }
 
         return {
@@ -114,14 +119,22 @@ export const authConfig: NextAuthConfig = {
   ],
   callbacks: {
     async signIn({ user, account }) {
-      // For OAuth providers, update user info if needed
+      // For OAuth providers, check if user/agent is suspended
       if (account?.provider === "google" && user.email) {
         const existingUser = await prisma.user.findUnique({
           where: { email: user.email },
+          include: { agent: true },
         })
 
-        if (existingUser && existingUser.status !== "ACTIVE") {
-          return false
+        if (existingUser) {
+          // Check if user account is not active
+          if (existingUser.status !== "ACTIVE") {
+            return false
+          }
+          // Check if agent is suspended
+          if (existingUser.agent && existingUser.agent.status === "SUSPENDED") {
+            return false
+          }
         }
       }
 

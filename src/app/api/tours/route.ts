@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     const minPrice = parseFloat(searchParams.get("minPrice") || "0")
     const maxPrice = parseFloat(searchParams.get("maxPrice") || "999999")
     const duration = searchParams.get("duration") || ""
-    const tourTypes = searchParams.get("types") || searchParams.get("tourType") || ""
+    const tourTypes = searchParams.get("types") || searchParams.get("tourType") || searchParams.get("type") || ""
     const sort = searchParams.get("sort") || searchParams.get("sortBy") || "featured"
     const featured = searchParams.get("featured") === "true"
     const hasLocation = searchParams.get("hasLocation") === "true"

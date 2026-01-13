@@ -75,7 +75,7 @@ export default function AdminAgentsPage() {
   }, [searchParams])
 
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [dialogType, setDialogType] = useState<"verify" | "suspend" | "activate">("verify")
+  const [dialogType, setDialogType] = useState<"verify" | "unverify" | "suspend" | "activate">("verify")
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
 
@@ -118,12 +118,13 @@ export default function AdminAgentsPage() {
 
     setIsProcessing(true)
     try {
-      const endpoint =
-        dialogType === "verify"
-          ? `/api/admin/agents/${selectedAgent.id}/verify`
-          : dialogType === "suspend"
-          ? `/api/admin/agents/${selectedAgent.id}/suspend`
-          : `/api/admin/agents/${selectedAgent.id}/activate`
+      const endpointMap = {
+        verify: `/api/admin/agents/${selectedAgent.id}/verify`,
+        unverify: `/api/admin/agents/${selectedAgent.id}/unverify`,
+        suspend: `/api/admin/agents/${selectedAgent.id}/suspend`,
+        activate: `/api/admin/agents/${selectedAgent.id}/activate`,
+      }
+      const endpoint = endpointMap[dialogType]
 
       const response = await fetch(endpoint, {
         method: "PATCH",
@@ -131,13 +132,13 @@ export default function AdminAgentsPage() {
 
       if (!response.ok) throw new Error("Failed to update agent")
 
-      toast.success(
-        dialogType === "verify"
-          ? "Agent verified"
-          : dialogType === "suspend"
-          ? "Agent suspended"
-          : "Agent activated"
-      )
+      const messageMap = {
+        verify: "Agent verified",
+        unverify: "Agent verification removed",
+        suspend: "Agent suspended",
+        activate: "Agent activated",
+      }
+      toast.success(messageMap[dialogType])
       setDialogOpen(false)
       fetchAgents()
     } catch (error) {
@@ -379,8 +380,22 @@ export default function AdminAgentsPage() {
                         {format(new Date(agent.createdAt), "MMM dd, yyyy")}
                       </TableCell>
                       <TableCell className="text-right">
-                        <div className="flex gap-2 justify-end">
-                          {!agent.isVerified && agent.status === "PENDING" && (
+                        <div className="flex gap-2 justify-end flex-wrap">
+                          {/* Verify/Unverify button */}
+                          {agent.isVerified ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedAgent(agent)
+                                setDialogType("unverify")
+                                setDialogOpen(true)
+                              }}
+                            >
+                              <X className="h-4 w-4 mr-1" />
+                              Unverify
+                            </Button>
+                          ) : (
                             <Button
                               variant="outline"
                               size="sm"
@@ -394,6 +409,7 @@ export default function AdminAgentsPage() {
                               Verify
                             </Button>
                           )}
+                          {/* Status actions */}
                           {agent.status === "ACTIVE" && (
                             <Button
                               variant="outline"
@@ -408,6 +424,19 @@ export default function AdminAgentsPage() {
                             </Button>
                           )}
                           {agent.status === "SUSPENDED" && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedAgent(agent)
+                                setDialogType("activate")
+                                setDialogOpen(true)
+                              }}
+                            >
+                              Activate
+                            </Button>
+                          )}
+                          {agent.status === "PENDING" && (
                             <Button
                               variant="outline"
                               size="sm"
@@ -465,6 +494,8 @@ export default function AdminAgentsPage() {
         title={
           dialogType === "verify"
             ? "Verify Agent"
+            : dialogType === "unverify"
+            ? "Remove Verification"
             : dialogType === "suspend"
             ? "Suspend Agent"
             : "Activate Agent"
@@ -472,6 +503,8 @@ export default function AdminAgentsPage() {
         description={
           dialogType === "verify"
             ? `Are you sure you want to verify ${selectedAgent?.businessName}? This will grant them full access to create and manage tours.`
+            : dialogType === "unverify"
+            ? `Are you sure you want to remove verification from ${selectedAgent?.businessName}? They will lose their verified badge.`
             : dialogType === "suspend"
             ? `Are you sure you want to suspend ${selectedAgent?.businessName}? They will not be able to access the platform.`
             : `Are you sure you want to activate ${selectedAgent?.businessName}? They will be able to access the platform again.`
@@ -479,11 +512,13 @@ export default function AdminAgentsPage() {
         confirmText={
           dialogType === "verify"
             ? "Verify Agent"
+            : dialogType === "unverify"
+            ? "Remove Verification"
             : dialogType === "suspend"
             ? "Suspend"
             : "Activate"
         }
-        variant={dialogType === "suspend" ? "danger" : "default"}
+        variant={dialogType === "suspend" || dialogType === "unverify" ? "danger" : "default"}
         isLoading={isProcessing}
       />
 

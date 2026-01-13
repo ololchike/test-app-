@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { FileText, Save, Plus, ExternalLink } from "lucide-react"
+import { FileText, Save, ExternalLink, Plus } from "lucide-react"
 import { toast } from "sonner"
 import Link from "next/link"
 
@@ -11,20 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
 
 interface SiteContent {
@@ -45,11 +32,9 @@ export default function AdminSiteContentPage() {
   const [contents, setContents] = useState<SiteContent[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [editingContent, setEditingContent] = useState<SiteContent | null>(null)
+  const [editingKey, setEditingKey] = useState<string | null>(null)
   const [editedTitle, setEditedTitle] = useState("")
   const [editedContent, setEditedContent] = useState("")
-  const [newPageDialogOpen, setNewPageDialogOpen] = useState(false)
-  const [newPageKey, setNewPageKey] = useState("")
 
   useEffect(() => {
     fetchContents()
@@ -70,20 +55,23 @@ export default function AdminSiteContentPage() {
     }
   }
 
-  function startEditing(content: SiteContent) {
-    setEditingContent(content)
-    setEditedTitle(content.title)
-    setEditedContent(content.content)
+  function startEditing(key: string) {
+    const template = PAGE_TEMPLATES.find((t) => t.key === key)
+    const existing = contents.find((c) => c.key === key)
+
+    setEditingKey(key)
+    setEditedTitle(existing?.title || template?.title || "")
+    setEditedContent(existing?.content || getDefaultContent(key))
   }
 
   function cancelEditing() {
-    setEditingContent(null)
+    setEditingKey(null)
     setEditedTitle("")
     setEditedContent("")
   }
 
   async function saveContent() {
-    if (!editingContent) return
+    if (!editingKey) return
 
     setSaving(true)
     try {
@@ -91,7 +79,7 @@ export default function AdminSiteContentPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          key: editingContent.key,
+          key: editingKey,
           title: editedTitle,
           content: editedContent,
         }),
@@ -107,40 +95,6 @@ export default function AdminSiteContentPage() {
     } catch (error) {
       console.error("Error saving content:", error)
       toast.error("Failed to save content")
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  async function createNewPage() {
-    if (!newPageKey) return
-
-    const template = PAGE_TEMPLATES.find((t) => t.key === newPageKey)
-    if (!template) return
-
-    setSaving(true)
-    try {
-      const response = await fetch("/api/admin/site-content", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          key: template.key,
-          title: template.title,
-          content: getDefaultContent(template.key),
-        }),
-      })
-
-      if (response.ok) {
-        toast.success(`${template.title} page created`)
-        fetchContents()
-        setNewPageDialogOpen(false)
-        setNewPageKey("")
-      } else {
-        throw new Error("Failed to create")
-      }
-    } catch (error) {
-      console.error("Error creating page:", error)
-      toast.error("Failed to create page")
     } finally {
       setSaving(false)
     }
@@ -180,8 +134,9 @@ export default function AdminSiteContentPage() {
     }
   }
 
-  const existingKeys = contents.map((c) => c.key)
-  const availableTemplates = PAGE_TEMPLATES.filter((t) => !existingKeys.includes(t.key))
+  function getExistingContent(key: string) {
+    return contents.find((c) => c.key === key)
+  }
 
   if (loading) {
     return (
@@ -196,12 +151,14 @@ export default function AdminSiteContentPage() {
     )
   }
 
-  if (editingContent) {
+  // Editing mode
+  if (editingKey) {
+    const template = PAGE_TEMPLATES.find((t) => t.key === editingKey)
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold">Edit {editingContent.title}</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold">Edit {template?.title}</h1>
             <p className="text-muted-foreground mt-2">
               Use the rich text editor to update the content
             </p>
@@ -250,104 +207,67 @@ export default function AdminSiteContentPage() {
     )
   }
 
+  // List view - show ALL pages (both existing and available to create)
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">Site Content</h1>
-          <p className="text-muted-foreground mt-2">
-            Manage editable pages like Privacy Policy, Terms, and Cookies
-          </p>
-        </div>
-        {availableTemplates.length > 0 && (
-          <Dialog open={newPageDialogOpen} onOpenChange={setNewPageDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Page
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Create New Page</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 pt-4">
-                <div className="space-y-2">
-                  <Label>Select Page Type</Label>
-                  <Select value={newPageKey} onValueChange={setNewPageKey}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choose a page type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableTemplates.map((template) => (
-                        <SelectItem key={template.key} value={template.key}>
-                          {template.title}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button
-                  className="w-full"
-                  onClick={createNewPage}
-                  disabled={!newPageKey || saving}
-                >
-                  {saving ? "Creating..." : "Create Page"}
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        )}
+      <div>
+        <h1 className="text-2xl sm:text-3xl font-bold">Site Content</h1>
+        <p className="text-muted-foreground mt-2">
+          Manage editable pages like Privacy Policy, Terms, and Cookies
+        </p>
       </div>
 
-      {contents.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <FileText className="h-12 w-12 text-muted-foreground" />
-            <p className="mt-4 text-muted-foreground">No site content created yet</p>
-            <p className="text-sm text-muted-foreground">
-              Click &quot;Add Page&quot; to create your first page
-            </p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid gap-4">
-          {contents.map((content) => {
-            const template = PAGE_TEMPLATES.find((t) => t.key === content.key)
-            return (
-              <Card key={content.id}>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
+      <div className="grid gap-4">
+        {PAGE_TEMPLATES.map((template) => {
+          const existing = getExistingContent(template.key)
+          const hasContent = !!existing
+
+          return (
+            <Card key={template.key}>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <FileText className="h-5 w-5 text-primary" />
+                    </div>
                     <div>
                       <CardTitle className="flex items-center gap-2">
-                        <FileText className="h-5 w-5" />
-                        {content.title}
+                        {template.title}
+                        {hasContent ? (
+                          <Badge variant="default" className="text-xs">Published</Badge>
+                        ) : (
+                          <Badge variant="secondary" className="text-xs">Default Content</Badge>
+                        )}
                       </CardTitle>
-                      <CardDescription className="mt-1">
-                        Key: {content.key} | Last updated:{" "}
-                        {format(new Date(content.updatedAt), "MMM dd, yyyy HH:mm")}
+                      <CardDescription>
+                        {hasContent
+                          ? `Last updated: ${format(new Date(existing.updatedAt), "MMM dd, yyyy HH:mm")}`
+                          : "Using default content - click Edit to customize"}
                       </CardDescription>
                     </div>
-                    <div className="flex gap-2">
-                      {template && (
-                        <Button variant="outline" size="sm" asChild>
-                          <Link href={template.path} target="_blank">
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            View
-                          </Link>
-                        </Button>
-                      )}
-                      <Button size="sm" onClick={() => startEditing(content)}>
-                        Edit
-                      </Button>
-                    </div>
                   </div>
-                </CardHeader>
-              </Card>
-            )
-          })}
-        </div>
-      )}
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href={template.path} target="_blank">
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        View
+                      </Link>
+                    </Button>
+                    <Button size="sm" onClick={() => startEditing(template.key)}>
+                      {hasContent ? "Edit" : (
+                        <>
+                          <Plus className="h-4 w-4 mr-2" />
+                          Customize
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+            </Card>
+          )
+        })}
+      </div>
     </div>
   )
 }

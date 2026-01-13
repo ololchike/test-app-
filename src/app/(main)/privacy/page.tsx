@@ -2,6 +2,7 @@ import Link from "next/link"
 import { Shield } from "lucide-react"
 import { format } from "date-fns"
 import { prisma } from "@/lib/prisma"
+import { RichTextViewer } from "@/components/ui/rich-text-viewer"
 
 async function getPrivacyContent() {
   try {
@@ -42,10 +43,7 @@ export default async function PrivacyPolicyPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-4xl">
             {dbContent?.content ? (
-              <div
-                className="prose prose-slate dark:prose-invert max-w-none"
-                dangerouslySetInnerHTML={{ __html: dbContent.content }}
-              />
+              <RichTextViewer content={dbContent.content} />
             ) : (
               <DefaultPrivacyContent />
             )}
