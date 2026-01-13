@@ -134,7 +134,7 @@ export default function PaymentPage() {
   const amountToPay = getAmountToPay()
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-screen bg-muted/30 pb-32">
       {/* Header */}
       <div className="bg-background border-b sticky top-0 z-40">
         <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
@@ -227,12 +227,6 @@ export default function PaymentPage() {
                 </>
               )}
 
-              <Separator />
-              <div className="flex justify-between text-lg sm:text-xl font-bold">
-                <span>Amount to Pay</span>
-                <span className="text-primary">{booking.currency} {amountToPay.toLocaleString()}</span>
-              </div>
-
               {/* Deposit info notice */}
               {booking.paymentType === "DEPOSIT" && (
                 <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/20 text-xs sm:text-sm">
@@ -248,11 +242,41 @@ export default function PaymentPage() {
             </CardContent>
           </Card>
 
-          {/* Pay Button */}
+          {/* Security Info */}
           <Card>
-            <CardContent className="pt-6 space-y-4">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-center gap-6 text-xs text-muted-foreground">
+                <div className="flex items-center gap-1.5">
+                  <Shield className="h-4 w-4" />
+                  <span>Secure Payment</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Lock className="h-4 w-4" />
+                  <span>SSL Encrypted</span>
+                </div>
+              </div>
+              <p className="text-xs text-center text-muted-foreground mt-3">
+                You&apos;ll be redirected to Pesapal to complete your payment securely.
+                Choose your preferred payment method (M-Pesa, Card, Bank Transfer) on the next screen.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Floating Pay Button */}
+      <div className="fixed bottom-0 left-0 right-0 bg-background border-t shadow-lg z-50">
+        <div className="container mx-auto px-4 sm:px-6 py-4">
+          <div className="max-w-2xl mx-auto">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-xs text-muted-foreground">Amount to Pay</p>
+                <p className="text-lg sm:text-xl font-bold text-primary">
+                  {booking.currency} {amountToPay.toLocaleString()}
+                </p>
+              </div>
               <Button
-                className="w-full h-12 sm:h-14 text-sm sm:text-base font-semibold"
+                className="h-12 px-8 text-sm sm:text-base font-semibold min-w-[140px]"
                 size="lg"
                 onClick={handlePayment}
                 disabled={isProcessing}
@@ -260,30 +284,14 @@ export default function PaymentPage() {
                 {isProcessing ? (
                   <>
                     <Clock className="h-4 w-4 mr-2 animate-spin" />
-                    Redirecting to payment...
+                    Processing...
                   </>
                 ) : (
-                  `Pay ${booking.currency} ${amountToPay.toLocaleString()}`
+                  "Confirm & Pay"
                 )}
               </Button>
-
-              <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <Shield className="h-3.5 w-3.5" />
-                  <span>Secure Payment</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Lock className="h-3.5 w-3.5" />
-                  <span>SSL Encrypted</span>
-                </div>
-              </div>
-
-              <p className="text-xs text-center text-muted-foreground">
-                You&apos;ll be redirected to Pesapal to complete your payment securely.
-                Choose your preferred payment method (M-Pesa, Card, Bank Transfer) on the next screen.
-              </p>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
     </div>
