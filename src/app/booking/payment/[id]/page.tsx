@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
-import { CheckCircle, Clock, CreditCard, Smartphone, ChevronLeft, AlertCircle } from "lucide-react"
+import Image from "next/image"
+import { Clock, ChevronLeft, AlertCircle, Shield, Lock } from "lucide-react"
 import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -14,10 +15,14 @@ interface BookingData {
   id: string
   bookingReference: string
   totalAmount: number
+  currency: string
   tour: {
     title: string
     slug: string
     coverImage: string
+    destination: string
+    durationDays: number
+    durationNights: number
   }
   agent: {
     businessName: string
@@ -26,11 +31,11 @@ interface BookingData {
   endDate: string
   adults: number
   children: number
+  infants: number
   contactName: string
   contactEmail: string
   status: string
   paymentStatus: string
-  // Payment type fields
   paymentType: "FULL" | "DEPOSIT"
   depositAmount: number | null
   balanceAmount: number | null
@@ -42,7 +47,6 @@ export default function PaymentPage() {
   const params = useParams()
   const [booking, setBooking] = useState<BookingData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [selectedMethod, setSelectedMethod] = useState<"mpesa" | "card" | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
 
   useEffect(() => {
@@ -66,35 +70,24 @@ export default function PaymentPage() {
   }, [params.id])
 
   const handlePayment = async () => {
-    if (!selectedMethod || !booking) return
+    if (!booking) return
 
     setIsProcessing(true)
 
     try {
-      // Calculate the amount to pay (deposit or full)
-      const amountToPay = booking.paymentType === "DEPOSIT" && booking.depositAmount
-        ? booking.depositAmount
-        : booking.totalAmount
-
-      // In production, this would call Pesapal API
       const response = await fetch("/api/payments/initiate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           bookingId: booking.id,
-          method: selectedMethod,
-          amount: amountToPay,
-          isDeposit: booking.paymentType === "DEPOSIT",
         }),
       })
 
       if (response.ok) {
         const data = await response.json()
-        // Redirect to payment gateway or show success
         if (data.redirectUrl) {
           window.location.href = data.redirectUrl
         } else {
-          // For demo, redirect to confirmation
           window.location.href = `/booking/confirmation/${booking.id}`
         }
       } else {
@@ -109,6 +102,14 @@ export default function PaymentPage() {
     } finally {
       setIsProcessing(false)
     }
+  }
+
+  // Calculate amount to pay
+  const getAmountToPay = () => {
+    if (!booking) return 0
+    return booking.paymentType === "DEPOSIT" && booking.depositAmount
+      ? booking.depositAmount
+      : booking.totalAmount
   }
 
   if (isLoading) {
@@ -130,6 +131,8 @@ export default function PaymentPage() {
     )
   }
 
+  const amountToPay = getAmountToPay()
+
   return (
     <div className="min-h-screen bg-muted/30">
       {/* Header */}
@@ -137,7 +140,7 @@ export default function PaymentPage() {
         <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center gap-2 sm:gap-4">
             <Button variant="ghost" size="sm" asChild className="h-8 sm:h-9">
-              <Link href={`/booking/checkout?tourId=${booking.tour?.slug || ""}`}>
+              <Link href={`/tours/${booking.tour?.slug || ""}`}>
                 <ChevronLeft className="h-4 w-4 mr-1" />
                 Back
               </Link>
@@ -150,19 +153,49 @@ export default function PaymentPage() {
 
       <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
         <div className="max-w-2xl mx-auto space-y-4 sm:space-y-6">
+          {/* Tour Preview */}
+          {booking.tour?.coverImage && (
+            <Card className="overflow-hidden">
+              <div className="flex gap-4 p-4">
+                <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-lg overflow-hidden shrink-0">
+                  <Image
+                    src={booking.tour.coverImage}
+                    alt={booking.tour.title}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h2 className="font-semibold text-sm sm:text-base line-clamp-2">{booking.tour.title}</h2>
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-1">{booking.tour.destination}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">
+                    {booking.tour.durationDays} days / {booking.tour.durationNights} nights
+                  </p>
+                  <p className="text-xs sm:text-sm mt-2">
+                    {format(new Date(booking.startDate), "MMM d")} - {format(new Date(booking.endDate), "MMM d, yyyy")}
+                  </p>
+                </div>
+              </div>
+            </Card>
+          )}
+
           {/* Booking Summary */}
           <Card>
             <CardHeader className="pb-3 sm:pb-6">
-              <CardTitle className="text-base sm:text-lg">Booking Summary</CardTitle>
+              <CardTitle className="text-base sm:text-lg">Payment Summary</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 sm:space-y-4">
               <div className="flex justify-between text-xs sm:text-sm">
                 <span className="text-muted-foreground">Booking Reference</span>
                 <span className="font-mono font-medium text-right">{booking.bookingReference}</span>
               </div>
-              <div className="flex justify-between text-xs sm:text-sm gap-2">
-                <span className="text-muted-foreground shrink-0">Tour</span>
-                <span className="font-medium text-right">{booking.tour?.title}</span>
+              <div className="flex justify-between text-xs sm:text-sm">
+                <span className="text-muted-foreground">Guests</span>
+                <span>
+                  {booking.adults} Adult{booking.adults > 1 ? "s" : ""}
+                  {booking.children > 0 && `, ${booking.children} Child${booking.children > 1 ? "ren" : ""}`}
+                  {booking.infants > 0 && `, ${booking.infants} Infant${booking.infants > 1 ? "s" : ""}`}
+                </span>
               </div>
               <div className="flex justify-between text-xs sm:text-sm">
                 <span className="text-muted-foreground">Contact</span>
@@ -171,19 +204,19 @@ export default function PaymentPage() {
               <Separator />
               <div className="flex justify-between text-xs sm:text-sm">
                 <span className="text-muted-foreground">Total Amount</span>
-                <span>${booking.totalAmount.toLocaleString()}</span>
+                <span>{booking.currency} {booking.totalAmount.toLocaleString()}</span>
               </div>
 
               {/* Show deposit breakdown if applicable */}
               {booking.paymentType === "DEPOSIT" && booking.depositAmount && (
                 <>
                   <div className="flex justify-between text-xs sm:text-sm">
-                    <span className="text-muted-foreground">Deposit Amount</span>
-                    <span className="text-primary font-medium">${booking.depositAmount.toLocaleString()}</span>
+                    <span className="text-muted-foreground">Deposit (Pay Now)</span>
+                    <span className="text-primary font-medium">{booking.currency} {booking.depositAmount.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-xs sm:text-sm">
-                    <span className="text-muted-foreground">Balance Due</span>
-                    <span>${booking.balanceAmount?.toLocaleString()}</span>
+                    <span className="text-muted-foreground">Balance Due Later</span>
+                    <span>{booking.currency} {booking.balanceAmount?.toLocaleString()}</span>
                   </div>
                   {booking.balanceDueDate && (
                     <div className="flex justify-between text-xs sm:text-sm">
@@ -195,13 +228,9 @@ export default function PaymentPage() {
               )}
 
               <Separator />
-              <div className="flex justify-between text-base sm:text-lg font-bold">
-                <span>{booking.paymentType === "DEPOSIT" ? "Pay Now (Deposit)" : "Pay Now"}</span>
-                <span>
-                  ${booking.paymentType === "DEPOSIT" && booking.depositAmount
-                    ? booking.depositAmount.toLocaleString()
-                    : booking.totalAmount.toLocaleString()}
-                </span>
+              <div className="flex justify-between text-lg sm:text-xl font-bold">
+                <span>Amount to Pay</span>
+                <span className="text-primary">{booking.currency} {amountToPay.toLocaleString()}</span>
               </div>
 
               {/* Deposit info notice */}
@@ -209,8 +238,8 @@ export default function PaymentPage() {
                 <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/20 text-xs sm:text-sm">
                   <AlertCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
                   <p className="text-amber-800 dark:text-amber-200">
-                    You&apos;re paying a deposit. The remaining balance of ${booking.balanceAmount?.toLocaleString()}
-                    will be due {booking.balanceDueDate
+                    You&apos;re paying a deposit. The remaining balance of {booking.currency} {booking.balanceAmount?.toLocaleString()}
+                    {" "}will be due {booking.balanceDueDate
                       ? `by ${format(new Date(booking.balanceDueDate), "MMM d, yyyy")}`
                       : "before your trip"}.
                   </p>
@@ -219,83 +248,39 @@ export default function PaymentPage() {
             </CardContent>
           </Card>
 
-          {/* Payment Methods */}
+          {/* Pay Button */}
           <Card>
-            <CardHeader className="pb-3 sm:pb-6">
-              <CardTitle className="text-base sm:text-lg">Select Payment Method</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 sm:space-y-4">
-              {/* M-Pesa Option */}
-              <div
-                onClick={() => setSelectedMethod("mpesa")}
-                className={`flex items-center gap-3 sm:gap-4 p-3 sm:p-4 border rounded-lg cursor-pointer transition-colors ${
-                  selectedMethod === "mpesa"
-                    ? "border-primary bg-primary/5"
-                    : "border-border hover:border-primary/50"
-                }`}
-              >
-                <div className={`p-2 sm:p-3 rounded-full shrink-0 ${
-                  selectedMethod === "mpesa" ? "bg-primary text-white" : "bg-muted"
-                }`}>
-                  <Smartphone className="h-4 w-4 sm:h-5 sm:w-5" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm sm:text-base">M-Pesa</p>
-                  <p className="text-xs sm:text-sm text-muted-foreground">
-                    Pay directly from your M-Pesa account
-                  </p>
-                </div>
-                {selectedMethod === "mpesa" && (
-                  <CheckCircle className="h-5 w-5 text-primary shrink-0" />
-                )}
-              </div>
-
-              {/* Card Option */}
-              <div
-                onClick={() => setSelectedMethod("card")}
-                className={`flex items-center gap-3 sm:gap-4 p-3 sm:p-4 border rounded-lg cursor-pointer transition-colors ${
-                  selectedMethod === "card"
-                    ? "border-primary bg-primary/5"
-                    : "border-border hover:border-primary/50"
-                }`}
-              >
-                <div className={`p-2 sm:p-3 rounded-full shrink-0 ${
-                  selectedMethod === "card" ? "bg-primary text-white" : "bg-muted"
-                }`}>
-                  <CreditCard className="h-4 w-4 sm:h-5 sm:w-5" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm sm:text-base">Credit/Debit Card</p>
-                  <p className="text-xs sm:text-sm text-muted-foreground">
-                    Visa, Mastercard, or American Express
-                  </p>
-                </div>
-                {selectedMethod === "card" && (
-                  <CheckCircle className="h-5 w-5 text-primary shrink-0" />
-                )}
-              </div>
-
-              {/* Pay Button */}
+            <CardContent className="pt-6 space-y-4">
               <Button
-                className="w-full mt-3 sm:mt-4 h-12 sm:h-14 text-sm sm:text-base font-semibold"
+                className="w-full h-12 sm:h-14 text-sm sm:text-base font-semibold"
                 size="lg"
                 onClick={handlePayment}
-                disabled={!selectedMethod || isProcessing}
+                disabled={isProcessing}
               >
                 {isProcessing ? (
                   <>
                     <Clock className="h-4 w-4 mr-2 animate-spin" />
-                    Processing...
+                    Redirecting to payment...
                   </>
                 ) : (
-                  booking.paymentType === "DEPOSIT" && booking.depositAmount
-                    ? `Pay $${booking.depositAmount.toLocaleString()} Deposit`
-                    : `Pay $${booking.totalAmount.toLocaleString()}`
+                  `Pay ${booking.currency} ${amountToPay.toLocaleString()}`
                 )}
               </Button>
 
+              <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <Shield className="h-3.5 w-3.5" />
+                  <span>Secure Payment</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Lock className="h-3.5 w-3.5" />
+                  <span>SSL Encrypted</span>
+                </div>
+              </div>
+
               <p className="text-xs text-center text-muted-foreground">
-                Payments are secured by Pesapal. Your card details are never stored on our servers.
+                You&apos;ll be redirected to Pesapal to complete your payment securely.
+                Choose your preferred payment method (M-Pesa, Card, Bank Transfer) on the next screen.
               </p>
             </CardContent>
           </Card>
