@@ -905,3 +905,19 @@ model ContactMessageReply {
   @@index([senderId])
   @@index([createdAt])
 }
+
+// ============================================================================
+// SITE CONTENT (Editable Pages)
+// ============================================================================
+
+model SiteContent {
+  id        String   @id @default(cuid())
+  key       String   @unique  // e.g., "privacy-policy", "terms-of-service", "about", "faq"
+  title     String
+  content   String   // HTML content from rich text editor
+  updatedBy String?  // Admin user ID who last updated
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+}

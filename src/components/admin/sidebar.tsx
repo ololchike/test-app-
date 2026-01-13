@@ -123,6 +123,11 @@ const adminNavItems = [
         icon: FileText,
       },
       {
+        title: "Site Content",
+        href: "/admin/site-content",
+        icon: FileText,
+      },
+      {
         title: "Settings",
         href: "/admin/settings",
         icon: Settings,
