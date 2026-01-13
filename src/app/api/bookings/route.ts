@@ -26,6 +26,10 @@ export async function POST(request: NextRequest) {
       travelers,
       contact,
       pricing,
+      // Payment type fields
+      paymentType = "FULL",
+      depositAmount,
+      balanceAmount,
     } = body
 
     // Validate required fields
@@ -88,6 +92,12 @@ export async function POST(request: NextRequest) {
       userId = user.id
     }
 
+    // Calculate balance due date for deposit payments
+    const tripStartDate = new Date(startDate)
+    const balanceDueDate = paymentType === "DEPOSIT" && tour.freeCancellationDays
+      ? new Date(tripStartDate.getTime() - (tour.freeCancellationDays * 24 * 60 * 60 * 1000))
+      : null
+
     // Create booking with related records
     const booking = await prisma.booking.create({
       data: {
@@ -95,7 +105,7 @@ export async function POST(request: NextRequest) {
         userId,
         tourId,
         agentId: tour.agentId,
-        startDate: new Date(startDate),
+        startDate: tripStartDate,
         endDate: new Date(endDate),
         adults,
         children: children || 0,
@@ -113,6 +123,11 @@ export async function POST(request: NextRequest) {
         specialRequests: contact.specialRequests || null,
         status: "PENDING",
         paymentStatus: "PENDING",
+        // Payment type fields
+        paymentType: paymentType as "FULL" | "DEPOSIT",
+        depositAmount: paymentType === "DEPOSIT" ? depositAmount : null,
+        balanceAmount: paymentType === "DEPOSIT" ? balanceAmount : null,
+        balanceDueDate,
         // Create booking accommodations
         accommodations: {
           create: Object.entries(accommodations || {}).map(([dayNumber, accId]) => {
@@ -159,6 +174,11 @@ export async function POST(request: NextRequest) {
       agentName: booking.agent.businessName,
       totalAmount: booking.totalAmount,
       status: booking.status,
+      // Payment type info
+      paymentType: booking.paymentType,
+      depositAmount: booking.depositAmount,
+      balanceAmount: booking.balanceAmount,
+      balanceDueDate: booking.balanceDueDate,
     })
   } catch (error) {
     console.error("Error creating booking:", error)

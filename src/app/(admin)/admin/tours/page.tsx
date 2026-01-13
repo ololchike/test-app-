@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { format } from "date-fns"
 import {
   Map,
@@ -87,13 +88,22 @@ const statusConfig = {
 }
 
 export default function AdminToursPage() {
+  const searchParams = useSearchParams()
   const [tours, setTours] = useState<Tour[]>([])
   const [statusCounts, setStatusCounts] = useState<StatusCounts>({})
   const [loading, setLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState<string>("all")
-  const [searchQuery, setSearchQuery] = useState("")
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "")
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
+
+  // Sync search from URL params
+  useEffect(() => {
+    const urlSearch = searchParams.get("search") || ""
+    if (urlSearch !== searchQuery) {
+      setSearchQuery(urlSearch)
+    }
+  }, [searchParams])
 
   // Confirmation dialog states
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)

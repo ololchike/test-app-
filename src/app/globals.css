@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "react-day-picker/style.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -579,6 +580,134 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* React Day Picker v9 Premium Theme Overrides */
+.rdp-root {
+  --rdp-accent-color: hsl(var(--primary));
+  --rdp-accent-background-color: hsl(var(--primary) / 0.1);
+  --rdp-day-height: 40px;
+  --rdp-day-width: 40px;
+  --rdp-day_button-height: 36px;
+  --rdp-day_button-width: 36px;
+  --rdp-day_button-border-radius: 8px;
+  --rdp-today-color: hsl(var(--primary));
+  --rdp-selected-border: none;
+  font-family: inherit;
+}
+
+.rdp-month_caption {
+  padding: 0 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.rdp-caption_label {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: hsl(var(--foreground));
+}
+
+.rdp-button_previous,
+.rdp-button_next {
+  border-radius: 8px;
+  border: 1px solid hsl(var(--border) / 0.5);
+  color: hsl(var(--muted-foreground));
+  transition: all 0.2s ease;
+}
+
+.rdp-button_previous:hover,
+.rdp-button_next:hover {
+  background: hsl(var(--muted));
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--border));
+}
+
+.rdp-weekday {
+  color: hsl(var(--muted-foreground));
+  font-weight: 500;
+  font-size: 0.75rem;
+}
+
+.rdp-day_button {
+  color: hsl(var(--foreground));
+  transition: all 0.15s ease;
+}
+
+.rdp-day_button:hover {
+  background: hsl(var(--primary) / 0.1) !important;
+  color: hsl(var(--primary));
+}
+
+.rdp-today .rdp-day_button {
+  background: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+  font-weight: 600;
+}
+
+.rdp-selected .rdp-day_button {
+  background: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+  font-weight: 500;
+  box-shadow: 0 2px 8px hsl(var(--primary) / 0.3);
+}
+
+.rdp-outside .rdp-day_button {
+  color: hsl(var(--muted-foreground) / 0.4);
+}
+
+.rdp-disabled .rdp-day_button {
+  color: hsl(var(--muted-foreground) / 0.3);
+  cursor: not-allowed;
+}
+
+.rdp-disabled .rdp-day_button:hover {
+  background: transparent !important;
+  color: hsl(var(--muted-foreground) / 0.3);
+}
+
+/* Premium Date Input Styles */
+input[type="date"] {
+  position: relative;
+  cursor: pointer;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  padding: 4px;
+  margin-right: -4px;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+  border-radius: 4px;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+  background-color: hsl(var(--primary) / 0.1);
+}
+
+input[type="date"]::-webkit-datetime-edit {
+  padding-right: 0.5em;
+}
+
+input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+  padding: 0;
+}
+
+input[type="date"]::-webkit-datetime-edit-text,
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-year-field {
+  padding: 2px;
+}
+
+/* Firefox date input styling */
+input[type="date"]::-moz-focus-inner {
+  border: 0;
+}
+
+/* Dark mode adjustments for date inputs */
+.dark input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
 }
 
 /* Tiptap Editor Styles */

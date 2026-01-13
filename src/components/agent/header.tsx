@@ -34,7 +34,8 @@ import {
   Users,
   Headphones,
 } from "lucide-react"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
+import { useState } from "react"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { motion } from "framer-motion"
@@ -63,11 +64,31 @@ const mobileNavItems = [
 
 export function AgentHeader({ user }: AgentHeaderProps) {
   const pathname = usePathname()
+  const router = useRouter()
+  const [searchQuery, setSearchQuery] = useState("")
   const initials = user.name
     ?.split(" ")
     .map((n) => n[0])
     .join("")
     .toUpperCase() || "A"
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      // Determine where to redirect based on current page or search content
+      const query = encodeURIComponent(searchQuery.trim())
+      if (pathname.includes("/bookings")) {
+        router.push(`/agent/bookings?search=${query}`)
+      } else if (pathname.includes("/customers")) {
+        router.push(`/agent/customers?search=${query}`)
+      } else if (pathname.includes("/reviews")) {
+        router.push(`/agent/reviews?search=${query}`)
+      } else {
+        // Default to tours search
+        router.push(`/agent/tours?search=${query}`)
+      }
+    }
+  }
 
   return (
     <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b border-border/50 bg-background/95 backdrop-blur-md px-4 lg:px-6">
@@ -141,15 +162,17 @@ export function AgentHeader({ user }: AgentHeaderProps) {
       </Sheet>
 
       {/* Search */}
-      <div className="flex-1 max-w-md">
+      <form onSubmit={handleSearch} className="flex-1 max-w-md">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search tours, bookings..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9 h-10 rounded-xl border-border/50 bg-muted/30 focus:bg-background focus:border-primary/50 transition-all"
           />
         </div>
-      </div>
+      </form>
 
       <div className="flex items-center gap-2">
         {/* Create Tour Button (Desktop) */}

@@ -75,19 +75,19 @@ export function BookingCard({
         <CardContent className="space-y-4">
           {/* Date Selection */}
           <div className="space-y-2">
-            <Label>Travel Date</Label>
+            <Label className="text-sm font-medium">Travel Date</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
                   className={cn(
-                    "w-full justify-start text-left font-normal",
+                    "w-full h-12 justify-start text-left font-normal rounded-xl border-border/50 hover:border-primary/50 transition-all gap-3",
                     !bookingState.startDate && "text-muted-foreground"
                   )}
                 >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  <CalendarIcon className="h-5 w-5 text-primary shrink-0" />
                   {bookingState.startDate ? (
-                    <span>
+                    <span className="font-medium">
                       {format(bookingState.startDate, "MMM d")} -{" "}
                       {endDate && format(endDate, "MMM d, yyyy")}
                     </span>

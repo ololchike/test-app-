@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { useSession } from "next-auth/react"
@@ -60,10 +61,19 @@ const statusColors: Record<string, string> = {
 
 export default function AgentToursPage() {
   const { data: session } = useSession()
+  const searchParams = useSearchParams()
   const [tours, setTours] = useState<Tour[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [search, setSearch] = useState("")
+  const [search, setSearch] = useState(searchParams.get("search") || "")
   const [statusFilter, setStatusFilter] = useState("all")
+
+  // Sync search from URL params
+  useEffect(() => {
+    const urlSearch = searchParams.get("search") || ""
+    if (urlSearch !== search) {
+      setSearch(urlSearch)
+    }
+  }, [searchParams])
 
   useEffect(() => {
     async function fetchTours() {

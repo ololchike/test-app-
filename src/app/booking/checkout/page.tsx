@@ -4,7 +4,7 @@ import { useSearchParams } from "next/navigation"
 import { useEffect, useState, Suspense } from "react"
 import { useSession } from "next-auth/react"
 import Link from "next/link"
-import { ChevronLeft, Shield, Clock, CreditCard, AlertCircle } from "lucide-react"
+import { ChevronLeft, Shield, Clock, CreditCard, AlertCircle, Percent, CheckCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { BookingSummary } from "@/components/booking/booking-summary"
 import { TravelerForm } from "@/components/booking/traveler-form"
@@ -19,6 +19,10 @@ interface TourData {
   durationDays: number
   durationNights: number
   basePrice: number
+  // Deposit settings
+  depositEnabled: boolean
+  depositPercentage: number
+  freeCancellationDays: number
   agent: {
     businessName: string
     isVerified: boolean
@@ -65,6 +69,7 @@ function CheckoutContent() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [userDataPrefilled, setUserDataPrefilled] = useState(false)
+  const [paymentType, setPaymentType] = useState<"FULL" | "DEPOSIT">("FULL")
 
   // Form state
   const [travelers, setTravelers] = useState<Array<{
@@ -301,6 +306,14 @@ function CheckoutContent() {
     setIsSubmitting(true)
 
     try {
+      // Calculate deposit and balance amounts
+      const depositAmount = paymentType === "DEPOSIT"
+        ? Math.round(checkoutData.pricing.total * (checkoutData.tour.depositPercentage / 100))
+        : checkoutData.pricing.total
+      const balanceAmount = paymentType === "DEPOSIT"
+        ? checkoutData.pricing.total - depositAmount
+        : 0
+
       const response = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -315,6 +328,10 @@ function CheckoutContent() {
           travelers,
           contact,
           pricing: checkoutData.pricing,
+          // Payment type info
+          paymentType,
+          depositAmount: paymentType === "DEPOSIT" ? depositAmount : null,
+          balanceAmount: paymentType === "DEPOSIT" ? balanceAmount : null,
         }),
       })
 
@@ -447,6 +464,86 @@ function CheckoutContent() {
                 Special requests cannot be guaranteed but we&apos;ll do our best to accommodate them.
               </p>
             </div>
+
+            {/* Payment Options - Only show if deposit is enabled */}
+            {checkoutData.tour.depositEnabled && (
+              <div className="bg-background rounded-xl p-4 sm:p-6 shadow-sm">
+                <h2 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4">Payment Option</h2>
+                <p className="text-xs sm:text-sm text-muted-foreground mb-4">
+                  Choose how you&apos;d like to pay for your booking.
+                </p>
+                <div className="space-y-3">
+                  {/* Full Payment Option */}
+                  <div
+                    onClick={() => setPaymentType("FULL")}
+                    className={`flex items-start gap-3 sm:gap-4 p-3 sm:p-4 border rounded-lg cursor-pointer transition-colors ${
+                      paymentType === "FULL"
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:border-primary/50"
+                    }`}
+                  >
+                    <div className={`p-2 rounded-full shrink-0 ${
+                      paymentType === "FULL" ? "bg-primary text-white" : "bg-muted"
+                    }`}>
+                      <CreditCard className="h-4 w-4 sm:h-5 sm:w-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="font-semibold text-sm sm:text-base">Pay in Full</p>
+                        {paymentType === "FULL" && (
+                          <CheckCircle className="h-4 w-4 text-primary shrink-0" />
+                        )}
+                      </div>
+                      <p className="text-xs sm:text-sm text-muted-foreground">
+                        Pay the full amount of ${checkoutData.pricing.total.toLocaleString()} now
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Deposit Payment Option */}
+                  <div
+                    onClick={() => setPaymentType("DEPOSIT")}
+                    className={`flex items-start gap-3 sm:gap-4 p-3 sm:p-4 border rounded-lg cursor-pointer transition-colors ${
+                      paymentType === "DEPOSIT"
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:border-primary/50"
+                    }`}
+                  >
+                    <div className={`p-2 rounded-full shrink-0 ${
+                      paymentType === "DEPOSIT" ? "bg-primary text-white" : "bg-muted"
+                    }`}>
+                      <Percent className="h-4 w-4 sm:h-5 sm:w-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="font-semibold text-sm sm:text-base">Pay Deposit ({checkoutData.tour.depositPercentage}%)</p>
+                        {paymentType === "DEPOSIT" && (
+                          <CheckCircle className="h-4 w-4 text-primary shrink-0" />
+                        )}
+                      </div>
+                      <p className="text-xs sm:text-sm text-muted-foreground">
+                        Pay ${Math.round(checkoutData.pricing.total * (checkoutData.tour.depositPercentage / 100)).toLocaleString()} now,
+                        ${Math.round(checkoutData.pricing.total * (1 - checkoutData.tour.depositPercentage / 100)).toLocaleString()} balance due later
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {paymentType === "DEPOSIT" && (
+                  <div className="mt-4 p-3 rounded-lg bg-muted/50 text-xs sm:text-sm">
+                    <p className="text-muted-foreground">
+                      <strong>Deposit:</strong> ${Math.round(checkoutData.pricing.total * (checkoutData.tour.depositPercentage / 100)).toLocaleString()} due today
+                    </p>
+                    <p className="text-muted-foreground mt-1">
+                      <strong>Balance:</strong> ${Math.round(checkoutData.pricing.total * (1 - checkoutData.tour.depositPercentage / 100)).toLocaleString()} due {checkoutData.tour.freeCancellationDays} days before your trip
+                    </p>
+                    <p className="text-muted-foreground mt-2">
+                      Free cancellation available up to {checkoutData.tour.freeCancellationDays} days before your trip starts.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Sidebar - Booking Summary - Show on top for mobile */}
@@ -481,12 +578,16 @@ function CheckoutContent() {
 
               {/* Confirm Button */}
               <Button
-                className="w-full mt-4 sm:mt-6 h-12 sm:h-auto text-sm sm:text-base"
+                className="w-full mt-4 sm:mt-6 h-12 sm:h-14 text-sm sm:text-base font-semibold"
                 size="lg"
                 onClick={handleSubmit}
                 disabled={isSubmitting}
               >
-                {isSubmitting ? "Processing..." : `Confirm & Pay $${checkoutData.pricing.total.toLocaleString()}`}
+                {isSubmitting ? "Processing..." : (
+                  paymentType === "DEPOSIT" && checkoutData.tour.depositEnabled
+                    ? `Confirm & Pay $${Math.round(checkoutData.pricing.total * (checkoutData.tour.depositPercentage / 100)).toLocaleString()} Deposit`
+                    : `Confirm & Pay $${checkoutData.pricing.total.toLocaleString()}`
+                )}
               </Button>
 
               <p className="text-xs text-center text-muted-foreground mt-2 sm:mt-3">

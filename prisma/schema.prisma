@@ -261,6 +261,11 @@ model Tour {
   featured         Boolean     @default(false)
   viewCount        Int         @default(0)
 
+  // Deposit & Cancellation Policy
+  depositEnabled       Boolean   @default(false)
+  depositPercentage    Float     @default(30)    // Percentage of total for deposit (e.g., 30 = 30%)
+  freeCancellationDays Int       @default(14)    // Days before start for free cancellation
+
   // SEO
   metaTitle        String?
   metaDescription  String?
@@ -384,6 +389,11 @@ enum PaymentStatus {
   PARTIALLY_REFUNDED
 }
 
+enum PaymentType {
+  FULL          // Full payment upfront
+  DEPOSIT       // Partial deposit payment
+}
+
 model Booking {
   id                String        @id @default(cuid())
   bookingReference  String        @unique @default(cuid())
@@ -416,6 +426,13 @@ model Booking {
   // Status
   status            BookingStatus @default(PENDING)
   paymentStatus     PaymentStatus @default(PENDING)
+
+  // Payment Type (Full or Deposit)
+  paymentType       PaymentType   @default(FULL)
+  depositAmount     Float?        // Amount paid as deposit
+  balanceAmount     Float?        // Remaining balance to pay
+  balanceDueDate    DateTime?     // When the balance is due
+  balancePaidAt     DateTime?     // When balance was paid
 
   // Contact
   contactName       String

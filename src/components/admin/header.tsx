@@ -33,7 +33,8 @@ import {
   Shield,
   BarChart3,
 } from "lucide-react"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
+import { useState } from "react"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 
@@ -60,11 +61,33 @@ const mobileNavItems = [
 
 export function AdminHeader({ user }: AdminHeaderProps) {
   const pathname = usePathname()
+  const router = useRouter()
+  const [searchQuery, setSearchQuery] = useState("")
   const initials = user.name
     ?.split(" ")
     .map((n) => n[0])
     .join("")
     .toUpperCase() || "A"
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      const query = encodeURIComponent(searchQuery.trim())
+      // Determine where to redirect based on current page
+      if (pathname.includes("/agents")) {
+        router.push(`/admin/agents?search=${query}`)
+      } else if (pathname.includes("/users")) {
+        router.push(`/admin/users?search=${query}`)
+      } else if (pathname.includes("/bookings")) {
+        router.push(`/admin/bookings?search=${query}`)
+      } else if (pathname.includes("/tours")) {
+        router.push(`/admin/tours?search=${query}`)
+      } else {
+        // Default to agents search
+        router.push(`/admin/agents?search=${query}`)
+      }
+    }
+  }
 
   return (
     <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b bg-background px-4 lg:px-6">
@@ -124,15 +147,17 @@ export function AdminHeader({ user }: AdminHeaderProps) {
       </Sheet>
 
       {/* Search */}
-      <div className="flex-1 max-w-md">
+      <form onSubmit={handleSearch} className="flex-1 max-w-md">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search users, agents, tours..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9 bg-muted/50"
           />
         </div>
-      </div>
+      </form>
 
       <div className="flex items-center gap-2">
         {/* System Status */}

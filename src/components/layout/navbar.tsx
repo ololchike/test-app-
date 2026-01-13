@@ -146,9 +146,12 @@ export function Navbar() {
               variant="ghost"
               size="icon"
               className="rounded-full h-10 w-10 hover:bg-primary/10 hover:text-primary transition-all"
+              asChild
             >
-              <Search className="h-5 w-5" />
-              <span className="sr-only">Search</span>
+              <Link href="/tours">
+                <Search className="h-5 w-5" />
+                <span className="sr-only">Search Tours</span>
+              </Link>
             </Button>
           </motion.div>
 

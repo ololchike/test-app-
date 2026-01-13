@@ -3,10 +3,18 @@
 import { motion } from "framer-motion"
 import Image from "next/image"
 import Link from "next/link"
-import { Search, MapPin, Calendar, Users, ArrowRight, Play, Sparkles } from "lucide-react"
+import { format } from "date-fns"
+import { Search, MapPin, Calendar as CalendarIcon, Users, ArrowRight, Play, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { Calendar } from "@/components/ui/calendar"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { cn } from "@/lib/utils"
 import { useState } from "react"
 
 interface HeroSectionProps {
@@ -20,6 +28,7 @@ interface HeroSectionProps {
 
 export function HeroSection({ stats }: HeroSectionProps) {
   const [destination, setDestination] = useState("")
+  const [date, setDate] = useState<Date | undefined>(undefined)
 
   const statItems = [
     { value: stats.travelers, label: "Happy Travelers" },
@@ -155,13 +164,29 @@ export function HeroSection({ stats }: HeroSectionProps) {
                   <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     When
                   </label>
-                  <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-primary" />
-                    <Input
-                      type="date"
-                      className="pl-10 h-12 border-0 bg-muted/50 text-base font-medium focus-visible:ring-primary"
-                    />
-                  </div>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className={cn(
+                          "w-full h-12 justify-start text-left font-medium bg-muted/50 hover:bg-muted/70 border-0 gap-2",
+                          !date && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="h-5 w-5 text-primary shrink-0" />
+                        <span>{date ? format(date, "MMM d, yyyy") : "Select date"}</span>
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={date}
+                        onSelect={setDate}
+                        disabled={(date) => date < new Date()}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">

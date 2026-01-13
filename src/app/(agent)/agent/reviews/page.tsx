@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { format } from "date-fns"
 import { Star, TrendingUp, MessageSquare, Filter, Search } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -65,15 +66,24 @@ interface ReviewStats {
 }
 
 export default function AgentReviewsPage() {
+  const searchParams = useSearchParams()
   const [reviews, setReviews] = useState<Review[]>([])
   const [stats, setStats] = useState<ReviewStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [filterRating, setFilterRating] = useState<string>("all")
   const [filterResponded, setFilterResponded] = useState<string>("all")
-  const [searchTerm, setSearchTerm] = useState("")
+  const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "")
   const [selectedReview, setSelectedReview] = useState<Review | null>(null)
   const [responseText, setResponseText] = useState("")
   const [submitting, setSubmitting] = useState(false)
+
+  // Sync search from URL params
+  useEffect(() => {
+    const urlSearch = searchParams.get("search") || ""
+    if (urlSearch !== searchTerm) {
+      setSearchTerm(urlSearch)
+    }
+  }, [searchParams])
 
   const fetchReviews = async () => {
     try {

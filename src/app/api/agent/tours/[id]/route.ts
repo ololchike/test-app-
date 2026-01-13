@@ -25,6 +25,10 @@ const updateTourSchema = z.object({
   bestSeason: z.array(z.string()).optional(),
   coverImage: z.string().url().optional().nullable(),
   images: z.array(z.string().url()).optional(),
+  // Deposit settings
+  depositEnabled: z.boolean().optional(),
+  depositPercentage: z.number().min(10).max(90).optional(),
+  freeCancellationDays: z.number().int().min(0).max(90).optional(),
 })
 
 // GET single tour for editing
@@ -217,6 +221,10 @@ export async function PUT(
     if (data.excluded !== undefined) updateData.excluded = JSON.stringify(data.excluded)
     if (data.bestSeason !== undefined) updateData.bestSeason = JSON.stringify(data.bestSeason)
     if (data.images !== undefined) updateData.images = JSON.stringify(data.images)
+    // Deposit settings
+    if (data.depositEnabled !== undefined) updateData.depositEnabled = data.depositEnabled
+    if (data.depositPercentage !== undefined) updateData.depositPercentage = data.depositPercentage
+    if (data.freeCancellationDays !== undefined) updateData.freeCancellationDays = data.freeCancellationDays
 
     // Update tour
     const tour = await prisma.tour.update({

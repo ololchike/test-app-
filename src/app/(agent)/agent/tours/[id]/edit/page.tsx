@@ -108,6 +108,10 @@ interface Tour {
   status: string
   accommodationOptions: AccommodationOption[]
   activityAddons: ActivityAddon[]
+  // Deposit settings
+  depositEnabled: boolean
+  depositPercentage: number
+  freeCancellationDays: number
 }
 
 interface AccommodationOption {
@@ -438,6 +442,10 @@ export default function EditTourPage({ params }: EditTourPageProps) {
           bestSeason: tour.bestSeason,
           coverImage: tour.coverImage,
           images: tour.images,
+          // Deposit settings
+          depositEnabled: tour.depositEnabled,
+          depositPercentage: tour.depositPercentage,
+          freeCancellationDays: tour.freeCancellationDays,
         }),
       })
 
@@ -1543,6 +1551,93 @@ export default function EditTourPage({ params }: EditTourPageProps) {
                   {tour.status}
                 </Badge>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Deposit & Payment Settings */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <DollarSign className="h-5 w-5" />
+                Deposit & Payment Settings
+              </CardTitle>
+              <CardDescription>
+                Allow travelers to pay a deposit instead of the full amount
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between rounded-lg border p-4">
+                <div>
+                  <p className="font-medium">Enable Deposit Payments</p>
+                  <p className="text-sm text-muted-foreground">
+                    Allow travelers to pay a percentage upfront and the balance later
+                  </p>
+                </div>
+                <Button
+                  variant={tour.depositEnabled ? "default" : "outline"}
+                  onClick={() => updateField("depositEnabled", !tour.depositEnabled)}
+                >
+                  {tour.depositEnabled ? "Enabled" : "Disabled"}
+                </Button>
+              </div>
+
+              {tour.depositEnabled && (
+                <div className="space-y-4 p-4 rounded-lg bg-muted/50">
+                  <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="depositPercentage">Deposit Percentage</Label>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          id="depositPercentage"
+                          type="number"
+                          min={10}
+                          max={90}
+                          value={tour.depositPercentage}
+                          onChange={(e) => updateField("depositPercentage", parseInt(e.target.value) || 30)}
+                          className="max-w-[100px]"
+                        />
+                        <span className="text-muted-foreground">%</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Minimum 10%, maximum 90%
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="freeCancellationDays">Free Cancellation Period</Label>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          id="freeCancellationDays"
+                          type="number"
+                          min={0}
+                          max={90}
+                          value={tour.freeCancellationDays}
+                          onChange={(e) => updateField("freeCancellationDays", parseInt(e.target.value) || 14)}
+                          className="max-w-[100px]"
+                        />
+                        <span className="text-muted-foreground">days before start</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Full refund if canceled within this period
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="rounded-lg bg-background p-3 border">
+                    <p className="text-sm">
+                      <strong>Example:</strong> For a ${tour.basePrice.toLocaleString()} tour, travelers can pay{" "}
+                      <span className="text-primary font-medium">
+                        ${Math.round(tour.basePrice * (tour.depositPercentage / 100)).toLocaleString()}
+                      </span>{" "}
+                      ({tour.depositPercentage}%) as deposit and{" "}
+                      <span className="font-medium">
+                        ${Math.round(tour.basePrice * (1 - tour.depositPercentage / 100)).toLocaleString()}
+                      </span>{" "}
+                      balance before the trip.
+                    </p>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
 

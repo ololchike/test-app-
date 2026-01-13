@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { format } from "date-fns"
 import { toast } from "sonner"
@@ -106,11 +107,20 @@ const statsConfig = [
 ]
 
 export default function AgentBookingsPage() {
+  const searchParams = useSearchParams()
   const [bookings, setBookings] = useState<Booking[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [searchQuery, setSearchQuery] = useState("")
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "")
   const [statusFilter, setStatusFilter] = useState("all")
   const [downloadingId, setDownloadingId] = useState<string | null>(null)
+
+  // Sync search from URL params
+  useEffect(() => {
+    const urlSearch = searchParams.get("search") || ""
+    if (urlSearch !== searchQuery) {
+      setSearchQuery(urlSearch)
+    }
+  }, [searchParams])
 
   useEffect(() => {
     async function fetchBookings() {

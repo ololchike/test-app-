@@ -25,6 +25,10 @@ const createTourSchema = z.object({
   bestSeason: z.array(z.string()).optional(),
   coverImage: z.string().url().optional().nullable(),
   images: z.array(z.string().url()).optional(),
+  // Deposit settings
+  depositEnabled: z.boolean().default(false),
+  depositPercentage: z.number().min(10).max(90).default(30),
+  freeCancellationDays: z.number().int().min(0).max(90).default(14),
 })
 
 export async function GET() {
@@ -190,6 +194,10 @@ export async function POST(request: NextRequest) {
         coverImage: data.coverImage || null,
         images: JSON.stringify(data.images || []),
         status: "DRAFT",
+        // Deposit settings
+        depositEnabled: data.depositEnabled,
+        depositPercentage: data.depositPercentage,
+        freeCancellationDays: data.freeCancellationDays,
       },
     })
 

@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
-import { CheckCircle, Clock, CreditCard, Smartphone, ChevronLeft } from "lucide-react"
+import { CheckCircle, Clock, CreditCard, Smartphone, ChevronLeft, AlertCircle } from "lucide-react"
+import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
@@ -29,6 +30,12 @@ interface BookingData {
   contactEmail: string
   status: string
   paymentStatus: string
+  // Payment type fields
+  paymentType: "FULL" | "DEPOSIT"
+  depositAmount: number | null
+  balanceAmount: number | null
+  balanceDueDate: string | null
+  balancePaidAt: string | null
 }
 
 export default function PaymentPage() {
@@ -64,6 +71,11 @@ export default function PaymentPage() {
     setIsProcessing(true)
 
     try {
+      // Calculate the amount to pay (deposit or full)
+      const amountToPay = booking.paymentType === "DEPOSIT" && booking.depositAmount
+        ? booking.depositAmount
+        : booking.totalAmount
+
       // In production, this would call Pesapal API
       const response = await fetch("/api/payments/initiate", {
         method: "POST",
@@ -71,7 +83,8 @@ export default function PaymentPage() {
         body: JSON.stringify({
           bookingId: booking.id,
           method: selectedMethod,
-          amount: booking.totalAmount,
+          amount: amountToPay,
+          isDeposit: booking.paymentType === "DEPOSIT",
         }),
       })
 
@@ -156,10 +169,53 @@ export default function PaymentPage() {
                 <span className="text-right">{booking.contactName}</span>
               </div>
               <Separator />
-              <div className="flex justify-between text-base sm:text-lg font-bold">
-                <span>Total Amount</span>
+              <div className="flex justify-between text-xs sm:text-sm">
+                <span className="text-muted-foreground">Total Amount</span>
                 <span>${booking.totalAmount.toLocaleString()}</span>
               </div>
+
+              {/* Show deposit breakdown if applicable */}
+              {booking.paymentType === "DEPOSIT" && booking.depositAmount && (
+                <>
+                  <div className="flex justify-between text-xs sm:text-sm">
+                    <span className="text-muted-foreground">Deposit Amount</span>
+                    <span className="text-primary font-medium">${booking.depositAmount.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between text-xs sm:text-sm">
+                    <span className="text-muted-foreground">Balance Due</span>
+                    <span>${booking.balanceAmount?.toLocaleString()}</span>
+                  </div>
+                  {booking.balanceDueDate && (
+                    <div className="flex justify-between text-xs sm:text-sm">
+                      <span className="text-muted-foreground">Balance Due By</span>
+                      <span>{format(new Date(booking.balanceDueDate), "MMM d, yyyy")}</span>
+                    </div>
+                  )}
+                </>
+              )}
+
+              <Separator />
+              <div className="flex justify-between text-base sm:text-lg font-bold">
+                <span>{booking.paymentType === "DEPOSIT" ? "Pay Now (Deposit)" : "Pay Now"}</span>
+                <span>
+                  ${booking.paymentType === "DEPOSIT" && booking.depositAmount
+                    ? booking.depositAmount.toLocaleString()
+                    : booking.totalAmount.toLocaleString()}
+                </span>
+              </div>
+
+              {/* Deposit info notice */}
+              {booking.paymentType === "DEPOSIT" && (
+                <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/20 text-xs sm:text-sm">
+                  <AlertCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+                  <p className="text-amber-800 dark:text-amber-200">
+                    You&apos;re paying a deposit. The remaining balance of ${booking.balanceAmount?.toLocaleString()}
+                    will be due {booking.balanceDueDate
+                      ? `by ${format(new Date(booking.balanceDueDate), "MMM d, yyyy")}`
+                      : "before your trip"}.
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -221,7 +277,7 @@ export default function PaymentPage() {
 
               {/* Pay Button */}
               <Button
-                className="w-full mt-3 sm:mt-4 h-11 sm:h-auto text-sm sm:text-base"
+                className="w-full mt-3 sm:mt-4 h-12 sm:h-14 text-sm sm:text-base font-semibold"
                 size="lg"
                 onClick={handlePayment}
                 disabled={!selectedMethod || isProcessing}
@@ -232,7 +288,9 @@ export default function PaymentPage() {
                     Processing...
                   </>
                 ) : (
-                  `Pay $${booking.totalAmount.toLocaleString()}`
+                  booking.paymentType === "DEPOSIT" && booking.depositAmount
+                    ? `Pay $${booking.depositAmount.toLocaleString()} Deposit`
+                    : `Pay $${booking.totalAmount.toLocaleString()}`
                 )}
               </Button>
 

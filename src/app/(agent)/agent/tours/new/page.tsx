@@ -156,6 +156,9 @@ interface TourFormData {
   infantPrice: number | null
   singleSupplement: number | null
   maxGroupSize: number
+  depositEnabled: boolean
+  depositPercentage: number
+  freeCancellationDays: number
   difficulty: string
   tourType: string[]
   highlights: string[]
@@ -182,6 +185,9 @@ const initialFormData: TourFormData = {
   infantPrice: null,
   singleSupplement: null,
   maxGroupSize: 12,
+  depositEnabled: false,
+  depositPercentage: 30,
+  freeCancellationDays: 14,
   difficulty: "Moderate",
   tourType: [],
   highlights: [],
@@ -452,6 +458,9 @@ export default function CreateTourPage() {
           infantPrice: formData.infantPrice,
           singleSupplement: formData.singleSupplement,
           maxGroupSize: formData.maxGroupSize,
+          depositEnabled: formData.depositEnabled,
+          depositPercentage: formData.depositPercentage,
+          freeCancellationDays: formData.freeCancellationDays,
           difficulty: formData.difficulty,
           tourType: formData.tourType,
           highlights: formData.highlights,
@@ -804,6 +813,64 @@ export default function CreateTourPage() {
                     </div>
                   </div>
                 </div>
+              </div>
+
+              {/* Deposit & Cancellation Policy */}
+              <div className="space-y-4 pt-4 border-t">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-base font-medium">Allow Deposit Payments</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Let customers pay a percentage upfront and the rest later
+                    </p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.depositEnabled}
+                      onChange={(e) => updateFormData("depositEnabled", e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                  </label>
+                </div>
+
+                {formData.depositEnabled && (
+                  <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 p-4 rounded-lg bg-muted/50">
+                    <div className="space-y-2">
+                      <Label htmlFor="depositPercentage">Deposit Percentage (%)</Label>
+                      <div className="relative">
+                        <Input
+                          id="depositPercentage"
+                          type="number"
+                          min={10}
+                          max={90}
+                          value={formData.depositPercentage}
+                          onChange={(e) => updateFormData("depositPercentage", parseInt(e.target.value) || 30)}
+                          className="pr-8"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">%</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Customer pays {formData.depositPercentage}% now, {100 - formData.depositPercentage}% before trip
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="freeCancellationDays">Free Cancellation Period (days)</Label>
+                      <Input
+                        id="freeCancellationDays"
+                        type="number"
+                        min={0}
+                        max={90}
+                        value={formData.freeCancellationDays}
+                        onChange={(e) => updateFormData("freeCancellationDays", parseInt(e.target.value) || 14)}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Full refund if cancelled {formData.freeCancellationDays}+ days before start
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}

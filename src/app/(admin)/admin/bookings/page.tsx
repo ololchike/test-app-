@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { format } from "date-fns"
 import { Calendar, Search, Eye } from "lucide-react"
 import { toast } from "sonner"
@@ -71,14 +72,23 @@ const paymentStatusConfig = {
 }
 
 export default function AdminBookingsPage() {
+  const searchParams = useSearchParams()
   const [bookings, setBookings] = useState<Booking[]>([])
   const [statusCounts, setStatusCounts] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [paymentFilter, setPaymentFilter] = useState<string>("all")
-  const [searchQuery, setSearchQuery] = useState("")
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "")
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
+
+  // Sync search from URL params
+  useEffect(() => {
+    const urlSearch = searchParams.get("search") || ""
+    if (urlSearch !== searchQuery) {
+      setSearchQuery(urlSearch)
+    }
+  }, [searchParams])
 
   useEffect(() => {
     fetchBookings()

@@ -54,6 +54,10 @@ export async function GET(request: NextRequest) {
       durationDays: tour.durationDays,
       durationNights: tour.durationNights,
       basePrice: tour.basePrice,
+      // Deposit settings
+      depositEnabled: tour.depositEnabled,
+      depositPercentage: tour.depositPercentage,
+      freeCancellationDays: tour.freeCancellationDays,
       agent: tour.agent,
       accommodationOptions: tour.accommodationOptions.map((acc) => ({
         id: acc.id,

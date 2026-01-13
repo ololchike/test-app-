@@ -1,7 +1,7 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { useParams } from "next/navigation"
+import { useEffect, useState, Suspense } from "react"
+import { useParams, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { format } from "date-fns"
@@ -18,7 +18,9 @@ import {
   Sparkles,
   Clock,
   Star,
-  Loader2
+  Loader2,
+  AlertCircle,
+  CreditCard
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -41,6 +43,12 @@ interface BookingData {
   contactEmail: string
   contactPhone: string
   specialRequests: string | null
+  // Payment type fields
+  paymentType: "FULL" | "DEPOSIT"
+  depositAmount: number | null
+  balanceAmount: number | null
+  balanceDueDate: string | null
+  balancePaidAt: string | null
   tour: {
     title: string
     slug: string
@@ -68,11 +76,14 @@ interface BookingData {
   }>
 }
 
-export default function ConfirmationPage() {
+function ConfirmationContent() {
   const params = useParams()
+  const searchParams = useSearchParams()
   const [booking, setBooking] = useState<BookingData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isDownloading, setIsDownloading] = useState(false)
+  const [isVerifyingPayment, setIsVerifyingPayment] = useState(false)
+  const [paymentVerified, setPaymentVerified] = useState(false)
 
   const handleDownloadItinerary = async () => {
     if (!booking) {
@@ -118,9 +129,53 @@ export default function ConfirmationPage() {
     }
   }
 
+  // Verify payment with Pesapal callback parameters
   useEffect(() => {
+    async function verifyPayment() {
+      const orderTrackingId = searchParams.get("OrderTrackingId")
+      const merchantReference = searchParams.get("OrderMerchantReference")
+
+      if (!orderTrackingId && !merchantReference) {
+        return false
+      }
+
+      setIsVerifyingPayment(true)
+
+      try {
+        const callbackUrl = new URL("/api/payments/callback", window.location.origin)
+        if (orderTrackingId) callbackUrl.searchParams.set("OrderTrackingId", orderTrackingId)
+        if (merchantReference) callbackUrl.searchParams.set("OrderMerchantReference", merchantReference)
+        callbackUrl.searchParams.set("bookingId", params.id as string)
+
+        const response = await fetch(callbackUrl.toString())
+        const data = await response.json()
+
+        if (data.success && data.paymentStatus === "COMPLETED") {
+          setPaymentVerified(true)
+          toast.success("Payment Verified!", {
+            description: "Your payment has been confirmed successfully.",
+          })
+          return true
+        } else if (data.paymentStatus === "FAILED") {
+          toast.error("Payment Failed", {
+            description: "Your payment could not be processed. Please try again.",
+          })
+        }
+      } catch (error) {
+        console.error("Error verifying payment:", error)
+      } finally {
+        setIsVerifyingPayment(false)
+      }
+
+      return false
+    }
+
     async function fetchBooking() {
       try {
+        // First verify payment if we have callback params
+        await verifyPayment()
+
+        // Then fetch the updated booking data
         const response = await fetch(`/api/bookings/${params.id}`)
         if (response.ok) {
           const data = await response.json()
@@ -136,9 +191,9 @@ export default function ConfirmationPage() {
     if (params.id) {
       fetchBooking()
     }
-  }, [params.id])
+  }, [params.id, searchParams])
 
-  if (isLoading) {
+  if (isLoading || isVerifyingPayment) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/30">
         {/* Background Shapes */}
@@ -158,7 +213,16 @@ export default function ConfirmationPage() {
               <Loader2 className="h-8 w-8 text-primary animate-spin" />
             </div>
           </div>
-          <p className="text-muted-foreground">Loading booking details...</p>
+          <div className="space-y-2">
+            <p className="text-muted-foreground">
+              {isVerifyingPayment ? "Verifying payment..." : "Loading booking details..."}
+            </p>
+            {isVerifyingPayment && (
+              <p className="text-xs text-muted-foreground">
+                Please wait while we confirm your payment status
+              </p>
+            )}
+          </div>
         </motion.div>
       </div>
     )
@@ -269,11 +333,24 @@ export default function ConfirmationPage() {
                       variant={booking.paymentStatus === "COMPLETED" ? "default" : "outline"}
                       className={cn(
                         "rounded-full px-3 py-1",
-                        booking.paymentStatus === "COMPLETED" && "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                        booking.paymentStatus === "COMPLETED" && "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+                        booking.paymentStatus === "PARTIAL" && "bg-amber-500/10 text-amber-600 border-amber-500/20"
                       )}
                     >
-                      {booking.paymentStatus === "COMPLETED" ? "Paid" : "Pending Payment"}
+                      {booking.paymentStatus === "COMPLETED"
+                        ? "Paid"
+                        : booking.paymentStatus === "PARTIAL"
+                          ? "Deposit Paid"
+                          : "Pending Payment"}
                     </Badge>
+                    {booking.paymentType === "DEPOSIT" && (
+                      <Badge
+                        variant="outline"
+                        className="rounded-full px-3 py-1 bg-blue-500/10 text-blue-600 border-blue-500/20"
+                      >
+                        Deposit Payment
+                      </Badge>
+                    )}
                   </div>
                 </div>
               </CardContent>
@@ -405,11 +482,85 @@ export default function ConfirmationPage() {
 
                 <Separator className="bg-border/50" />
 
-                <div className="flex justify-between items-center p-3 sm:p-4 rounded-xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20">
-                  <span className="text-base sm:text-lg font-semibold">Total Paid</span>
-                  <span className="text-xl sm:text-2xl font-bold text-emerald-600">
-                    ${booking.totalAmount.toLocaleString()}
-                  </span>
+                {/* Payment Summary */}
+                <div className="space-y-3">
+                  {/* Total Amount */}
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-muted-foreground">Total Amount</span>
+                    <span className="font-medium">${booking.totalAmount.toLocaleString()}</span>
+                  </div>
+
+                  {/* Deposit/Balance breakdown for deposit payments */}
+                  {booking.paymentType === "DEPOSIT" && booking.depositAmount && (
+                    <>
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-muted-foreground">Deposit Paid</span>
+                        <span className="font-medium text-emerald-600">${booking.depositAmount.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-muted-foreground">Balance Remaining</span>
+                        <span className={cn(
+                          "font-medium",
+                          booking.balancePaidAt ? "text-emerald-600 line-through" : "text-amber-600"
+                        )}>
+                          ${booking.balanceAmount?.toLocaleString()}
+                        </span>
+                      </div>
+                      {booking.balanceDueDate && !booking.balancePaidAt && (
+                        <div className="flex justify-between items-center text-sm">
+                          <span className="text-muted-foreground">Balance Due By</span>
+                          <span className="font-medium">{format(new Date(booking.balanceDueDate), "MMM d, yyyy")}</span>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {/* Amount Paid Summary */}
+                  <div className={cn(
+                    "flex justify-between items-center p-3 sm:p-4 rounded-xl border",
+                    booking.paymentType === "DEPOSIT" && !booking.balancePaidAt
+                      ? "bg-gradient-to-r from-amber-500/10 to-orange-500/10 border-amber-500/20"
+                      : "bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border-emerald-500/20"
+                  )}>
+                    <span className="text-base sm:text-lg font-semibold">
+                      {booking.paymentType === "DEPOSIT" && !booking.balancePaidAt ? "Deposit Paid" : "Total Paid"}
+                    </span>
+                    <span className={cn(
+                      "text-xl sm:text-2xl font-bold",
+                      booking.paymentType === "DEPOSIT" && !booking.balancePaidAt ? "text-amber-600" : "text-emerald-600"
+                    )}>
+                      ${booking.paymentType === "DEPOSIT" && booking.depositAmount
+                        ? booking.depositAmount.toLocaleString()
+                        : booking.totalAmount.toLocaleString()}
+                    </span>
+                  </div>
+
+                  {/* Balance Due Notice */}
+                  {booking.paymentType === "DEPOSIT" && booking.balanceAmount && !booking.balancePaidAt && (
+                    <div className="flex items-start gap-3 p-3 sm:p-4 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-500/20">
+                      <AlertCircle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-medium text-amber-800 dark:text-amber-200">Balance Payment Required</p>
+                        <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+                          Please pay the remaining ${booking.balanceAmount.toLocaleString()}
+                          {booking.balanceDueDate
+                            ? ` by ${format(new Date(booking.balanceDueDate), "MMMM d, yyyy")}`
+                            : " before your trip"} to confirm your booking.
+                        </p>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="mt-3 border-amber-500/30 text-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/30"
+                          asChild
+                        >
+                          <Link href={`/booking/payment/${booking.id}?balance=true`}>
+                            <CreditCard className="h-4 w-4 mr-2" />
+                            Pay Balance
+                          </Link>
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -551,5 +702,26 @@ export default function ConfirmationPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+
+export default function ConfirmationPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/30">
+        <div className="text-center space-y-6">
+          <div className="relative mx-auto w-20 h-20">
+            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 animate-pulse" />
+            <div className="absolute inset-2 rounded-full bg-background flex items-center justify-center">
+              <div className="h-8 w-8 border-t-2 border-primary rounded-full animate-spin" />
+            </div>
+          </div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    }>
+      <ConfirmationContent />
+    </Suspense>
   )
 }

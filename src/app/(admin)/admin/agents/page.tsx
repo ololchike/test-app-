@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { format } from "date-fns"
 import { Shield, Search, Check, X, Percent, Loader2 } from "lucide-react"
 import { toast } from "sonner"
@@ -57,12 +58,21 @@ const statusConfig = {
 }
 
 export default function AdminAgentsPage() {
+  const searchParams = useSearchParams()
   const [agents, setAgents] = useState<Agent[]>([])
   const [loading, setLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState<string>("all")
-  const [searchQuery, setSearchQuery] = useState("")
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "")
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
+
+  // Sync search from URL params
+  useEffect(() => {
+    const urlSearch = searchParams.get("search") || ""
+    if (urlSearch !== searchQuery) {
+      setSearchQuery(urlSearch)
+    }
+  }, [searchParams])
 
   const [dialogOpen, setDialogOpen] = useState(false)
   const [dialogType, setDialogType] = useState<"verify" | "suspend" | "activate">("verify")

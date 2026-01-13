@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { format } from "date-fns"
 import { Users, Search, Shield, User, UserCog } from "lucide-react"
 import { toast } from "sonner"
@@ -62,13 +63,22 @@ const statusConfig = {
 }
 
 export default function AdminUsersPage() {
+  const searchParams = useSearchParams()
   const [users, setUsers] = useState<User[]>([])
   const [roleCounts, setRoleCounts] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(true)
   const [roleFilter, setRoleFilter] = useState<string>("all")
-  const [searchQuery, setSearchQuery] = useState("")
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "")
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
+
+  // Sync search from URL params
+  useEffect(() => {
+    const urlSearch = searchParams.get("search") || ""
+    if (urlSearch !== searchQuery) {
+      setSearchQuery(urlSearch)
+    }
+  }, [searchParams])
 
   const [changeDialogOpen, setChangeDialogOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
