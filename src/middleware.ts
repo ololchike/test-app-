@@ -33,14 +33,21 @@ const publicVerificationRoutes = [
   "/resend-verification",
 ]
 
+// Cookie name matches auth.ts configuration
+const useSecureCookies = process.env.NODE_ENV === "production"
+const cookieName = useSecureCookies
+  ? "__Secure-authjs.session-token"
+  : "authjs.session-token"
+
 export async function middleware(req: NextRequest) {
   const { nextUrl } = req
   const pathname = nextUrl.pathname
 
-  // Get token from JWT
+  // Get token from JWT with correct cookie name
   const token = await getToken({
     req,
     secret: process.env.AUTH_SECRET,
+    cookieName,
   })
 
   const isLoggedIn = !!token
