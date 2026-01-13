@@ -144,8 +144,8 @@ export default function AgentAnalyticsPage() {
             <BarChart3 className="h-3.5 w-3.5 text-primary" />
             <span className="text-xs font-medium text-primary">Analytics</span>
           </div>
-          <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Analytics</h1>
+          <p className="text-muted-foreground mt-1 text-sm sm:text-base">
             Track your business performance and insights
           </p>
         </motion.div>
@@ -219,7 +219,7 @@ export default function AgentAnalyticsPage() {
       </motion.div>
 
       {/* Overview Stats */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         {statsConfig.map((stat, index) => {
           const Icon = stat.icon
           const value = overview[stat.key as keyof typeof overview]
@@ -254,7 +254,7 @@ export default function AgentAnalyticsPage() {
       </div>
 
       {/* Secondary Stats */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -539,8 +539,8 @@ export default function AgentAnalyticsPage() {
           </CardHeader>
           <CardContent>
             {topTours.length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="w-full">
+              <div className="overflow-x-auto -mx-4 sm:mx-0">
+                <table className="w-full min-w-[600px]">
                   <thead>
                     <tr className="border-b border-border/50">
                       <th className="text-left py-3 px-2 font-semibold text-muted-foreground">

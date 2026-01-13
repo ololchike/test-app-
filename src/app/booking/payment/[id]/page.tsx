@@ -121,42 +121,42 @@ export default function PaymentPage() {
     <div className="min-h-screen bg-muted/30">
       {/* Header */}
       <div className="bg-background border-b sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" asChild>
+        <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
+          <div className="flex items-center gap-2 sm:gap-4">
+            <Button variant="ghost" size="sm" asChild className="h-8 sm:h-9">
               <Link href={`/booking/checkout?tourId=${booking.tour?.slug || ""}`}>
                 <ChevronLeft className="h-4 w-4 mr-1" />
                 Back
               </Link>
             </Button>
             <div className="h-6 w-px bg-border" />
-            <h1 className="font-semibold">Complete Payment</h1>
+            <h1 className="font-semibold text-sm sm:text-base">Complete Payment</h1>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-2xl mx-auto space-y-6">
+      <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
+        <div className="max-w-2xl mx-auto space-y-4 sm:space-y-6">
           {/* Booking Summary */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Booking Summary</CardTitle>
+            <CardHeader className="pb-3 sm:pb-6">
+              <CardTitle className="text-base sm:text-lg">Booking Summary</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-between text-sm">
+            <CardContent className="space-y-3 sm:space-y-4">
+              <div className="flex justify-between text-xs sm:text-sm">
                 <span className="text-muted-foreground">Booking Reference</span>
-                <span className="font-mono font-medium">{booking.bookingReference}</span>
+                <span className="font-mono font-medium text-right">{booking.bookingReference}</span>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Tour</span>
-                <span className="font-medium">{booking.tour?.title}</span>
+              <div className="flex justify-between text-xs sm:text-sm gap-2">
+                <span className="text-muted-foreground shrink-0">Tour</span>
+                <span className="font-medium text-right">{booking.tour?.title}</span>
               </div>
-              <div className="flex justify-between text-sm">
+              <div className="flex justify-between text-xs sm:text-sm">
                 <span className="text-muted-foreground">Contact</span>
-                <span>{booking.contactName}</span>
+                <span className="text-right">{booking.contactName}</span>
               </div>
               <Separator />
-              <div className="flex justify-between text-lg font-bold">
+              <div className="flex justify-between text-base sm:text-lg font-bold">
                 <span>Total Amount</span>
                 <span>${booking.totalAmount.toLocaleString()}</span>
               </div>
@@ -165,63 +165,63 @@ export default function PaymentPage() {
 
           {/* Payment Methods */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Select Payment Method</CardTitle>
+            <CardHeader className="pb-3 sm:pb-6">
+              <CardTitle className="text-base sm:text-lg">Select Payment Method</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3 sm:space-y-4">
               {/* M-Pesa Option */}
               <div
                 onClick={() => setSelectedMethod("mpesa")}
-                className={`flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-colors ${
+                className={`flex items-center gap-3 sm:gap-4 p-3 sm:p-4 border rounded-lg cursor-pointer transition-colors ${
                   selectedMethod === "mpesa"
                     ? "border-primary bg-primary/5"
                     : "border-border hover:border-primary/50"
                 }`}
               >
-                <div className={`p-3 rounded-full ${
+                <div className={`p-2 sm:p-3 rounded-full shrink-0 ${
                   selectedMethod === "mpesa" ? "bg-primary text-white" : "bg-muted"
                 }`}>
-                  <Smartphone className="h-5 w-5" />
+                  <Smartphone className="h-4 w-4 sm:h-5 sm:w-5" />
                 </div>
-                <div className="flex-1">
-                  <p className="font-semibold">M-Pesa</p>
-                  <p className="text-sm text-muted-foreground">
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-sm sm:text-base">M-Pesa</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     Pay directly from your M-Pesa account
                   </p>
                 </div>
                 {selectedMethod === "mpesa" && (
-                  <CheckCircle className="h-5 w-5 text-primary" />
+                  <CheckCircle className="h-5 w-5 text-primary shrink-0" />
                 )}
               </div>
 
               {/* Card Option */}
               <div
                 onClick={() => setSelectedMethod("card")}
-                className={`flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-colors ${
+                className={`flex items-center gap-3 sm:gap-4 p-3 sm:p-4 border rounded-lg cursor-pointer transition-colors ${
                   selectedMethod === "card"
                     ? "border-primary bg-primary/5"
                     : "border-border hover:border-primary/50"
                 }`}
               >
-                <div className={`p-3 rounded-full ${
+                <div className={`p-2 sm:p-3 rounded-full shrink-0 ${
                   selectedMethod === "card" ? "bg-primary text-white" : "bg-muted"
                 }`}>
-                  <CreditCard className="h-5 w-5" />
+                  <CreditCard className="h-4 w-4 sm:h-5 sm:w-5" />
                 </div>
-                <div className="flex-1">
-                  <p className="font-semibold">Credit/Debit Card</p>
-                  <p className="text-sm text-muted-foreground">
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-sm sm:text-base">Credit/Debit Card</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     Visa, Mastercard, or American Express
                   </p>
                 </div>
                 {selectedMethod === "card" && (
-                  <CheckCircle className="h-5 w-5 text-primary" />
+                  <CheckCircle className="h-5 w-5 text-primary shrink-0" />
                 )}
               </div>
 
               {/* Pay Button */}
               <Button
-                className="w-full mt-4"
+                className="w-full mt-3 sm:mt-4 h-11 sm:h-auto text-sm sm:text-base"
                 size="lg"
                 onClick={handlePayment}
                 disabled={!selectedMethod || isProcessing}

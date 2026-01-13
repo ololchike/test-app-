@@ -639,7 +639,7 @@ export default function CreateTourPage() {
                 )}
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="destination">Destination *</Label>
                   <Input
@@ -676,7 +676,7 @@ export default function CreateTourPage() {
                 </div>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-3">
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
                 <div className="space-y-2">
                   <Label htmlFor="durationDays">Duration (Days) *</Label>
                   <Input
@@ -713,7 +713,7 @@ export default function CreateTourPage() {
                 </div>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="basePrice">Adult Price (USD) *</Label>
                   <div className="relative">
@@ -757,7 +757,7 @@ export default function CreateTourPage() {
                 <p className="text-sm text-muted-foreground">
                   Set different prices for children and infants (optional)
                 </p>
-                <div className="grid gap-4 sm:grid-cols-3">
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
                   <div className="space-y-2">
                     <Label htmlFor="childPrice" className="text-sm">Child Price (2-11 yrs)</Label>
                     <div className="relative">
@@ -932,7 +932,7 @@ export default function CreateTourPage() {
                 </div>
               </div>
 
-              <div className="grid gap-6 sm:grid-cols-2">
+              <div className="grid gap-6 grid-cols-1 sm:grid-cols-2">
                 <div className="space-y-3">
                   <Label>What&apos;s Included</Label>
                   <div className="flex gap-2">
@@ -1293,7 +1293,7 @@ export default function CreateTourPage() {
             <div className="space-y-6">
               <h3 className="text-lg font-semibold">Review Your Tour</h3>
 
-              <div className="grid gap-6 sm:grid-cols-2">
+              <div className="grid gap-6 grid-cols-1 sm:grid-cols-2">
                 <Card>
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm">Basic Details</CardTitle>
@@ -1519,7 +1519,7 @@ function AccommodationFormCreate({
         />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="acc-tier">Tier *</Label>
           <Select value={tier} onValueChange={setTier}>
@@ -1551,7 +1551,7 @@ function AccommodationFormCreate({
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="acc-location">Location</Label>
           <Input
@@ -1678,7 +1678,7 @@ function AddonFormCreate({
         />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="addon-price">Price (USD) *</Label>
           <div className="relative">

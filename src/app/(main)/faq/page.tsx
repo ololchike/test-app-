@@ -186,7 +186,7 @@ export default function FAQPage() {
   return (
     <div className="pt-20">
       {/* Hero Header */}
-      <section className="relative bg-gradient-to-br from-secondary via-secondary/95 to-primary/30 py-20 lg:py-28 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-secondary via-secondary/95 to-primary/30 py-16 sm:py-20 lg:py-28 overflow-hidden">
         {/* Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <motion.div
@@ -201,7 +201,7 @@ export default function FAQPage() {
           />
         </div>
 
-        <div className="container relative mx-auto px-4 lg:px-8">
+        <div className="container relative mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -218,7 +218,7 @@ export default function FAQPage() {
               <span className="text-white/90 text-sm font-medium">{totalQuestions}+ Questions Answered</span>
             </motion.div>
 
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white">
               Frequently Asked{" "}
               <span className="relative">
                 <span className="relative z-10 text-accent">Questions</span>
@@ -226,11 +226,11 @@ export default function FAQPage() {
                   initial={{ scaleX: 0 }}
                   animate={{ scaleX: 1 }}
                   transition={{ duration: 0.8, delay: 0.5 }}
-                  className="absolute bottom-2 left-0 right-0 h-3 bg-accent/30 -z-0 origin-left"
+                  className="absolute bottom-1 sm:bottom-2 left-0 right-0 h-2 sm:h-3 bg-accent/30 -z-0 origin-left"
                 />
               </span>
             </h1>
-            <p className="mt-6 text-lg md:text-xl text-white/80 max-w-2xl mx-auto">
+            <p className="mt-4 sm:mt-6 text-base sm:text-lg md:text-xl text-white/80 max-w-2xl mx-auto">
               Everything you need to know about booking safaris with SafariPlus
             </p>
 
@@ -277,8 +277,8 @@ export default function FAQPage() {
       </section>
 
       {/* FAQ Content */}
-      <section className="py-16 lg:py-24">
-        <div className="container mx-auto px-4 lg:px-8">
+      <section className="py-12 sm:py-16 lg:py-24">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-4xl space-y-12">
             {(searchQuery ? filteredCategories : faqCategories).map((category, catIndex) => (
               <motion.div
@@ -347,8 +347,8 @@ export default function FAQPage() {
       </section>
 
       {/* Still Have Questions */}
-      <section className="py-16 lg:py-24 bg-gradient-to-r from-primary/5 via-accent/5 to-secondary/5">
-        <div className="container mx-auto px-4 lg:px-8">
+      <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-r from-primary/5 via-accent/5 to-secondary/5">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}

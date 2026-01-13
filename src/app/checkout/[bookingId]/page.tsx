@@ -382,17 +382,17 @@ export default function CheckoutPage() {
         <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl" />
       </div>
 
-      <div className="container mx-auto px-4 py-8 relative z-10">
+      <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8 relative z-10">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
+          className="mb-4 sm:mb-8"
         >
           <Button
             variant="ghost"
             asChild
-            className="mb-4 hover:bg-background/80"
+            className="mb-3 sm:mb-4 hover:bg-background/80 h-9 sm:h-10 text-sm sm:text-base"
           >
             <Link href={`/tours/${booking.tour.title.toLowerCase().replace(/\s+/g, "-")}`}>
               <ArrowLeftIcon className="h-4 w-4 mr-2" />
@@ -400,20 +400,20 @@ export default function CheckoutPage() {
             </Link>
           </Button>
 
-          <div className="flex items-center gap-3 mb-2">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
-              <Sparkles className="h-5 w-5 text-white" />
+          <div className="flex items-center gap-2 sm:gap-3 mb-2">
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
+              <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
             </div>
-            <h1 className="text-3xl font-bold">Complete Your Booking</h1>
+            <h1 className="text-xl sm:text-3xl font-bold">Complete Your Booking</h1>
           </div>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-xs sm:text-base text-muted-foreground mt-1">
             Booking Reference: <span className="font-mono font-semibold text-foreground">{booking.bookingReference}</span>
           </p>
         </motion.div>
 
-        <div className="grid gap-8 lg:grid-cols-3">
+        <div className="grid gap-4 sm:gap-8 lg:grid-cols-3">
           {/* Left Column - Forms */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6 order-2 lg:order-1">
             {/* Traveler Details */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -421,10 +421,10 @@ export default function CheckoutPage() {
               transition={{ delay: 0.1 }}
             >
               <Card className="border-border/50 hover:border-primary/30 hover:shadow-premium transition-all duration-300">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-                      <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <CardHeader className="pb-3 sm:pb-6">
+                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                    <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                      <svg className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                       </svg>
                     </div>
@@ -449,10 +449,10 @@ export default function CheckoutPage() {
               transition={{ delay: 0.2 }}
             >
               <Card className="border-border/50 hover:border-primary/30 hover:shadow-premium transition-all duration-300">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
-                      <CreditCardIcon className="h-4 w-4 text-white" />
+                <CardHeader className="pb-3 sm:pb-6">
+                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                    <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
+                      <CreditCardIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
                     </div>
                     Payment Method
                   </CardTitle>
@@ -476,8 +476,8 @@ export default function CheckoutPage() {
               transition={{ delay: 0.3 }}
             >
               <Card className="border-border/50 hover:border-primary/30 hover:shadow-premium transition-all duration-300">
-                <CardContent className="pt-6">
-                  <div className="flex items-start space-x-3">
+                <CardContent className="pt-4 sm:pt-6">
+                  <div className="flex items-start space-x-2 sm:space-x-3">
                     <Checkbox
                       id="terms"
                       checked={acceptedTerms}
@@ -487,11 +487,11 @@ export default function CheckoutPage() {
                     <div className="space-y-1">
                       <Label
                         htmlFor="terms"
-                        className="text-sm font-medium leading-none cursor-pointer"
+                        className="text-xs sm:text-sm font-medium leading-none cursor-pointer"
                       >
                         I accept the terms and conditions
                       </Label>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs sm:text-sm text-muted-foreground">
                         By proceeding, you agree to our{" "}
                         <Link href="/terms" className="text-primary hover:underline font-medium">
                           Terms of Service
@@ -514,13 +514,13 @@ export default function CheckoutPage() {
               transition={{ delay: 0.4 }}
               className="lg:hidden"
             >
-              <div className="flex flex-wrap items-center justify-center gap-4 py-4">
+              <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 py-3 sm:py-4">
                 {securityFeatures.map((feature, index) => (
                   <div
                     key={index}
-                    className="flex items-center gap-2 text-xs text-muted-foreground"
+                    className="flex items-center gap-1.5 sm:gap-2 text-xs text-muted-foreground"
                   >
-                    <feature.icon className="h-4 w-4 text-emerald-600" />
+                    <feature.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-600 shrink-0" />
                     <span>{feature.text}</span>
                   </div>
                 ))}
@@ -528,8 +528,8 @@ export default function CheckoutPage() {
             </motion.div>
           </div>
 
-          {/* Right Column - Order Summary */}
-          <div className="lg:col-span-1">
+          {/* Right Column - Order Summary - Show on top for mobile */}
+          <div className="lg:col-span-1 order-1 lg:order-2">
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -562,13 +562,13 @@ export default function CheckoutPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="mt-6 space-y-4"
+                className="mt-4 sm:mt-6 space-y-3 sm:space-y-4"
               >
                 <Button
                   onClick={handlePayment}
                   disabled={!isFormValid || isProcessing}
                   className={cn(
-                    "w-full h-14 text-base font-semibold rounded-xl transition-all duration-300",
+                    "w-full h-12 sm:h-14 text-sm sm:text-base font-semibold rounded-xl transition-all duration-300",
                     isFormValid && !isProcessing
                       ? "bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl hover:shadow-primary/20"
                       : ""
@@ -577,12 +577,12 @@ export default function CheckoutPage() {
                 >
                   {isProcessing ? (
                     <span className="flex items-center gap-2">
-                      <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <div className="h-4 w-4 sm:h-5 sm:w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                       Processing...
                     </span>
                   ) : (
                     <span className="flex items-center gap-2">
-                      <Lock className="h-5 w-5" />
+                      <Lock className="h-4 w-4 sm:h-5 sm:w-5" />
                       Pay {new Intl.NumberFormat("en-US", {
                         style: "currency",
                         currency: booking.currency,
@@ -597,15 +597,15 @@ export default function CheckoutPage() {
                 </p>
 
                 {/* Security Features - Desktop */}
-                <div className="hidden lg:block pt-4 border-t border-border/50">
-                  <div className="space-y-3">
+                <div className="hidden lg:block pt-3 sm:pt-4 border-t border-border/50">
+                  <div className="space-y-2 sm:space-y-3">
                     {securityFeatures.map((feature, index) => (
                       <div
                         key={index}
-                        className="flex items-center gap-3 text-sm text-muted-foreground"
+                        className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground"
                       >
-                        <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                          <feature.icon className="h-4 w-4 text-emerald-600" />
+                        <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
+                          <feature.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-600" />
                         </div>
                         <span>{feature.text}</span>
                       </div>

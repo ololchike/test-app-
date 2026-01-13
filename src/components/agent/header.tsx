@@ -79,8 +79,8 @@ export function AgentHeader({ user }: AgentHeaderProps) {
             <span className="sr-only">Toggle menu</span>
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="w-72 p-0 bg-gradient-to-b from-background to-muted/20">
-          <SheetHeader className="border-b border-border/50 p-4">
+        <SheetContent side="left" className="w-72 p-0 bg-background border-r border-border">
+          <SheetHeader className="border-b border-border p-4 bg-background">
             <SheetTitle>
               <Link href="/" className="flex items-center gap-2">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-orange-500 shadow-glow">
@@ -93,7 +93,7 @@ export function AgentHeader({ user }: AgentHeaderProps) {
               </Link>
             </SheetTitle>
           </SheetHeader>
-          <div className="p-3 border-b border-border/50">
+          <div className="p-3 border-b border-border bg-background">
             <Button className="w-full shadow-glow h-10" asChild>
               <Link href="/agent/tours/new">
                 <Plus className="h-4 w-4 mr-2" />
@@ -101,7 +101,7 @@ export function AgentHeader({ user }: AgentHeaderProps) {
               </Link>
             </Button>
           </div>
-          <nav className="flex-1 space-y-1 p-2">
+          <nav className="flex-1 space-y-1 p-2 bg-background overflow-y-auto">
             {mobileNavItems.map((item, index) => {
               const isActive = pathname === item.href
               return (
@@ -127,7 +127,7 @@ export function AgentHeader({ user }: AgentHeaderProps) {
               )
             })}
           </nav>
-          <div className="border-t border-border/50 p-4 bg-gradient-to-t from-muted/30 to-transparent">
+          <div className="border-t border-border p-4 bg-muted/50">
             <Button
               variant="ghost"
               className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"

@@ -251,14 +251,14 @@ export default function AdminWithdrawalsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Withdrawal Management</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Withdrawal Management</h1>
         <p className="text-muted-foreground mt-1">
           Review and process agent withdrawal requests
         </p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
         {Object.entries(statusCounts).map(([status, data]: [string, any]) => (
           <Card key={status}>
             <CardHeader className="pb-2">
@@ -282,8 +282,8 @@ export default function AdminWithdrawalsPage() {
           <CardTitle>Filter Withdrawals</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-4">
-            <div className="w-48">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="w-full sm:w-48">
               <Label htmlFor="status">Status</Label>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger id="status">
@@ -326,7 +326,7 @@ export default function AdminWithdrawalsPage() {
             </div>
           ) : (
             <>
-              <div className="rounded-md border">
+              <div className="overflow-x-auto rounded-md border">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -412,7 +412,7 @@ export default function AdminWithdrawalsPage() {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-between mt-4">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4">
                   <p className="text-sm text-muted-foreground">
                     Page {page} of {totalPages}
                   </p>

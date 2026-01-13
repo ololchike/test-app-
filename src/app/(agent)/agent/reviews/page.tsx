@@ -172,15 +172,15 @@ export default function AgentReviewsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Reviews</h1>
-        <p className="text-muted-foreground mt-1">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Reviews</h1>
+        <p className="text-muted-foreground mt-1 text-sm sm:text-base">
           Manage and respond to customer reviews
         </p>
       </div>
 
       {/* Stats Cards */}
       {loading ? (
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
           {[1, 2, 3].map((i) => (
             <Card key={i}>
               <CardHeader className="pb-2">
@@ -193,7 +193,7 @@ export default function AgentReviewsPage() {
           ))}
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">

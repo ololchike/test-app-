@@ -100,8 +100,8 @@ export default function AgentEarningsPage() {
             <DollarSign className="h-3.5 w-3.5 text-primary" />
             <span className="text-xs font-medium text-primary">Earnings</span>
           </div>
-          <h1 className="text-3xl font-bold tracking-tight">Your Earnings</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Your Earnings</h1>
+          <p className="text-muted-foreground mt-1 text-sm sm:text-base">
             Track your earnings and manage withdrawal requests
           </p>
         </motion.div>
@@ -137,14 +137,14 @@ export default function AgentEarningsPage() {
           <DollarSign className="h-3.5 w-3.5 text-primary" />
           <span className="text-xs font-medium text-primary">Earnings</span>
         </div>
-        <h1 className="text-3xl font-bold tracking-tight">Your Earnings</h1>
-        <p className="text-muted-foreground mt-1">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Your Earnings</h1>
+        <p className="text-muted-foreground mt-1 text-sm sm:text-base">
           Track your earnings and manage withdrawal requests
         </p>
       </motion.div>
 
       {/* Stats Grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         {statsConfig.map((stat, index) => {
           const Icon = stat.icon
           return (

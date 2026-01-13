@@ -59,7 +59,7 @@ export default function DestinationsPage() {
   return (
     <div className="pt-20">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-secondary via-secondary/95 to-primary/30 py-20 lg:py-28 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-secondary via-secondary/95 to-primary/30 py-16 sm:py-20 lg:py-28 overflow-hidden">
         {/* Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <motion.div
@@ -88,7 +88,7 @@ export default function DestinationsPage() {
           />
         </div>
 
-        <div className="container relative mx-auto px-4 lg:px-8">
+        <div className="container relative mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -104,7 +104,7 @@ export default function DestinationsPage() {
               <span className="text-white/90 text-sm font-medium">East Africa Awaits</span>
             </motion.div>
 
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white">
               Explore{" "}
               <span className="relative">
                 <span className="relative z-10 text-accent">East Africa</span>
@@ -112,12 +112,12 @@ export default function DestinationsPage() {
                   initial={{ scaleX: 0 }}
                   animate={{ scaleX: 1 }}
                   transition={{ duration: 0.8, delay: 0.5 }}
-                  className="absolute bottom-2 left-0 right-0 h-3 bg-accent/30 -z-0 origin-left"
+                  className="absolute bottom-1 sm:bottom-2 left-0 right-0 h-2 sm:h-3 bg-accent/30 -z-0 origin-left"
                 />
               </span>
             </h1>
 
-            <p className="mt-4 text-lg md:text-xl text-white/80 max-w-2xl">
+            <p className="mt-3 sm:mt-4 text-base sm:text-lg md:text-xl text-white/80 max-w-2xl">
               Discover the best safari destinations across Kenya, Tanzania, Uganda, and Rwanda.
               Each country offers unique wildlife experiences and breathtaking landscapes.
             </p>
@@ -127,7 +127,7 @@ export default function DestinationsPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
-              className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-6"
+              className="mt-6 sm:mt-8 lg:mt-10 grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6"
             >
               {stats.map((stat, index) => (
                 <motion.div
@@ -137,8 +137,8 @@ export default function DestinationsPage() {
                   transition={{ delay: 0.5 + index * 0.1 }}
                   className="text-center md:text-left"
                 >
-                  <div className="text-3xl md:text-4xl font-bold text-white">{stat.value}</div>
-                  <div className="text-sm text-white/60 mt-1">{stat.label}</div>
+                  <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">{stat.value}</div>
+                  <div className="text-xs sm:text-sm text-white/60 mt-1">{stat.label}</div>
                 </motion.div>
               ))}
             </motion.div>
@@ -147,26 +147,26 @@ export default function DestinationsPage() {
       </section>
 
       {/* Destinations Grid */}
-      <section className="container mx-auto px-4 lg:px-8 py-16 lg:py-24">
+      <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-24">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-12"
+          className="text-center mb-8 sm:mb-12"
         >
-          <span className="text-primary font-semibold text-sm uppercase tracking-wider">
+          <span className="text-primary font-semibold text-xs sm:text-sm uppercase tracking-wider">
             Popular Destinations
           </span>
-          <h2 className="mt-2 text-3xl md:text-4xl font-bold tracking-tight">
+          <h2 className="mt-2 text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">
             Choose Your Safari Destination
           </h2>
-          <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
+          <p className="mt-3 sm:mt-4 text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto">
             Each destination offers unique experiences, from the Great Migration to mountain gorilla trekking
           </p>
         </motion.div>
 
-        <div className="grid gap-8 md:grid-cols-2">
+        <div className="grid gap-6 sm:gap-8 md:grid-cols-2">
           {DESTINATIONS.map((destination, index) => (
             <motion.div
               key={destination.slug}
@@ -181,7 +181,7 @@ export default function DestinationsPage() {
                   transition={{ duration: 0.3 }}
                 >
                   <Card className="overflow-hidden group border-border/50 hover:border-primary/30 hover:shadow-premium-lg transition-all duration-500">
-                    <div className="relative h-72 lg:h-80 overflow-hidden">
+                    <div className="relative h-64 sm:h-72 lg:h-80 overflow-hidden">
                       <Image
                         src={destination.image}
                         alt={destination.name}
@@ -195,20 +195,20 @@ export default function DestinationsPage() {
                         {destination.tourCount} Tours
                       </Badge>
 
-                      <div className="absolute bottom-0 left-0 right-0 p-6 lg:p-8">
-                        <div className="flex items-center gap-2 text-white/80 text-sm mb-3">
-                          <MapPin className="h-4 w-4" />
+                      <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 lg:p-8">
+                        <div className="flex items-center gap-2 text-white/80 text-xs sm:text-sm mb-2 sm:mb-3">
+                          <MapPin className="h-3 w-3 sm:h-4 sm:w-4" />
                           East Africa
                         </div>
-                        <h2 className="text-3xl lg:text-4xl font-bold text-white mb-2">
+                        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-1 sm:mb-2">
                           {destination.name}
                         </h2>
-                        <p className="text-white/90 text-lg">
+                        <p className="text-white/90 text-sm sm:text-base lg:text-lg">
                           {destination.description}
                         </p>
                       </div>
                     </div>
-                    <CardContent className="p-6 lg:p-8">
+                    <CardContent className="p-5 sm:p-6 lg:p-8">
                       <div className="flex flex-wrap gap-2 mb-6">
                         {destination.highlights.map((highlight) => (
                           <Badge
@@ -237,8 +237,8 @@ export default function DestinationsPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 lg:py-24 bg-gradient-to-r from-primary/5 via-accent/5 to-secondary/5">
-        <div className="container mx-auto px-4 lg:px-8">
+      <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-r from-primary/5 via-accent/5 to-secondary/5">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -249,18 +249,18 @@ export default function DestinationsPage() {
               <Sparkles className="h-4 w-4 text-primary" />
               <span className="text-sm font-medium text-primary">Can't Decide?</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight mb-3 sm:mb-4">
               Let Us Help You Choose
             </h2>
-            <p className="text-muted-foreground text-lg mb-8">
+            <p className="text-muted-foreground text-base sm:text-lg mb-6 sm:mb-8">
               Our travel experts can help you find the perfect destination based on your interests,
               budget, and travel dates.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="h-12 px-8 shadow-glow">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+              <Button size="lg" className="h-12 px-6 sm:px-8 w-full sm:w-auto shadow-glow">
                 <Link href="/contact">Talk to an Expert</Link>
               </Button>
-              <Button size="lg" variant="outline" className="h-12 px-8">
+              <Button size="lg" variant="outline" className="h-12 px-6 sm:px-8 w-full sm:w-auto">
                 <Link href="/tours">Browse All Tours</Link>
               </Button>
             </div>

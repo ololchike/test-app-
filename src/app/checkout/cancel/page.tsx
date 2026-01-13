@@ -91,7 +91,7 @@ function PaymentCancelContent() {
   const colors = colorClasses[reasonDetails.color as keyof typeof colorClasses]
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/30 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/30 py-4 sm:py-8">
       {/* Background Shapes */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 -left-20 w-80 h-80 bg-orange-500/5 rounded-full blur-3xl" />
@@ -102,40 +102,40 @@ function PaymentCancelContent() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative z-10"
+        className="relative z-10 w-full"
       >
         <Card className="max-w-2xl w-full mx-4 border-border/50 shadow-premium overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-transparent to-amber-500/5" />
 
-          <CardHeader className="text-center relative pb-2 pt-8">
+          <CardHeader className="text-center relative pb-2 pt-6 sm:pt-8">
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: "spring", duration: 0.6 }}
-              className={`mx-auto w-24 h-24 rounded-2xl bg-gradient-to-br ${colors.bg} flex items-center justify-center mb-4`}
+              className={`mx-auto w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br ${colors.bg} flex items-center justify-center mb-3 sm:mb-4`}
             >
-              <Icon className={`h-14 w-14 ${colors.icon}`} />
+              <Icon className={`h-10 w-10 sm:h-14 sm:w-14 ${colors.icon}`} />
             </motion.div>
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <CardTitle className="text-3xl font-bold">{reasonDetails.title}</CardTitle>
+              <CardTitle className="text-2xl sm:text-3xl font-bold">{reasonDetails.title}</CardTitle>
             </motion.div>
           </CardHeader>
 
-          <CardContent className="space-y-6 relative pb-8">
+          <CardContent className="space-y-4 sm:space-y-6 relative pb-6 sm:pb-8">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
               className="text-center space-y-2"
             >
-              <p className="text-lg text-muted-foreground">
+              <p className="text-base sm:text-lg text-muted-foreground">
                 {reasonDetails.message}
               </p>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 Your booking is still reserved and no charges were made.
               </p>
             </motion.div>
@@ -146,18 +146,18 @@ function PaymentCancelContent() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="space-y-4"
+              className="space-y-3 sm:space-y-4"
             >
-              <h3 className="font-semibold text-lg flex items-center gap-2">
-                <HelpCircle className="h-5 w-5 text-primary" />
+              <h3 className="font-semibold text-base sm:text-lg flex items-center gap-2">
+                <HelpCircle className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                 What happened?
               </h3>
-              <div className="space-y-3 text-muted-foreground">
-                <p className="text-sm">
+              <div className="space-y-2 sm:space-y-3 text-muted-foreground">
+                <p className="text-xs sm:text-sm">
                   The payment process was interrupted or cancelled before completion.
                   Your booking has not been confirmed and will remain in pending status.
                 </p>
-                <p className="text-sm">
+                <p className="text-xs sm:text-sm">
                   Don&apos;t worry - you can try again at any time, and your booking details are still saved.
                 </p>
               </div>
@@ -169,26 +169,26 @@ function PaymentCancelContent() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="space-y-4"
+              className="space-y-3 sm:space-y-4"
             >
-              <h3 className="font-semibold flex items-center gap-2">
-                <RefreshCw className="h-5 w-5 text-primary" />
+              <h3 className="font-semibold text-sm sm:text-base flex items-center gap-2">
+                <RefreshCw className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                 Next Steps
               </h3>
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 {bookingId && (
                   <motion.div
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.6 }}
-                    className="flex items-start gap-4 p-4 rounded-xl bg-primary/5 border border-primary/10"
+                    className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl bg-primary/5 border border-primary/10"
                   >
-                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <ArrowLeftIcon className="h-5 w-5 text-primary" />
+                    <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <ArrowLeftIcon className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                     </div>
-                    <div className="flex-1">
-                      <p className="font-medium">Try Payment Again</p>
-                      <p className="text-sm text-muted-foreground mt-1">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm sm:text-base">Try Payment Again</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                         Return to checkout and complete your payment using the same or a different payment method
                       </p>
                     </div>
@@ -199,14 +199,14 @@ function PaymentCancelContent() {
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.7 }}
-                  className="flex items-start gap-4 p-4 rounded-xl bg-muted/50 border border-border/50"
+                  className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl bg-muted/50 border border-border/50"
                 >
-                  <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
-                    <MailIcon className="h-5 w-5 text-muted-foreground" />
+                  <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                    <MailIcon className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
                   </div>
-                  <div className="flex-1">
-                    <p className="font-medium">Need Help?</p>
-                    <p className="text-sm text-muted-foreground mt-1">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm sm:text-base">Need Help?</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                       Contact our support team if you&apos;re experiencing issues or have questions about your booking
                     </p>
                   </div>
@@ -218,14 +218,14 @@ function PaymentCancelContent() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 }}
-              className="flex flex-col sm:flex-row gap-3 pt-4"
+              className="flex flex-col sm:flex-row gap-3 pt-2 sm:pt-4"
             >
               {bookingId ? (
                 <>
                   <Button
                     asChild
                     size="lg"
-                    className="flex-1 rounded-xl bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg"
+                    className="w-full sm:flex-1 h-11 sm:h-12 text-sm sm:text-base rounded-xl bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg"
                   >
                     <Link href={`/checkout/${bookingId}`}>
                       <ArrowLeftIcon className="h-4 w-4 mr-2" />
@@ -236,7 +236,7 @@ function PaymentCancelContent() {
                     variant="outline"
                     asChild
                     size="lg"
-                    className="flex-1 rounded-xl border-border/50 hover:bg-muted/50"
+                    className="w-full sm:flex-1 h-11 sm:h-12 text-sm sm:text-base rounded-xl border-border/50 hover:bg-muted/50"
                   >
                     <Link href="/support">
                       <MailIcon className="h-4 w-4 mr-2" />
@@ -249,7 +249,7 @@ function PaymentCancelContent() {
                   <Button
                     asChild
                     size="lg"
-                    className="flex-1 rounded-xl bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg"
+                    className="w-full sm:flex-1 h-11 sm:h-12 text-sm sm:text-base rounded-xl bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg"
                   >
                     <Link href="/tours">Browse Tours</Link>
                   </Button>
@@ -257,7 +257,7 @@ function PaymentCancelContent() {
                     variant="outline"
                     asChild
                     size="lg"
-                    className="flex-1 rounded-xl border-border/50 hover:bg-muted/50"
+                    className="w-full sm:flex-1 h-11 sm:h-12 text-sm sm:text-base rounded-xl border-border/50 hover:bg-muted/50"
                   >
                     <Link href="/support">
                       <MailIcon className="h-4 w-4 mr-2" />
@@ -272,16 +272,16 @@ function PaymentCancelContent() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.9 }}
-              className="text-center pt-6 border-t border-border/50"
+              className="text-center pt-4 sm:pt-6 border-t border-border/50"
             >
-              <div className="flex items-center justify-center gap-2 text-amber-600 mb-3">
-                <Clock className="h-4 w-4" />
+              <div className="flex items-center justify-center gap-2 text-amber-600 mb-2 sm:mb-3">
+                <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 <span className="text-xs font-medium">Booking Reserved</span>
               </div>
-              <p className="text-xs text-muted-foreground mb-4">
+              <p className="text-xs text-muted-foreground mb-3 sm:mb-4">
                 Your booking will be held for 24 hours. After that, it may be released if payment is not completed.
               </p>
-              <Button variant="ghost" size="sm" asChild className="text-muted-foreground hover:text-foreground">
+              <Button variant="ghost" size="sm" asChild className="text-xs sm:text-sm text-muted-foreground hover:text-foreground">
                 <Link href="/tours">Browse More Tours</Link>
               </Button>
             </motion.div>

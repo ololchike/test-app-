@@ -193,7 +193,7 @@ export default function ConfirmationPage() {
   const isConfirmed = booking.status === "CONFIRMED" && booking.paymentStatus === "COMPLETED"
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30 py-8 relative">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30 py-4 sm:py-8 relative">
       {/* Background Shapes */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 -left-40 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl" />
@@ -201,27 +201,27 @@ export default function ConfirmationPage() {
         <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-primary/5 rounded-full blur-3xl" />
       </div>
 
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="max-w-3xl mx-auto space-y-6">
+      <div className="container mx-auto px-4 sm:px-6 relative z-10">
+        <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6">
           {/* Success Header */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center space-y-4"
+            className="text-center space-y-3 sm:space-y-4"
           >
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: "spring", duration: 0.6 }}
               className={cn(
-                "inline-flex items-center justify-center w-24 h-24 rounded-2xl",
+                "inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 rounded-2xl",
                 isConfirmed
                   ? "bg-gradient-to-br from-emerald-500/20 to-teal-500/20"
                   : "bg-gradient-to-br from-amber-500/20 to-orange-500/20"
               )}
             >
               <CheckCircle className={cn(
-                "h-12 w-12",
+                "h-10 w-10 sm:h-12 sm:w-12",
                 isConfirmed ? "text-emerald-600" : "text-amber-600"
               )} />
             </motion.div>
@@ -230,10 +230,10 @@ export default function ConfirmationPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <h1 className="text-3xl font-bold">
+              <h1 className="text-2xl sm:text-3xl font-bold">
                 {isConfirmed ? "Booking Confirmed!" : "Booking Received"}
               </h1>
-              <p className="text-muted-foreground mt-2">
+              <p className="text-sm sm:text-base text-muted-foreground mt-2">
                 {isConfirmed
                   ? "Your safari adventure has been booked successfully."
                   : "Your booking is being processed."}
@@ -249,13 +249,13 @@ export default function ConfirmationPage() {
           >
             <Card className="border-border/50 shadow-premium overflow-hidden relative">
               <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-secondary/5 pointer-events-none" />
-              <CardContent className="py-6 relative z-10">
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <CardContent className="py-4 sm:py-6 relative z-10">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
                   <div className="text-center sm:text-left">
-                    <p className="text-sm text-muted-foreground">Booking Reference</p>
-                    <p className="text-2xl font-mono font-bold mt-1">{booking.bookingReference}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">Booking Reference</p>
+                    <p className="text-xl sm:text-2xl font-mono font-bold mt-1">{booking.bookingReference}</p>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2 justify-center">
                     <Badge
                       variant={isConfirmed ? "default" : "secondary"}
                       className={cn(
@@ -287,17 +287,17 @@ export default function ConfirmationPage() {
             transition={{ delay: 0.2 }}
           >
             <Card className="border-border/50 shadow-premium hover:border-primary/30 transition-all duration-300">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
-                    <Sparkles className="h-4 w-4 text-white" />
+              <CardHeader className="pb-3 sm:pb-6">
+                <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+                  <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
+                    <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
                   </div>
                   Trip Details
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex gap-4">
-                  <div className="w-28 h-28 rounded-xl overflow-hidden flex-shrink-0 border border-border/50">
+                <div className="flex gap-3 sm:gap-4">
+                  <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-xl overflow-hidden flex-shrink-0 border border-border/50">
                     <Image
                       src={booking.tour.coverImage}
                       alt={booking.tour.title}
@@ -306,14 +306,14 @@ export default function ConfirmationPage() {
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <div className="flex-1 space-y-2">
-                    <h3 className="font-semibold text-lg">{booking.tour.title}</h3>
-                    <p className="text-sm text-muted-foreground flex items-center gap-1.5">
-                      <MapPin className="h-4 w-4" />
-                      {booking.tour.destination}
+                  <div className="flex-1 space-y-1.5 sm:space-y-2 min-w-0">
+                    <h3 className="font-semibold text-sm sm:text-lg">{booking.tour.title}</h3>
+                    <p className="text-xs sm:text-sm text-muted-foreground flex items-center gap-1.5">
+                      <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+                      <span className="truncate">{booking.tour.destination}</span>
                     </p>
-                    <p className="text-sm text-muted-foreground flex items-center gap-1.5">
-                      <Clock className="h-4 w-4" />
+                    <p className="text-xs sm:text-sm text-muted-foreground flex items-center gap-1.5">
+                      <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
                       {booking.tour.durationDays} days, {booking.tour.durationNights} nights
                     </p>
                   </div>
@@ -321,26 +321,26 @@ export default function ConfirmationPage() {
 
                 <Separator className="bg-border/50" />
 
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
-                    <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                      <Calendar className="h-5 w-5 text-blue-600" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-xl bg-muted/50">
+                    <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
+                      <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <p className="text-xs text-muted-foreground">Travel Dates</p>
-                      <p className="font-medium">
+                      <p className="text-sm sm:text-base font-medium">
                         {format(new Date(booking.startDate), "MMM d")} -{" "}
                         {format(new Date(booking.endDate), "MMM d, yyyy")}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
-                    <div className="h-10 w-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                      <Users className="h-5 w-5 text-purple-600" />
+                  <div className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-xl bg-muted/50">
+                    <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">
+                      <Users className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Travelers</p>
-                      <p className="font-medium">
+                      <p className="text-sm sm:text-base font-medium">
                         {booking.adults} adult{booking.adults > 1 ? "s" : ""}
                         {booking.children > 0 && `, ${booking.children} child${booking.children > 1 ? "ren" : ""}`}
                       </p>
@@ -405,9 +405,9 @@ export default function ConfirmationPage() {
 
                 <Separator className="bg-border/50" />
 
-                <div className="flex justify-between items-center p-4 rounded-xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20">
-                  <span className="text-lg font-semibold">Total Paid</span>
-                  <span className="text-2xl font-bold text-emerald-600">
+                <div className="flex justify-between items-center p-3 sm:p-4 rounded-xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20">
+                  <span className="text-base sm:text-lg font-semibold">Total Paid</span>
+                  <span className="text-xl sm:text-2xl font-bold text-emerald-600">
                     ${booking.totalAmount.toLocaleString()}
                   </span>
                 </div>
@@ -422,16 +422,16 @@ export default function ConfirmationPage() {
             transition={{ delay: 0.3 }}
           >
             <Card className="border-border/50 shadow-premium hover:border-primary/30 transition-all duration-300">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-                    <Mail className="h-4 w-4 text-white" />
+              <CardHeader className="pb-3 sm:pb-6">
+                <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+                  <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                    <Mail className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
                   </div>
                   Contact Information
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid sm:grid-cols-2 gap-4">
+              <CardContent className="space-y-3 sm:space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
                     <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
                       <Mail className="h-5 w-5 text-muted-foreground" />
@@ -507,10 +507,10 @@ export default function ConfirmationPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="flex flex-col sm:flex-row gap-4 relative z-20"
+            className="flex flex-col sm:flex-row gap-3 sm:gap-4 relative z-20"
           >
             <Button
-              className="flex-1 h-12 rounded-xl border-border/50 hover:bg-muted/50"
+              className="w-full sm:flex-1 h-11 sm:h-12 text-sm sm:text-base rounded-xl border-border/50 hover:bg-muted/50"
               variant="outline"
               onClick={handleDownloadItinerary}
               disabled={isDownloading || !booking}
@@ -528,7 +528,7 @@ export default function ConfirmationPage() {
               )}
             </Button>
             <Button
-              className="flex-1 h-12 rounded-xl bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg"
+              className="w-full sm:flex-1 h-11 sm:h-12 text-sm sm:text-base rounded-xl bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg"
               asChild
             >
               <Link href="/dashboard/bookings">View My Bookings</Link>

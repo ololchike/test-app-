@@ -11,13 +11,13 @@ export default function PrivacyPolicyPage() {
 
       <main className="flex-1">
         {/* Header */}
-        <section className="bg-secondary py-16 lg:py-20">
-          <div className="container mx-auto px-4 lg:px-8">
+        <section className="bg-secondary py-12 sm:py-16 lg:py-20">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl mx-auto text-center">
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
                 <Shield className="h-8 w-8 text-primary" />
               </div>
-              <h1 className="mt-6 text-4xl font-bold tracking-tight sm:text-5xl">
+              <h1 className="mt-4 sm:mt-6 text-3xl sm:text-4xl font-bold tracking-tight lg:text-5xl">
                 Privacy Policy
               </h1>
               <p className="mt-4 text-muted-foreground">
@@ -28,8 +28,8 @@ export default function PrivacyPolicyPage() {
         </section>
 
         {/* Content */}
-        <section className="py-16 lg:py-24">
-          <div className="container mx-auto px-4 lg:px-8">
+        <section className="py-12 sm:py-16 lg:py-24">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-4xl prose prose-slate">
               <div className="space-y-8">
                 <div>

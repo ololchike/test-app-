@@ -62,14 +62,14 @@ export default function ForgotPasswordPage() {
       <div className="space-y-6">
         <div className="space-y-2">
           <div className="flex justify-center mb-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-              <CheckCircle className="h-8 w-8 text-[#16a34a]" />
+            <div className="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-green-100">
+              <CheckCircle className="h-6 w-6 sm:h-8 sm:w-8 text-[#16a34a]" />
             </div>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-center">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-center">
             Check your email
           </h1>
-          <p className="text-muted-foreground text-center">
+          <p className="text-sm sm:text-base text-muted-foreground text-center">
             If an account exists with the email address you provided, we&apos;ve sent
             password reset instructions to that email.
           </p>
@@ -105,8 +105,8 @@ export default function ForgotPasswordPage() {
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <h1 className="text-2xl font-bold tracking-tight">Forgot password?</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Forgot password?</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">
           Enter your email address and we&apos;ll send you a link to reset your password
         </p>
       </div>

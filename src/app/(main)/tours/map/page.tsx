@@ -114,16 +114,16 @@ function MapSearchContent() {
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)]">
       {/* Header */}
-      <div className="border-b bg-background px-4 py-3">
-        <div className="container mx-auto flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
+      <div className="border-b bg-background px-3 sm:px-4 py-2 sm:py-3">
+        <div className="container mx-auto flex items-center justify-between gap-2 sm:gap-4">
+          <div className="flex items-center gap-1 sm:gap-2">
             <Link href="/tours">
-              <Button variant="ghost" size="sm">
-                <ChevronLeft className="h-4 w-4 mr-1" />
-                Back to Tours
+              <Button variant="ghost" size="sm" className="h-8 sm:h-9 px-2 sm:px-3">
+                <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1" />
+                <span className="hidden sm:inline">Back to Tours</span>
               </Button>
             </Link>
-            <h1 className="text-lg font-semibold">Explore Tours on Map</h1>
+            <h1 className="text-sm sm:text-base lg:text-lg font-semibold">Explore Tours on Map</h1>
           </div>
 
           <div className="flex items-center gap-2">
@@ -283,7 +283,7 @@ function MapSearchContent() {
       <div className="flex-1 flex overflow-hidden">
         {/* Tour List Sidebar */}
         {showList && (
-          <div className="w-full md:w-96 border-r bg-background overflow-y-auto">
+          <div className="w-full md:w-96 lg:w-[400px] border-r bg-background overflow-y-auto">
             <div className="p-4 border-b sticky top-0 bg-background z-10">
               <p className="text-sm text-muted-foreground">
                 {isLoading

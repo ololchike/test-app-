@@ -134,13 +134,13 @@ export default function AdminReviewsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Review Management</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">Review Management</h1>
         <p className="text-muted-foreground mt-2">
           Moderate and manage tour reviews
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
         <Card
           className={`cursor-pointer transition-all hover:shadow-lg ${
             approvalFilter === "all" ? "ring-2 ring-primary" : ""
@@ -237,7 +237,7 @@ export default function AdminReviewsPage() {
         <CardHeader>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <CardTitle>Reviews</CardTitle>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
               <div className="relative flex-1 sm:w-80">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -265,7 +265,8 @@ export default function AdminReviewsPage() {
             </div>
           ) : (
             <>
-              <Table>
+              <div className="overflow-x-auto">
+                <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Reviewer</TableHead>
@@ -384,9 +385,10 @@ export default function AdminReviewsPage() {
                   ))}
                 </TableBody>
               </Table>
+              </div>
 
               {totalPages > 1 && (
-                <div className="flex items-center justify-between mt-4">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4">
                   <p className="text-sm text-muted-foreground">
                     Page {page} of {totalPages}
                   </p>

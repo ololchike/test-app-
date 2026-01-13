@@ -115,7 +115,7 @@ export default function ContactPage() {
   return (
     <div className="pt-20">
       {/* Hero Header */}
-      <section className="relative bg-gradient-to-br from-secondary via-secondary/95 to-primary/30 py-20 lg:py-28 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-secondary via-secondary/95 to-primary/30 py-16 sm:py-20 lg:py-28 overflow-hidden">
         {/* Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <motion.div
@@ -130,7 +130,7 @@ export default function ContactPage() {
           />
         </div>
 
-        <div className="container relative mx-auto px-4 lg:px-8">
+        <div className="container relative mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -147,7 +147,7 @@ export default function ContactPage() {
               <span className="text-white/90 text-sm font-medium">We're Here to Help</span>
             </motion.div>
 
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white">
               Get in{" "}
               <span className="relative">
                 <span className="relative z-10 text-accent">Touch</span>
@@ -155,11 +155,11 @@ export default function ContactPage() {
                   initial={{ scaleX: 0 }}
                   animate={{ scaleX: 1 }}
                   transition={{ duration: 0.8, delay: 0.5 }}
-                  className="absolute bottom-2 left-0 right-0 h-3 bg-accent/30 -z-0 origin-left"
+                  className="absolute bottom-1 sm:bottom-2 left-0 right-0 h-2 sm:h-3 bg-accent/30 -z-0 origin-left"
                 />
               </span>
             </h1>
-            <p className="mt-6 text-lg md:text-xl text-white/80 max-w-2xl mx-auto">
+            <p className="mt-4 sm:mt-6 text-base sm:text-lg md:text-xl text-white/80 max-w-2xl mx-auto">
               Have questions about your safari adventure? We're here to help.
               Send us a message and we'll respond within 24 hours.
             </p>
@@ -168,9 +168,9 @@ export default function ContactPage() {
       </section>
 
       {/* Contact Info Cards */}
-      <section className="py-12 -mt-16 relative z-10">
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="grid gap-6 md:grid-cols-3 max-w-4xl mx-auto">
+      <section className="py-8 sm:py-12 -mt-12 sm:-mt-16 relative z-10">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-4 sm:gap-6 md:grid-cols-3 max-w-4xl mx-auto">
             {contactInfo.map((info, index) => (
               <motion.div
                 key={info.title}
@@ -205,9 +205,9 @@ export default function ContactPage() {
       </section>
 
       {/* Contact Form and Info */}
-      <section className="py-16 lg:py-24">
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="grid gap-8 lg:grid-cols-3 max-w-6xl mx-auto">
+      <section className="py-12 sm:py-16 lg:py-24">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-6 sm:gap-8 lg:grid-cols-3 max-w-6xl mx-auto">
             {/* Contact Form */}
             <motion.div
               initial={{ opacity: 0, x: -30 }}
@@ -337,7 +337,7 @@ export default function ContactPage() {
                         type="submit"
                         size="lg"
                         disabled={isSubmitting}
-                        className="h-12 px-8 shadow-glow"
+                        className="h-12 px-8 w-full sm:w-auto shadow-glow"
                       >
                         {isSubmitting ? (
                           <>
@@ -426,8 +426,8 @@ export default function ContactPage() {
       </section>
 
       {/* FAQ Teaser */}
-      <section className="py-16 lg:py-24 bg-gradient-to-r from-primary/5 via-accent/5 to-secondary/5">
-        <div className="container mx-auto px-4 lg:px-8">
+      <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-r from-primary/5 via-accent/5 to-secondary/5">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -438,10 +438,10 @@ export default function ContactPage() {
               <Sparkles className="h-4 w-4 text-primary" />
               <span className="text-sm font-medium text-primary">Quick Answers</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">
               Looking for Quick Answers?
             </h2>
-            <p className="mt-4 text-muted-foreground text-lg">
+            <p className="mt-3 sm:mt-4 text-muted-foreground text-base sm:text-lg">
               Check out our FAQ page for immediate answers to common questions
               about booking, payments, cancellations, and more.
             </p>

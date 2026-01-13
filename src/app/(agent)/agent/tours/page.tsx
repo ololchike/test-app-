@@ -109,12 +109,12 @@ export default function AgentToursPage() {
           <Skeleton className="h-8 w-32" />
           <Skeleton className="h-10 w-32" />
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
           {[...Array(4)].map((_, i) => (
             <Skeleton key={i} className="h-24" />
           ))}
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {[...Array(6)].map((_, i) => (
             <Skeleton key={i} className="h-64" />
           ))}
@@ -128,12 +128,12 @@ export default function AgentToursPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">My Tours</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">My Tours</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">
             Manage and track your tour listings
           </p>
         </div>
-        <Button asChild>
+        <Button asChild className="w-full sm:w-auto">
           <Link href="/agent/tours/new">
             <Plus className="mr-2 h-4 w-4" />
             Create Tour
@@ -142,7 +142,7 @@ export default function AgentToursPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
@@ -209,10 +209,10 @@ export default function AgentToursPage() {
           />
         </div>
         <Tabs value={statusFilter} onValueChange={setStatusFilter}>
-          <TabsList>
-            <TabsTrigger value="all">All ({stats.total})</TabsTrigger>
-            <TabsTrigger value="active">Active ({stats.active})</TabsTrigger>
-            <TabsTrigger value="draft">Draft ({stats.draft})</TabsTrigger>
+          <TabsList className="flex-wrap h-auto">
+            <TabsTrigger value="all" className="text-xs sm:text-sm">All ({stats.total})</TabsTrigger>
+            <TabsTrigger value="active" className="text-xs sm:text-sm">Active ({stats.active})</TabsTrigger>
+            <TabsTrigger value="draft" className="text-xs sm:text-sm">Draft ({stats.draft})</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
@@ -241,7 +241,7 @@ export default function AgentToursPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {filteredTours.map((tour) => (
             <TourCard key={tour.id} tour={tour} />
           ))}

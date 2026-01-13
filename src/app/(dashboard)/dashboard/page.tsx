@@ -116,7 +116,7 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8 animate-fade-up">
       {/* Welcome Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-secondary via-secondary/95 to-primary/30 p-8 text-white">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-secondary via-secondary/95 to-primary/30 p-4 sm:p-6 lg:p-8 text-white">
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -top-20 -right-20 w-80 h-80 bg-white/10 rounded-full blur-3xl" />
           <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-accent/20 rounded-full blur-3xl" />
@@ -126,16 +126,16 @@ export default async function DashboardPage() {
             <Sparkles className="h-4 w-4" />
             <span className="text-sm font-medium">{greeting}</span>
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight">
             Welcome back, {firstName}!
           </h1>
-          <p className="text-white/80 mt-2 max-w-xl">
+          <p className="text-white/80 mt-2 max-w-xl text-sm sm:text-base">
             Here&apos;s what&apos;s happening with your safari adventures
           </p>
 
           {stats.daysUntilNextTrip && (
-            <div className="mt-6 inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20">
-              <Plane className="h-5 w-5 text-accent" />
+            <div className="mt-4 sm:mt-6 inline-flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-sm sm:text-base">
+              <Plane className="h-4 w-4 sm:h-5 sm:w-5 text-accent" />
               <span className="font-medium">
                 Your next adventure is in <span className="text-accent font-bold">{stats.daysUntilNextTrip} days</span>
               </span>
@@ -214,7 +214,7 @@ export default async function DashboardPage() {
               </div>
             </CardHeader>
             <CardContent className="relative">
-              <div className="text-3xl font-bold">{stat.value}</div>
+              <div className="text-2xl sm:text-3xl font-bold">{stat.value}</div>
               <p className="text-xs text-muted-foreground mt-1">
                 {stat.subtitle}
               </p>
@@ -226,15 +226,15 @@ export default async function DashboardPage() {
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Upcoming Bookings */}
         <Card className="border-border/50 hover:shadow-premium transition-all duration-300">
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                 <Calendar className="h-5 w-5 text-primary" />
                 Upcoming Trips
               </CardTitle>
-              <CardDescription>Your scheduled safari adventures</CardDescription>
+              <CardDescription className="text-sm">Your scheduled safari adventures</CardDescription>
             </div>
-            <Button variant="ghost" size="sm" asChild className="hover:bg-primary/5 hover:text-primary">
+            <Button variant="ghost" size="sm" asChild className="hover:bg-primary/5 hover:text-primary w-full sm:w-auto">
               <Link href="/dashboard/bookings">
                 View all <ArrowRight className="ml-1 h-4 w-4" />
               </Link>
@@ -260,12 +260,12 @@ export default async function DashboardPage() {
                   key={booking.id}
                   href={`/booking/confirmation/${booking.id}`}
                   className={cn(
-                    "flex gap-4 p-4 rounded-xl border border-border/50 bg-card hover:bg-muted/50 hover:border-primary/30 hover:shadow-lg transition-all duration-300",
+                    "flex flex-col sm:flex-row gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl border border-border/50 bg-card hover:bg-muted/50 hover:border-primary/30 hover:shadow-lg transition-all duration-300",
                     "animate-fade-up"
                   )}
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  <div className="relative h-20 w-28 rounded-lg overflow-hidden shrink-0 bg-muted">
+                  <div className="relative h-48 sm:h-20 w-full sm:w-28 rounded-lg overflow-hidden shrink-0 bg-muted">
                     {booking.tour.coverImage && (
                       <Image
                         src={booking.tour.coverImage}
@@ -277,12 +277,12 @@ export default async function DashboardPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
-                      <h4 className="font-semibold line-clamp-1">
+                      <h4 className="font-semibold line-clamp-1 text-sm sm:text-base">
                         {booking.tour.title}
                       </h4>
                       <Badge
                         className={cn(
-                          "shrink-0",
+                          "shrink-0 text-xs",
                           booking.status === "CONFIRMED"
                             ? "bg-secondary/10 text-secondary border-secondary/20"
                             : "bg-amber-500/10 text-amber-600 border-amber-500/20"
@@ -294,7 +294,7 @@ export default async function DashboardPage() {
                     <p className="text-xs text-muted-foreground mt-1">
                       {booking.agent.businessName}
                     </p>
-                    <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-3 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-muted/50">
                         <Calendar className="h-3 w-3" />
                         {format(new Date(booking.startDate), "MMM d, yyyy")}
@@ -314,11 +314,11 @@ export default async function DashboardPage() {
         {/* Quick Actions */}
         <Card className="border-border/50 hover:shadow-premium transition-all duration-300">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
               <TrendingUp className="h-5 w-5 text-accent" />
               Quick Actions
             </CardTitle>
-            <CardDescription>Things you can do right now</CardDescription>
+            <CardDescription className="text-sm">Things you can do right now</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3">
             {[
@@ -379,17 +379,17 @@ export default async function DashboardPage() {
       {/* Recommended Tours */}
       {recommendedTours.length > 0 && (
         <Card className="border-border/50 hover:shadow-premium transition-all duration-300">
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                 <Star className="h-5 w-5 text-amber-500" />
                 Recommended for You
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-sm">
                 Based on your interests and past trips
               </CardDescription>
             </div>
-            <Button variant="ghost" size="sm" asChild className="hover:bg-primary/5 hover:text-primary">
+            <Button variant="ghost" size="sm" asChild className="hover:bg-primary/5 hover:text-primary w-full sm:w-auto">
               <Link href="/tours">
                 View all <ArrowRight className="ml-1 h-4 w-4" />
               </Link>

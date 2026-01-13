@@ -35,16 +35,16 @@ export default function ClientMessagesPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Messages</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Messages</h1>
+          <p className="text-muted-foreground mt-1 text-sm sm:text-base">
             Chat with tour operators
           </p>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>Configuration Required</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-lg sm:text-xl">Configuration Required</CardTitle>
+            <CardDescription className="text-sm">
               Real-time messaging requires Pusher to be configured
             </CardDescription>
           </CardHeader>
@@ -67,23 +67,23 @@ export default function ClientMessagesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Messages</h1>
-        <p className="text-muted-foreground mt-1">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Messages</h1>
+        <p className="text-muted-foreground mt-1 text-sm sm:text-base">
           Chat with tour operators about your bookings
         </p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 grid-cols-2 sm:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
               Unread Messages
             </CardTitle>
             <MessageSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{unreadCount}</div>
+            <div className="text-xl sm:text-2xl font-bold">{unreadCount}</div>
             <p className="text-xs text-muted-foreground mt-1">
               {unreadCount === 1 ? "New message" : "New messages"}
             </p>
@@ -92,28 +92,28 @@ export default function ClientMessagesPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
               Conversations
             </CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{activeConversations.length}</div>
+            <div className="text-xl sm:text-2xl font-bold">{activeConversations.length}</div>
             <p className="text-xs text-muted-foreground mt-1">
               With tour operators
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="col-span-2 sm:col-span-1">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
               Response Time
             </CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{"< 2 hrs"}</div>
+            <div className="text-xl sm:text-2xl font-bold">{"< 2 hrs"}</div>
             <p className="text-xs text-muted-foreground mt-1">
               Avg. operator response
             </p>

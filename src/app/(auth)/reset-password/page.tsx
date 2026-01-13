@@ -114,14 +114,14 @@ function ResetPasswordForm() {
       <div className="space-y-6">
         <div className="space-y-2">
           <div className="flex justify-center mb-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
-              <AlertCircle className="h-8 w-8 text-red-600" />
+            <div className="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-red-100">
+              <AlertCircle className="h-6 w-6 sm:h-8 sm:w-8 text-red-600" />
             </div>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-center">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-center">
             Invalid reset link
           </h1>
-          <p className="text-muted-foreground text-center">
+          <p className="text-sm sm:text-base text-muted-foreground text-center">
             This password reset link is invalid or has expired. Please request a new one.
           </p>
         </div>
@@ -149,14 +149,14 @@ function ResetPasswordForm() {
       <div className="space-y-6">
         <div className="space-y-2">
           <div className="flex justify-center mb-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-              <CheckCircle className="h-8 w-8 text-[#16a34a]" />
+            <div className="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-green-100">
+              <CheckCircle className="h-6 w-6 sm:h-8 sm:w-8 text-[#16a34a]" />
             </div>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-center">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-center">
             Password reset successful!
           </h1>
-          <p className="text-muted-foreground text-center">
+          <p className="text-sm sm:text-base text-muted-foreground text-center">
             Your password has been successfully reset. You can now sign in with your new password.
           </p>
         </div>
@@ -180,8 +180,8 @@ function ResetPasswordForm() {
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <h1 className="text-2xl font-bold tracking-tight">Reset your password</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Reset your password</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">
           Enter your new password below
         </p>
       </div>

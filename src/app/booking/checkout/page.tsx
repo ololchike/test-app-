@@ -358,45 +358,46 @@ function CheckoutContent() {
     <div className="min-h-screen bg-muted/30">
       {/* Header */}
       <div className="bg-background border-b sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" asChild>
+        <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
+          <div className="flex items-center gap-2 sm:gap-4">
+            <Button variant="ghost" size="sm" asChild className="h-8 sm:h-9">
               <Link href={`/tours/${checkoutData.tour.slug}`}>
                 <ChevronLeft className="h-4 w-4 mr-1" />
-                Back to tour
+                <span className="hidden sm:inline">Back to tour</span>
+                <span className="sm:hidden">Back</span>
               </Link>
             </Button>
             <div className="h-6 w-px bg-border" />
-            <h1 className="font-semibold">Complete your booking</h1>
+            <h1 className="font-semibold text-sm sm:text-base">Complete your booking</h1>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-3 gap-8">
+      <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
+        <div className="grid lg:grid-cols-3 gap-4 sm:gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Tour Summary Card */}
-            <div className="bg-background rounded-xl p-6 shadow-sm">
-              <h2 className="font-semibold text-lg mb-4">Trip Summary</h2>
-              <div className="flex gap-4">
-                <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
+            <div className="bg-background rounded-xl p-4 sm:p-6 shadow-sm">
+              <h2 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4">Trip Summary</h2>
+              <div className="flex gap-3 sm:gap-4">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden flex-shrink-0">
                   <img
                     src={checkoutData.tour.coverImage}
                     alt={checkoutData.tour.title}
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold">{checkoutData.tour.title}</h3>
-                  <p className="text-sm text-muted-foreground">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-sm sm:text-base">{checkoutData.tour.title}</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     {checkoutData.tour.durationDays} days / {checkoutData.tour.durationNights} nights
                   </p>
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                     {checkoutData.startDate && format(checkoutData.startDate, "MMM d")} -{" "}
                     {checkoutData.endDate && format(checkoutData.endDate, "MMM d, yyyy")}
                   </p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     {checkoutData.adults} adult{checkoutData.adults > 1 ? "s" : ""}
                     {checkoutData.children > 0 && `, ${checkoutData.children} child${checkoutData.children > 1 ? "ren" : ""}`}
                   </p>
@@ -406,38 +407,38 @@ function CheckoutContent() {
 
             {/* General Error Banner */}
             {formErrors.general && (
-              <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4 flex items-start gap-3" data-error="true">
-                <AlertCircle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+              <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-3 sm:p-4 flex items-start gap-2 sm:gap-3" data-error="true">
+                <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-destructive shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-medium text-destructive">Booking Failed</p>
-                  <p className="text-sm text-destructive/80">{formErrors.general}</p>
+                  <p className="font-medium text-sm sm:text-base text-destructive">Booking Failed</p>
+                  <p className="text-xs sm:text-sm text-destructive/80">{formErrors.general}</p>
                 </div>
               </div>
             )}
 
             {/* Contact Details */}
-            <div className="bg-background rounded-xl p-6 shadow-sm" data-error={formErrors.contact ? "true" : undefined}>
-              <h2 className="font-semibold text-lg mb-4">Contact Details</h2>
-              <p className="text-sm text-muted-foreground mb-4">
+            <div className="bg-background rounded-xl p-4 sm:p-6 shadow-sm" data-error={formErrors.contact ? "true" : undefined}>
+              <h2 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4">Contact Details</h2>
+              <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
                 We&apos;ll send your booking confirmation and updates to this contact.
               </p>
               <ContactForm contact={contact} onChange={setContact} errors={formErrors.contact} />
             </div>
 
             {/* Traveler Details */}
-            <div className="bg-background rounded-xl p-6 shadow-sm" data-error={formErrors.travelers ? "true" : undefined}>
-              <h2 className="font-semibold text-lg mb-4">Traveler Details</h2>
-              <p className="text-sm text-muted-foreground mb-4">
+            <div className="bg-background rounded-xl p-4 sm:p-6 shadow-sm" data-error={formErrors.travelers ? "true" : undefined}>
+              <h2 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4">Traveler Details</h2>
+              <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
                 Enter details for each traveler as they appear on their passport/ID.
               </p>
               <TravelerForm travelers={travelers} onChange={setTravelers} errors={formErrors.travelers} />
             </div>
 
             {/* Special Requests */}
-            <div className="bg-background rounded-xl p-6 shadow-sm">
-              <h2 className="font-semibold text-lg mb-4">Special Requests</h2>
+            <div className="bg-background rounded-xl p-4 sm:p-6 shadow-sm">
+              <h2 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4">Special Requests</h2>
               <textarea
-                className="w-full min-h-[100px] p-3 rounded-lg border bg-background resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full min-h-[100px] p-3 text-sm sm:text-base rounded-lg border bg-background resize-none focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="Any dietary requirements, accessibility needs, or special requests..."
                 value={contact.specialRequests}
                 onChange={(e) => setContact({ ...contact, specialRequests: e.target.value })}
@@ -448,9 +449,9 @@ function CheckoutContent() {
             </div>
           </div>
 
-          {/* Sidebar - Booking Summary */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-24">
+          {/* Sidebar - Booking Summary - Show on top for mobile */}
+          <div className="lg:col-span-1 order-first lg:order-none">
+            <div className="lg:sticky lg:top-24">
               <BookingSummary
                 tour={checkoutData.tour}
                 pricing={checkoutData.pricing}
@@ -463,24 +464,24 @@ function CheckoutContent() {
               />
 
               {/* Trust Indicators */}
-              <div className="mt-4 space-y-3">
-                <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                  <Shield className="h-4 w-4 text-green-600" />
+              <div className="mt-4 space-y-2 sm:space-y-3">
+                <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground">
+                  <Shield className="h-4 w-4 text-green-600 shrink-0" />
                   <span>Secure SSL encrypted payment</span>
                 </div>
-                <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                  <Clock className="h-4 w-4 text-blue-600" />
+                <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground">
+                  <Clock className="h-4 w-4 text-blue-600 shrink-0" />
                   <span>Free cancellation up to 30 days before</span>
                 </div>
-                <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                  <CreditCard className="h-4 w-4 text-purple-600" />
+                <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground">
+                  <CreditCard className="h-4 w-4 text-purple-600 shrink-0" />
                   <span>Pay with M-Pesa or Card</span>
                 </div>
               </div>
 
               {/* Confirm Button */}
               <Button
-                className="w-full mt-6"
+                className="w-full mt-4 sm:mt-6 h-12 sm:h-auto text-sm sm:text-base"
                 size="lg"
                 onClick={handleSubmit}
                 disabled={isSubmitting}
@@ -488,7 +489,7 @@ function CheckoutContent() {
                 {isSubmitting ? "Processing..." : `Confirm & Pay $${checkoutData.pricing.total.toLocaleString()}`}
               </Button>
 
-              <p className="text-xs text-center text-muted-foreground mt-3">
+              <p className="text-xs text-center text-muted-foreground mt-2 sm:mt-3">
                 By clicking confirm, you agree to our{" "}
                 <Link href="/terms" className="underline">Terms of Service</Link>
                 {" "}and{" "}

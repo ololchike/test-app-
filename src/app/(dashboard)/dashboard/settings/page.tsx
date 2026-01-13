@@ -131,8 +131,8 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-        <p className="text-muted-foreground mt-1">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Settings</h1>
+        <p className="text-muted-foreground mt-1 text-sm sm:text-base">
           Manage your account preferences
         </p>
       </div>
@@ -140,23 +140,23 @@ export default function SettingsPage() {
       {/* Appearance */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
             <Sun className="h-5 w-5" />
             Appearance
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-sm">
             Customize how SafariPlus looks on your device
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label>Theme</Label>
-            <div className="flex gap-2">
+            <Label className="text-sm">Theme</Label>
+            <div className="flex flex-wrap gap-2">
               <Button
                 variant={theme === "light" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setTheme("light")}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 text-xs sm:text-sm"
               >
                 <Sun className="h-4 w-4" />
                 Light
@@ -166,7 +166,7 @@ export default function SettingsPage() {
                 variant={theme === "dark" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setTheme("dark")}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 text-xs sm:text-sm"
               >
                 <Moon className="h-4 w-4" />
                 Dark
@@ -176,7 +176,7 @@ export default function SettingsPage() {
                 variant={theme === "system" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setTheme("system")}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 text-xs sm:text-sm"
               >
                 <Monitor className="h-4 w-4" />
                 System
@@ -190,16 +190,16 @@ export default function SettingsPage() {
       {/* Regional Settings */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
             <Globe className="h-5 w-5" />
             Regional Settings
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-sm">
             Set your preferred currency and language
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="currency" className="flex items-center gap-2">
                 <DollarSign className="h-4 w-4" />
@@ -256,19 +256,19 @@ export default function SettingsPage() {
       {/* Notification Settings */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
             <Bell className="h-5 w-5" />
             Notifications
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-sm">
             Manage how you receive updates and alerts
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label htmlFor="email-notifications">Email Notifications</Label>
-              <p className="text-sm text-muted-foreground">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="space-y-0.5 flex-1">
+              <Label htmlFor="email-notifications" className="text-sm">Email Notifications</Label>
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 Receive important updates about your bookings via email
               </p>
             </div>
@@ -283,10 +283,10 @@ export default function SettingsPage() {
 
           <Separator />
 
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label htmlFor="booking-reminders">Booking Reminders</Label>
-              <p className="text-sm text-muted-foreground">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="space-y-0.5 flex-1">
+              <Label htmlFor="booking-reminders" className="text-sm">Booking Reminders</Label>
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 Get reminders before your upcoming trips
               </p>
             </div>
@@ -301,10 +301,10 @@ export default function SettingsPage() {
 
           <Separator />
 
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label htmlFor="review-requests">Review Requests</Label>
-              <p className="text-sm text-muted-foreground">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="space-y-0.5 flex-1">
+              <Label htmlFor="review-requests" className="text-sm">Review Requests</Label>
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 Receive requests to review tours after completion
               </p>
             </div>
@@ -319,10 +319,10 @@ export default function SettingsPage() {
 
           <Separator />
 
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label htmlFor="marketing-emails">Marketing Emails</Label>
-              <p className="text-sm text-muted-foreground">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="space-y-0.5 flex-1">
+              <Label htmlFor="marketing-emails" className="text-sm">Marketing Emails</Label>
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 Receive promotional offers and special deals
               </p>
             </div>
@@ -340,51 +340,51 @@ export default function SettingsPage() {
       {/* Privacy & Security */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
             <Shield className="h-5 w-5" />
             Privacy & Security
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-sm">
             Manage your account security settings
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label>Change Password</Label>
-              <p className="text-sm text-muted-foreground">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="space-y-0.5 flex-1">
+              <Label className="text-sm">Change Password</Label>
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 Update your account password
               </p>
             </div>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="w-full sm:w-auto">
               Change Password
             </Button>
           </div>
 
           <Separator />
 
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label>Two-Factor Authentication</Label>
-              <p className="text-sm text-muted-foreground">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="space-y-0.5 flex-1">
+              <Label className="text-sm">Two-Factor Authentication</Label>
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 Add an extra layer of security to your account
               </p>
             </div>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="w-full sm:w-auto">
               Enable 2FA
             </Button>
           </div>
 
           <Separator />
 
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label className="text-destructive">Delete Account</Label>
-              <p className="text-sm text-muted-foreground">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="space-y-0.5 flex-1">
+              <Label className="text-destructive text-sm">Delete Account</Label>
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 Permanently delete your account and all data
               </p>
             </div>
-            <Button variant="destructive" size="sm">
+            <Button variant="destructive" size="sm" className="w-full sm:w-auto">
               Delete Account
             </Button>
           </div>
@@ -393,7 +393,7 @@ export default function SettingsPage() {
 
       {/* Save Button */}
       <div className="flex justify-end">
-        <Button onClick={handleSavePreferences} disabled={isSaving}>
+        <Button onClick={handleSavePreferences} disabled={isSaving} className="w-full sm:w-auto">
           {isSaving ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

@@ -287,9 +287,9 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
       <TourStructuredData tour={tour} slug={slug} />
       <div className="pt-16">
         {/* Breadcrumb */}
-        <div className="bg-gradient-to-r from-muted/50 to-transparent py-4 border-b border-border/30">
-        <div className="container mx-auto px-4 lg:px-8">
-          <nav className="flex items-center gap-2 text-sm">
+        <div className="bg-gradient-to-r from-muted/50 to-transparent py-3 sm:py-4 border-b border-border/30">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <nav className="flex items-center gap-2 text-xs sm:text-sm overflow-x-auto">
             <Link href="/" className="text-muted-foreground hover:text-primary transition-colors">
               Home
             </Link>
@@ -308,7 +308,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
       </div>
 
       {/* Image Gallery */}
-      <div className="container mx-auto px-4 lg:px-8 py-6">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
         <TourGallery images={tour.images} title={tour.title} />
       </div>
 
@@ -317,8 +317,8 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
 
       {/* Similar Tours Section */}
       {similarTours.length > 0 && (
-        <section className="py-16 bg-gradient-to-b from-muted/30 to-transparent">
-          <div className="container mx-auto px-4 lg:px-8">
+        <section className="py-12 sm:py-16 bg-gradient-to-b from-muted/30 to-transparent">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="mb-10">
               <span className="text-primary font-semibold text-sm uppercase tracking-wider">
                 Discover More
@@ -331,7 +331,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
               </p>
             </div>
 
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {similarTours.map((similarTour, index) => (
                 <TourCard key={similarTour.id} tour={similarTour} index={index} />
               ))}

@@ -40,23 +40,29 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    if (session.user.role !== "AGENT") {
+    const isAdmin = session.user.role === "ADMIN"
+    const isAgent = session.user.role === "AGENT"
+
+    if (!isAdmin && !isAgent) {
       return NextResponse.json(
-        { error: "Only agents can access this resource" },
+        { error: "Only agents or admins can access this resource" },
         { status: 403 }
       )
     }
 
-    // Find agent profile
-    const agent = await prisma.agent.findUnique({
-      where: { userId: session.user.id },
-    })
+    // Find agent profile (only for agents)
+    let agent = null
+    if (isAgent) {
+      agent = await prisma.agent.findUnique({
+        where: { userId: session.user.id },
+      })
 
-    if (!agent) {
-      return NextResponse.json(
-        { error: "Agent profile not found" },
-        { status: 404 }
-      )
+      if (!agent) {
+        return NextResponse.json(
+          { error: "Agent profile not found" },
+          { status: 404 }
+        )
+      }
     }
 
     // Fetch tour
@@ -73,8 +79,8 @@ export async function GET(
       return NextResponse.json({ error: "Tour not found" }, { status: 404 })
     }
 
-    // Verify ownership
-    if (tour.agentId !== agent.id) {
+    // Verify ownership (agents can only access their own tours, admins can access all)
+    if (isAgent && tour.agentId !== agent?.id) {
       return NextResponse.json(
         { error: "You don't have permission to access this tour" },
         { status: 403 }
@@ -133,26 +139,32 @@ export async function PUT(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    if (session.user.role !== "AGENT") {
+    const isAdmin = session.user.role === "ADMIN"
+    const isAgent = session.user.role === "AGENT"
+
+    if (!isAdmin && !isAgent) {
       return NextResponse.json(
-        { error: "Only agents can update tours" },
+        { error: "Only agents or admins can update tours" },
         { status: 403 }
       )
     }
 
-    // Find agent profile
-    const agent = await prisma.agent.findUnique({
-      where: { userId: session.user.id },
-    })
+    // Find agent profile (only for agents)
+    let agent = null
+    if (isAgent) {
+      agent = await prisma.agent.findUnique({
+        where: { userId: session.user.id },
+      })
 
-    if (!agent) {
-      return NextResponse.json(
-        { error: "Agent profile not found" },
-        { status: 404 }
-      )
+      if (!agent) {
+        return NextResponse.json(
+          { error: "Agent profile not found" },
+          { status: 404 }
+        )
+      }
     }
 
-    // Check tour exists and ownership
+    // Check tour exists
     const existingTour = await prisma.tour.findUnique({
       where: { id },
     })
@@ -161,7 +173,8 @@ export async function PUT(
       return NextResponse.json({ error: "Tour not found" }, { status: 404 })
     }
 
-    if (existingTour.agentId !== agent.id) {
+    // Verify ownership (agents can only update their own tours, admins can update all)
+    if (isAgent && existingTour.agentId !== agent?.id) {
       return NextResponse.json(
         { error: "You don't have permission to update this tour" },
         { status: 403 }
@@ -242,26 +255,32 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    if (session.user.role !== "AGENT") {
+    const isAdmin = session.user.role === "ADMIN"
+    const isAgent = session.user.role === "AGENT"
+
+    if (!isAdmin && !isAgent) {
       return NextResponse.json(
-        { error: "Only agents can delete tours" },
+        { error: "Only agents or admins can delete tours" },
         { status: 403 }
       )
     }
 
-    // Find agent profile
-    const agent = await prisma.agent.findUnique({
-      where: { userId: session.user.id },
-    })
+    // Find agent profile (only for agents)
+    let agent = null
+    if (isAgent) {
+      agent = await prisma.agent.findUnique({
+        where: { userId: session.user.id },
+      })
 
-    if (!agent) {
-      return NextResponse.json(
-        { error: "Agent profile not found" },
-        { status: 404 }
-      )
+      if (!agent) {
+        return NextResponse.json(
+          { error: "Agent profile not found" },
+          { status: 404 }
+        )
+      }
     }
 
-    // Check tour exists and ownership
+    // Check tour exists
     const existingTour = await prisma.tour.findUnique({
       where: { id },
       include: {
@@ -281,7 +300,8 @@ export async function DELETE(
       return NextResponse.json({ error: "Tour not found" }, { status: 404 })
     }
 
-    if (existingTour.agentId !== agent.id) {
+    // Verify ownership (agents can only delete their own tours, admins can delete all)
+    if (isAgent && existingTour.agentId !== agent?.id) {
       return NextResponse.json(
         { error: "You don't have permission to delete this tour" },
         { status: 403 }

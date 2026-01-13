@@ -155,8 +155,8 @@ function LoginForm() {
           <Sparkles className="h-3.5 w-3.5 text-primary" />
           <span className="text-xs font-medium text-primary">Welcome Back</span>
         </motion.div>
-        <h1 className="text-3xl font-bold tracking-tight">Sign in to your account</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Sign in to your account</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">
           Continue your safari adventure
         </p>
       </div>
@@ -169,14 +169,14 @@ function LoginForm() {
       >
         <Button
           variant="outline"
-          className="w-full h-12 rounded-xl border-border/50 hover:border-primary/30 hover:bg-primary/5 transition-all"
+          className="w-full h-11 sm:h-12 rounded-xl border-border/50 hover:border-primary/30 hover:bg-primary/5 transition-all text-sm sm:text-base"
           onClick={handleGoogleSignIn}
           disabled={isGoogleLoading || isLoading}
         >
           {isGoogleLoading ? (
-            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
           ) : (
-            <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24">
+            <svg className="mr-2 h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 24 24">
               <path
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                 fill="#4285F4"
@@ -230,7 +230,7 @@ function LoginForm() {
                       placeholder="you@example.com"
                       autoComplete="email"
                       disabled={isLoading || isGoogleLoading}
-                      className="h-12 rounded-xl border-border/50 focus:border-primary/50"
+                      className="h-11 sm:h-12 rounded-xl border-border/50 focus:border-primary/50"
                       {...field}
                     />
                   </FormControl>
@@ -260,7 +260,7 @@ function LoginForm() {
                         placeholder="Enter your password"
                         autoComplete="current-password"
                         disabled={isLoading || isGoogleLoading}
-                        className="h-12 rounded-xl border-border/50 focus:border-primary/50 pr-12"
+                        className="h-11 sm:h-12 rounded-xl border-border/50 focus:border-primary/50 pr-12"
                         {...field}
                       />
                       <Button
@@ -311,18 +311,18 @@ function LoginForm() {
 
             <Button
               type="submit"
-              className="w-full h-12 rounded-xl shadow-glow text-base font-semibold"
+              className="w-full h-11 sm:h-12 rounded-xl shadow-glow text-sm sm:text-base font-semibold"
               disabled={isLoading || isGoogleLoading}
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
                   Signing in...
                 </>
               ) : (
                 <>
                   Sign In
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
                 </>
               )}
             </Button>

@@ -142,11 +142,11 @@ export default function AdminUsersPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">User Management</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">User Management</h1>
         <p className="text-muted-foreground mt-2">Manage all platform users</p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4">
         <Card
           className={`cursor-pointer transition-all hover:shadow-lg ${
             roleFilter === "all" ? "ring-2 ring-primary" : ""
@@ -204,7 +204,7 @@ export default function AdminUsersPage() {
         <CardHeader>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <CardTitle>Users</CardTitle>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
               <div className="relative flex-1 sm:w-80">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -215,7 +215,7 @@ export default function AdminUsersPage() {
                   className="pl-9"
                 />
               </div>
-              <Button onClick={handleSearch} variant="secondary">
+              <Button onClick={handleSearch} variant="secondary" className="w-full sm:w-auto">
                 Search
               </Button>
             </div>
@@ -235,7 +235,8 @@ export default function AdminUsersPage() {
             </div>
           ) : (
             <>
-              <Table>
+              <div className="overflow-x-auto">
+                <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>User</TableHead>
@@ -337,9 +338,10 @@ export default function AdminUsersPage() {
                   ))}
                 </TableBody>
               </Table>
+              </div>
 
               {totalPages > 1 && (
-                <div className="flex items-center justify-between mt-4">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4">
                   <p className="text-sm text-muted-foreground">
                     Page {page} of {totalPages}
                   </p>

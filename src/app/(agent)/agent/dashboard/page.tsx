@@ -191,14 +191,14 @@ export default async function AgentDashboardPage() {
             <Sparkles className="h-3.5 w-3.5 text-primary" />
             <span className="text-xs font-medium text-primary">Agent Dashboard</span>
           </div>
-          <h1 className="text-3xl font-bold tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
             Welcome back, <span className="text-gradient">{firstName}</span>!
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-muted-foreground mt-1 text-sm sm:text-base">
             Here&apos;s what&apos;s happening with your tours today
           </p>
         </div>
-        <Button asChild className="shadow-glow">
+        <Button asChild className="shadow-glow w-full sm:w-auto">
           <Link href="/agent/tours/new">
             <Map className="h-4 w-4 mr-2" />
             Create New Tour
@@ -207,7 +207,7 @@ export default async function AgentDashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         {statsConfig.map((stat, index) => {
           const value = stats[stat.key as keyof typeof stats]
           const Icon = stat.icon
@@ -261,7 +261,7 @@ export default async function AgentDashboardPage() {
         })}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
         {/* Recent Bookings */}
         <Card className="lg:col-span-2 border-border/50 hover:shadow-premium transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between">
@@ -299,10 +299,11 @@ export default async function AgentDashboardPage() {
                   <Link
                     key={booking.id}
                     href={`/booking/confirmation/${booking.id}`}
-                    className="flex items-center gap-4 p-4 rounded-xl border border-border/50 hover:border-primary/30 hover:bg-primary/5 hover:shadow-md transition-all duration-200 group"
+                    className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl border border-border/50 hover:border-primary/30 hover:bg-primary/5 hover:shadow-md transition-all duration-200 group"
                     style={{ animationDelay: `${index * 50}ms` }}
                   >
-                    <div className="relative h-14 w-14 rounded-xl overflow-hidden shrink-0 bg-muted">
+                    <div className="flex items-center gap-3 sm:gap-4 w-full">
+                    <div className="relative h-12 w-12 sm:h-14 sm:w-14 rounded-xl overflow-hidden shrink-0 bg-muted">
                       {booking.tour.coverImage && (
                         <Image
                           src={booking.tour.coverImage}
@@ -341,11 +342,12 @@ export default async function AgentDashboardPage() {
                         </span>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-bold text-lg">${booking.totalAmount.toLocaleString()}</p>
+                    <div className="text-right shrink-0 sm:ml-auto">
+                      <p className="font-bold text-base sm:text-lg">${booking.totalAmount.toLocaleString()}</p>
                       <p className="text-[10px] text-muted-foreground font-mono">{booking.bookingReference}</p>
                     </div>
-                    <ArrowUpRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <ArrowUpRight className="hidden sm:block h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
                   </Link>
                 ))}
               </div>
@@ -411,15 +413,16 @@ export default async function AgentDashboardPage() {
                 <Link
                   key={tour.id}
                   href={`/agent/tours/${tour.id}/edit`}
-                  className="flex items-center gap-4 p-4 rounded-xl border border-border/50 hover:border-primary/30 hover:bg-primary/5 hover:shadow-md transition-all duration-200 group"
+                  className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl border border-border/50 hover:border-primary/30 hover:bg-primary/5 hover:shadow-md transition-all duration-200 group"
                 >
+                  <div className="flex items-center gap-3 sm:gap-4 w-full">
                   <div className={cn(
-                    "font-bold text-2xl w-8 text-center",
+                    "font-bold text-xl sm:text-2xl w-6 sm:w-8 text-center shrink-0",
                     index === 0 ? "text-amber-500" : index === 1 ? "text-slate-400" : index === 2 ? "text-amber-700" : "text-muted-foreground"
                   )}>
                     #{index + 1}
                   </div>
-                  <div className="relative h-16 w-24 rounded-xl overflow-hidden shrink-0 bg-muted">
+                  <div className="relative h-14 w-20 sm:h-16 sm:w-24 rounded-xl overflow-hidden shrink-0 bg-muted">
                     {tour.coverImage && (
                       <Image
                         src={tour.coverImage}
@@ -438,11 +441,12 @@ export default async function AgentDashboardPage() {
                       </span>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-bold text-xl">${tour.revenue.toLocaleString()}</p>
+                  <div className="text-right shrink-0 sm:ml-auto">
+                    <p className="font-bold text-lg sm:text-xl">${tour.revenue.toLocaleString()}</p>
                     <p className="text-xs text-muted-foreground">Revenue</p>
                   </div>
-                  <ArrowUpRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <ArrowUpRight className="hidden sm:block h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
                 </Link>
               ))}
             </div>

@@ -440,21 +440,21 @@ export default async function AdminDashboardPage() {
             <Shield className="h-3.5 w-3.5 text-primary" />
             <span className="text-xs font-medium text-primary">Admin Dashboard</span>
           </div>
-          <h1 className="text-3xl font-bold tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
             Welcome back, <span className="text-gradient">{firstName}</span>!
           </h1>
           <p className="text-muted-foreground mt-1">
             Platform overview and management
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" className="border-border/50 hover:border-primary/30" asChild>
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <Button variant="outline" className="border-border/50 hover:border-primary/30 w-full sm:w-auto" asChild>
             <Link href="/admin/reports">
               <BarChart3 className="h-4 w-4 mr-2" />
               View Reports
             </Link>
           </Button>
-          <Button className="shadow-glow" asChild>
+          <Button className="shadow-glow w-full sm:w-auto" asChild>
             <Link href="/admin/settings">
               <Settings className="h-4 w-4 mr-2" />
               Platform Settings
@@ -464,7 +464,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Platform Stats */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {statsConfig.map((statConfig, index) => {
           const stat = stats[statConfig.key as keyof typeof stats]
           const Icon = statConfig.icon
@@ -510,7 +510,7 @@ export default async function AdminDashboardPage() {
         })}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
         {/* Pending Agent Approvals */}
         <Card className="border-border/50 hover:shadow-premium transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between">
@@ -642,7 +642,7 @@ export default async function AdminDashboardPage() {
         </Card>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
         {/* Recent Activity */}
         <Card className="lg:col-span-1 border-border/50 hover:shadow-premium transition-all duration-300">
           <CardHeader>

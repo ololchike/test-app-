@@ -170,9 +170,9 @@ export default function AdminNotificationsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Notifications</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">Notifications</h1>
           <p className="text-muted-foreground mt-2">
             {unreadCount > 0
               ? `${unreadCount} unread notification${unreadCount > 1 ? "s" : ""}`
@@ -180,7 +180,7 @@ export default function AdminNotificationsPage() {
           </p>
         </div>
         {unreadCount > 0 && (
-          <Button onClick={handleMarkAllAsRead} variant="outline">
+          <Button onClick={handleMarkAllAsRead} variant="outline" className="w-full sm:w-auto">
             <CheckCheck className="h-4 w-4 mr-2" />
             Mark All as Read
           </Button>
@@ -188,7 +188,7 @@ export default function AdminNotificationsPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
         <Card
           className={`cursor-pointer transition-all hover:shadow-lg ${
             typeFilter === "all" ? "ring-2 ring-primary" : ""
@@ -248,9 +248,9 @@ export default function AdminNotificationsPage() {
         <CardHeader>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <CardTitle>Your Notifications</CardTitle>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
               <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="w-40">
+                <SelectTrigger className="w-full sm:w-40">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -263,7 +263,7 @@ export default function AdminNotificationsPage() {
                 </SelectContent>
               </Select>
               <Select value={readFilter} onValueChange={setReadFilter}>
-                <SelectTrigger className="w-32">
+                <SelectTrigger className="w-full sm:w-32">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -378,7 +378,7 @@ export default function AdminNotificationsPage() {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-between mt-6">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6">
                   <p className="text-sm text-muted-foreground">
                     Page {page} of {totalPages}
                   </p>

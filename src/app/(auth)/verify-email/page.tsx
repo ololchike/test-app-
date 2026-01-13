@@ -121,14 +121,14 @@ function VerifyEmailForm() {
       <div className="space-y-6">
         <div className="space-y-2">
           <div className="flex justify-center mb-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
-              <Loader2 className="h-8 w-8 text-blue-600 animate-spin" />
+            <div className="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-blue-100">
+              <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600 animate-spin" />
             </div>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-center">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-center">
             Verifying your email
           </h1>
-          <p className="text-muted-foreground text-center">
+          <p className="text-sm sm:text-base text-muted-foreground text-center">
             Please wait while we verify your email address...
           </p>
         </div>
@@ -142,14 +142,14 @@ function VerifyEmailForm() {
       <div className="space-y-6">
         <div className="space-y-2">
           <div className="flex justify-center mb-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-              <CheckCircle className="h-8 w-8 text-[#16a34a]" />
+            <div className="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-green-100">
+              <CheckCircle className="h-6 w-6 sm:h-8 sm:w-8 text-[#16a34a]" />
             </div>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-center">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-center">
             Email verified!
           </h1>
-          <p className="text-muted-foreground text-center">
+          <p className="text-sm sm:text-base text-muted-foreground text-center">
             Your email has been successfully verified. You can now access your account.
           </p>
         </div>
@@ -177,14 +177,14 @@ function VerifyEmailForm() {
       <div className="space-y-6">
         <div className="space-y-2">
           <div className="flex justify-center mb-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
-              <AlertCircle className="h-8 w-8 text-red-600" />
+            <div className="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-red-100">
+              <AlertCircle className="h-6 w-6 sm:h-8 sm:w-8 text-red-600" />
             </div>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-center">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-center">
             Verification failed
           </h1>
-          <p className="text-muted-foreground text-center">
+          <p className="text-sm sm:text-base text-muted-foreground text-center">
             {errorMessage}
           </p>
         </div>
@@ -202,7 +202,7 @@ function VerifyEmailForm() {
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-10 h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="w-full pl-10 h-10 sm:h-11 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={isResending}
               />
             </div>
@@ -238,14 +238,14 @@ function VerifyEmailForm() {
     <div className="space-y-6">
       <div className="space-y-2">
         <div className="flex justify-center mb-4">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
-            <Mail className="h-8 w-8 text-blue-600" />
+          <div className="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-blue-100">
+            <Mail className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
           </div>
         </div>
-        <h1 className="text-2xl font-bold tracking-tight text-center">
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-center">
           Check your email
         </h1>
-        <p className="text-muted-foreground text-center">
+        <p className="text-sm sm:text-base text-muted-foreground text-center">
           We&apos;ve sent a verification link to your email address. Click the link to verify your account.
         </p>
       </div>
@@ -272,7 +272,7 @@ function VerifyEmailForm() {
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full pl-10 h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-full pl-10 h-10 sm:h-11 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={isResending}
             />
           </div>

@@ -209,14 +209,14 @@ export default function AdminToursPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold">Tour Management</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">Tour Management</h1>
         <p className="text-muted-foreground mt-2">
           Manage all tours on the platform
         </p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-5">
         <Card
           className={`cursor-pointer transition-all hover:shadow-lg ${
             statusFilter === "all" ? "ring-2 ring-primary" : ""
@@ -274,7 +274,7 @@ export default function AdminToursPage() {
         <CardHeader>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <CardTitle>Tours</CardTitle>
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center w-full sm:w-auto">
               <div className="relative flex-1 sm:w-80">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -285,7 +285,7 @@ export default function AdminToursPage() {
                   className="pl-9"
                 />
               </div>
-              <Button onClick={handleSearch} variant="secondary">
+              <Button onClick={handleSearch} variant="secondary" className="w-full sm:w-auto">
                 <Search className="h-4 w-4 mr-2" />
                 Search
               </Button>
@@ -440,7 +440,7 @@ export default function AdminToursPage() {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-between mt-4">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4">
                   <p className="text-sm text-muted-foreground">
                     Page {page} of {totalPages}
                   </p>

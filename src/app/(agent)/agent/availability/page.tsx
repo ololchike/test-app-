@@ -53,16 +53,16 @@ export default function AgentAvailabilityPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
           Availability Management
         </h1>
-        <p className="text-muted-foreground mt-1">
+        <p className="text-muted-foreground mt-1 text-sm sm:text-base">
           Manage tour dates, block unavailable periods, and set limited
           availability
         </p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-4">
+      <div className="grid gap-6 grid-cols-1 lg:grid-cols-4">
         {/* Tour Selection Sidebar */}
         <div className="lg:col-span-1 space-y-4">
           <Card>

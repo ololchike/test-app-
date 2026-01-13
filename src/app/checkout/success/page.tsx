@@ -218,7 +218,7 @@ function PaymentSuccessContent() {
   // Success state
   if (paymentStatus?.status === "COMPLETED") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/30 py-8">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/30 py-4 sm:py-8">
         {showConfetti && (
           <Confetti
             width={width}
@@ -239,19 +239,19 @@ function PaymentSuccessContent() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative z-10"
+          className="relative z-10 w-full"
         >
           <Card className="max-w-2xl w-full mx-4 border-border/50 shadow-premium overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-teal-500/5" />
 
-            <CardHeader className="text-center relative pb-2 pt-8">
+            <CardHeader className="text-center relative pb-2 pt-6 sm:pt-8">
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", duration: 0.6, delay: 0.1 }}
-                className="mx-auto w-24 h-24 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 flex items-center justify-center mb-4"
+                className="mx-auto w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 flex items-center justify-center mb-3 sm:mb-4"
               >
-                <CheckCircleIcon className="h-14 w-14 text-emerald-600" />
+                <CheckCircleIcon className="h-10 w-10 sm:h-14 sm:w-14 text-emerald-600" />
               </motion.div>
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
@@ -259,24 +259,24 @@ function PaymentSuccessContent() {
                 transition={{ delay: 0.3 }}
               >
                 <div className="flex items-center justify-center gap-2 mb-2">
-                  <PartyPopper className="h-5 w-5 text-amber-500" />
-                  <span className="text-sm font-medium text-amber-600">Congratulations!</span>
+                  <PartyPopper className="h-4 w-4 sm:h-5 sm:w-5 text-amber-500" />
+                  <span className="text-xs sm:text-sm font-medium text-amber-600">Congratulations!</span>
                 </div>
-                <CardTitle className="text-3xl font-bold">Payment Successful!</CardTitle>
+                <CardTitle className="text-2xl sm:text-3xl font-bold">Payment Successful!</CardTitle>
               </motion.div>
             </CardHeader>
 
-            <CardContent className="space-y-6 relative pb-8">
+            <CardContent className="space-y-4 sm:space-y-6 relative pb-6 sm:pb-8">
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.4 }}
                 className="text-center space-y-2"
               >
-                <p className="text-lg text-muted-foreground">
+                <p className="text-base sm:text-lg text-muted-foreground">
                   Thank you for your booking. Your payment has been confirmed.
                 </p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   A confirmation email has been sent to your email address.
                 </p>
               </motion.div>
@@ -287,25 +287,25 @@ function PaymentSuccessContent() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className="space-y-4"
+                className="space-y-3 sm:space-y-4"
               >
-                <h3 className="font-semibold text-lg flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold text-base sm:text-lg flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                   Booking Details
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   {paymentStatus.bookingReference && (
-                    <div className="p-4 rounded-xl bg-muted/50 border border-border/50">
-                      <p className="text-sm text-muted-foreground">Booking Reference</p>
-                      <p className="font-mono font-bold text-xl mt-1">
+                    <div className="p-3 sm:p-4 rounded-xl bg-muted/50 border border-border/50">
+                      <p className="text-xs sm:text-sm text-muted-foreground">Booking Reference</p>
+                      <p className="font-mono font-bold text-lg sm:text-xl mt-1">
                         {paymentStatus.bookingReference}
                       </p>
                     </div>
                   )}
                   {paymentStatus.amount && paymentStatus.currency && (
-                    <div className="p-4 rounded-xl bg-muted/50 border border-border/50">
-                      <p className="text-sm text-muted-foreground">Amount Paid</p>
-                      <p className="font-bold text-xl mt-1 text-emerald-600">
+                    <div className="p-3 sm:p-4 rounded-xl bg-muted/50 border border-border/50">
+                      <p className="text-xs sm:text-sm text-muted-foreground">Amount Paid</p>
+                      <p className="font-bold text-lg sm:text-xl mt-1 text-emerald-600">
                         {new Intl.NumberFormat("en-US", {
                           style: "currency",
                           currency: paymentStatus.currency,
@@ -323,25 +323,25 @@ function PaymentSuccessContent() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
-                className="space-y-4"
+                className="space-y-3 sm:space-y-4"
               >
-                <h3 className="font-semibold flex items-center gap-2">
-                  <Calendar className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold text-sm sm:text-base flex items-center gap-2">
+                  <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                   What&apos;s Next?
                 </h3>
-                <ul className="space-y-3">
+                <ul className="space-y-2 sm:space-y-3">
                   {nextSteps.map((step, index) => (
                     <motion.li
                       key={index}
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.7 + index * 0.1 }}
-                      className="flex items-start gap-3 p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/10"
+                      className="flex items-start gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/10"
                     >
-                      <div className="h-6 w-6 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <step.icon className="h-3.5 w-3.5 text-emerald-600" />
+                      <div className="h-5 w-5 sm:h-6 sm:w-6 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <step.icon className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-emerald-600" />
                       </div>
-                      <span className="text-sm text-muted-foreground">{step.text}</span>
+                      <span className="text-xs sm:text-sm text-muted-foreground">{step.text}</span>
                     </motion.li>
                   ))}
                 </ul>
@@ -351,14 +351,14 @@ function PaymentSuccessContent() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.9 }}
-                className="flex flex-col sm:flex-row gap-3 pt-4"
+                className="flex flex-col sm:flex-row gap-3 pt-2 sm:pt-4"
               >
                 {paymentStatus.bookingId && (
                   <>
                     <Button
                       asChild
                       size="lg"
-                      className="flex-1 rounded-xl bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg"
+                      className="w-full sm:flex-1 h-11 sm:h-12 text-sm sm:text-base rounded-xl bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg"
                     >
                       <Link href={`/booking/confirmation/${paymentStatus.bookingId}`}>
                         <EyeIcon className="h-4 w-4 mr-2" />
@@ -369,7 +369,7 @@ function PaymentSuccessContent() {
                       variant="outline"
                       asChild
                       size="lg"
-                      className="flex-1 rounded-xl border-border/50 hover:bg-muted/50"
+                      className="w-full sm:flex-1 h-11 sm:h-12 text-sm sm:text-base rounded-xl border-border/50 hover:bg-muted/50"
                     >
                       <Link href={`/booking/confirmation/${paymentStatus.bookingId}?download=true`}>
                         <DownloadIcon className="h-4 w-4 mr-2" />
@@ -384,9 +384,9 @@ function PaymentSuccessContent() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 1 }}
-                className="text-center pt-4"
+                className="text-center pt-3 sm:pt-4"
               >
-                <Button variant="ghost" asChild className="text-muted-foreground hover:text-foreground">
+                <Button variant="ghost" asChild className="text-xs sm:text-sm text-muted-foreground hover:text-foreground">
                   <Link href="/tours">Browse More Tours</Link>
                 </Button>
               </motion.div>

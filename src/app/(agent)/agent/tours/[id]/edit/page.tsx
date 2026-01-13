@@ -605,7 +605,7 @@ export default function EditTourPage({ params }: EditTourPageProps) {
 
       {/* Edit Form */}
       <Tabs defaultValue="details" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 sm:grid-cols-7">
+        <TabsList className="grid w-full grid-cols-4 sm:grid-cols-7 text-xs sm:text-sm">
           <TabsTrigger value="details">Details</TabsTrigger>
           <TabsTrigger value="features">Features</TabsTrigger>
           <TabsTrigger value="accommodations">Stays</TabsTrigger>
@@ -650,7 +650,7 @@ export default function EditTourPage({ params }: EditTourPageProps) {
                 />
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="destination">Destination</Label>
                   <Input
@@ -679,7 +679,7 @@ export default function EditTourPage({ params }: EditTourPageProps) {
                 </div>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-3">
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
                 <div className="space-y-2">
                   <Label htmlFor="durationDays">Days</Label>
                   <Input
@@ -712,7 +712,7 @@ export default function EditTourPage({ params }: EditTourPageProps) {
                 </div>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="basePrice">Adult Price (USD)</Label>
                   <div className="relative">
@@ -753,7 +753,7 @@ export default function EditTourPage({ params }: EditTourPageProps) {
                 <p className="text-sm text-muted-foreground">
                   Set different prices for children and infants (optional)
                 </p>
-                <div className="grid gap-4 sm:grid-cols-3">
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
                   <div className="space-y-2">
                     <Label htmlFor="childPrice" className="text-sm">Child Price (2-11 yrs)</Label>
                     <div className="relative">
@@ -927,7 +927,7 @@ export default function EditTourPage({ params }: EditTourPageProps) {
             </CardContent>
           </Card>
 
-          <div className="grid gap-6 sm:grid-cols-2">
+          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2">
             <Card>
               <CardHeader>
                 <CardTitle>Included</CardTitle>
@@ -1689,7 +1689,7 @@ function AccommodationForm({ tourId, onSuccess }: { tourId: string; onSuccess: (
         />
       </div>
 
-      <div className="grid gap-4 grid-cols-2">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="acc-tier">Tier *</Label>
           <Select
@@ -1733,7 +1733,7 @@ function AccommodationForm({ tourId, onSuccess }: { tourId: string; onSuccess: (
         />
       </div>
 
-      <div className="grid gap-4 grid-cols-2">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="acc-location">Location</Label>
           <Input
@@ -1861,7 +1861,7 @@ function ActivityForm({ tourId, durationDays, onSuccess }: { tourId: string; dur
         />
       </div>
 
-      <div className="grid gap-4 grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
         <div className="space-y-2">
           <Label htmlFor="addon-price">Price (USD) *</Label>
           <Input

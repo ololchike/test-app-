@@ -212,7 +212,7 @@ export default function AdminReportsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Reports & Analytics</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Reports & Analytics</h1>
           <p className="text-muted-foreground mt-1">
             Comprehensive platform analytics and insights
           </p>
@@ -236,7 +236,7 @@ export default function AdminReportsPage() {
 
       {/* Summary Stats */}
       {loading ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           {[...Array(4)].map((_, i) => (
             <Card key={i}>
               <CardHeader className="pb-2">
@@ -249,7 +249,7 @@ export default function AdminReportsPage() {
           ))}
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -319,7 +319,7 @@ export default function AdminReportsPage() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
           <TabsTrigger value="revenue">Revenue</TabsTrigger>
           <TabsTrigger value="bookings">Bookings</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
@@ -330,7 +330,7 @@ export default function AdminReportsPage() {
         {/* Revenue Tab */}
         <TabsContent value="revenue" className="space-y-4">
           {loading ? (
-            <div className="grid gap-4 lg:grid-cols-2">
+            <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
               {[...Array(4)].map((_, i) => (
                 <Card key={i}>
                   <CardHeader>
@@ -388,7 +388,7 @@ export default function AdminReportsPage() {
                 </CardContent>
               </Card>
 
-              <div className="grid gap-4 lg:grid-cols-2">
+              <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between">
                     <div>
@@ -523,7 +523,7 @@ export default function AdminReportsPage() {
                 </CardContent>
               </Card>
 
-              <div className="grid gap-4 lg:grid-cols-2">
+              <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between">
                     <div>
@@ -843,7 +843,7 @@ export default function AdminReportsPage() {
                 </CardContent>
               </Card>
 
-              <div className="grid gap-4 lg:grid-cols-2">
+              <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between">
                     <div>
@@ -1002,7 +1002,7 @@ export default function AdminReportsPage() {
                 </CardContent>
               </Card>
 
-              <div className="grid gap-4 lg:grid-cols-2">
+              <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between">
                     <div>

@@ -167,7 +167,7 @@ function ToursContent() {
   return (
     <div className="pt-20">
       {/* Premium Hero Header */}
-      <div className="relative bg-gradient-to-br from-secondary via-secondary/95 to-primary/30 py-16 lg:py-24 overflow-hidden">
+      <div className="relative bg-gradient-to-br from-secondary via-secondary/95 to-primary/30 py-12 sm:py-16 lg:py-24 overflow-hidden">
         {/* Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <motion.div
@@ -204,7 +204,7 @@ function ToursContent() {
           }}
         />
 
-        <div className="container relative mx-auto px-4 lg:px-8">
+        <div className="container relative mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -220,7 +220,7 @@ function ToursContent() {
               <span className="text-white/90 text-sm font-medium">Discover Amazing Experiences</span>
             </motion.div>
 
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white">
               Explore{" "}
               <span className="relative">
                 <span className="relative z-10 text-accent">Safari Tours</span>
@@ -228,12 +228,12 @@ function ToursContent() {
                   initial={{ scaleX: 0 }}
                   animate={{ scaleX: 1 }}
                   transition={{ duration: 0.8, delay: 0.5 }}
-                  className="absolute bottom-2 left-0 right-0 h-3 bg-accent/30 -z-0 origin-left"
+                  className="absolute bottom-1 sm:bottom-2 left-0 right-0 h-2 sm:h-3 bg-accent/30 -z-0 origin-left"
                 />
               </span>
             </h1>
 
-            <p className="mt-4 text-lg md:text-xl text-white/80 max-w-2xl">
+            <p className="mt-3 sm:mt-4 text-base sm:text-lg md:text-xl text-white/80 max-w-2xl">
               Discover unforgettable safari experiences across East Africa. From
               wildlife safaris to gorilla trekking, find your perfect adventure.
             </p>
@@ -243,7 +243,7 @@ function ToursContent() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
-              className="mt-8 flex flex-wrap gap-8"
+              className="mt-6 sm:mt-8 flex flex-wrap gap-6 sm:gap-8"
             >
               {[
                 { value: "500+", label: "Tours" },
@@ -251,8 +251,8 @@ function ToursContent() {
                 { value: "10K+", label: "Happy Travelers" },
               ].map((stat) => (
                 <div key={stat.label}>
-                  <div className="text-3xl font-bold text-white">{stat.value}</div>
-                  <div className="text-sm text-white/60">{stat.label}</div>
+                  <div className="text-2xl sm:text-3xl font-bold text-white">{stat.value}</div>
+                  <div className="text-xs sm:text-sm text-white/60">{stat.label}</div>
                 </div>
               ))}
             </motion.div>
@@ -261,7 +261,7 @@ function ToursContent() {
       </div>
 
       {/* Filters and Results */}
-      <div className="container mx-auto px-4 lg:px-8 py-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -270,7 +270,7 @@ function ToursContent() {
           <TourFilters />
         </motion.div>
 
-        <div className="flex gap-8 mt-8">
+        <div className="flex gap-6 lg:gap-8 mt-6 sm:mt-8">
           {/* Sidebar Filters (Desktop) */}
           <TourFiltersSidebar />
 
@@ -477,9 +477,9 @@ function ToursContent() {
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          className="py-16 bg-gradient-to-r from-primary/5 via-accent/5 to-secondary/5"
+          className="py-12 sm:py-16 bg-gradient-to-r from-primary/5 via-accent/5 to-secondary/5"
         >
-          <div className="container mx-auto px-4 lg:px-8 text-center">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -489,13 +489,13 @@ function ToursContent() {
               <Sparkles className="h-4 w-4 text-primary" />
               <span className="text-sm font-medium text-primary">Need Help Choosing?</span>
             </motion.div>
-            <h2 className="text-2xl md:text-3xl font-bold mb-4">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-3 sm:mb-4">
               Can&apos;t decide? Let us help you find your perfect safari
             </h2>
-            <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
+            <p className="text-sm sm:text-base text-muted-foreground mb-6 sm:mb-8 max-w-2xl mx-auto">
               Our travel experts are here to help you plan your dream African adventure.
             </p>
-            <Button size="lg" className="h-12 px-8 shadow-glow">
+            <Button size="lg" className="h-12 px-6 sm:px-8 w-full sm:w-auto shadow-glow">
               <Link href="/contact">Talk to an Expert</Link>
             </Button>
           </div>

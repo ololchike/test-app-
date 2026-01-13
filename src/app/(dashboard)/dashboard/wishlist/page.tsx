@@ -33,13 +33,13 @@ export default function WishlistPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">My Wishlist</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">My Wishlist</h1>
+          <p className="text-muted-foreground mt-1 text-sm sm:text-base">
             Tours you have saved for later
           </p>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {[...Array(6)].map((_, i) => (
             <Card key={i} className="overflow-hidden">
               <Skeleton className="h-48 w-full" />
@@ -59,8 +59,8 @@ export default function WishlistPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">My Wishlist</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">My Wishlist</h1>
+          <p className="text-muted-foreground mt-1 text-sm sm:text-base">
             Tours you have saved for later
           </p>
         </div>
@@ -85,14 +85,14 @@ export default function WishlistPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">My Wishlist</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">My Wishlist</h1>
+          <p className="text-muted-foreground mt-1 text-sm sm:text-base">
             {meta.total} tour{meta.total !== 1 ? "s" : ""} saved
           </p>
         </div>
       </div>
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {items.map((item) => (
           <Card key={item.id} className="overflow-hidden group">
             <div className="relative">
@@ -147,44 +147,44 @@ export default function WishlistPage() {
               </div>
             </div>
 
-            <CardContent className="p-4">
+            <CardContent className="p-3 sm:p-4">
               <Link href={`/tours/${item.tour.slug}`}>
-                <h3 className="font-semibold line-clamp-1 hover:text-primary transition-colors">
+                <h3 className="font-semibold line-clamp-1 hover:text-primary transition-colors text-sm sm:text-base">
                   {item.tour.title}
                 </h3>
               </Link>
 
-              <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 text-xs sm:text-sm text-muted-foreground">
                 <span className="flex items-center gap-1">
-                  <MapPin className="h-3.5 w-3.5" />
+                  <MapPin className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   {item.tour.destination}
                 </span>
                 <span className="flex items-center gap-1">
-                  <Clock className="h-3.5 w-3.5" />
+                  <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   {item.tour.durationDays}D/{item.tour.durationNights}N
                 </span>
               </div>
 
               {item.tour.rating && (
-                <div className="flex items-center gap-1 mt-2">
-                  <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                <div className="flex items-center gap-1 mt-2 text-sm">
+                  <Star className="h-3.5 w-3.5 sm:h-4 sm:w-4 fill-yellow-400 text-yellow-400" />
                   <span className="font-medium">
                     {item.tour.rating.toFixed(1)}
                   </span>
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-xs sm:text-sm text-muted-foreground">
                     ({item.tour.reviewCount} reviews)
                   </span>
                 </div>
               )}
 
-              <div className="flex items-center justify-between mt-4 pt-4 border-t">
-                <span className="text-sm text-muted-foreground">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mt-4 pt-4 border-t">
+                <span className="text-xs sm:text-sm text-muted-foreground truncate">
                   by {item.tour.agent.businessName}
                 </span>
-                <Button size="sm" asChild>
+                <Button size="sm" asChild className="w-full sm:w-auto text-xs sm:text-sm">
                   <Link href={`/tours/${item.tour.slug}`}>
                     View Tour
-                    <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
+                    <ExternalLink className="h-3 w-3 sm:h-3.5 sm:w-3.5 ml-1.5" />
                   </Link>
                 </Button>
               </div>
@@ -195,21 +195,25 @@ export default function WishlistPage() {
 
       {/* Pagination */}
       {meta.totalPages > 1 && (
-        <div className="flex justify-center gap-2">
+        <div className="flex flex-wrap justify-center items-center gap-2">
           <Button
             variant="outline"
             onClick={() => goToPage(meta.page - 1)}
             disabled={meta.page === 1}
+            size="sm"
+            className="text-xs sm:text-sm"
           >
             Previous
           </Button>
-          <span className="flex items-center px-4 text-sm text-muted-foreground">
+          <span className="flex items-center px-3 sm:px-4 text-xs sm:text-sm text-muted-foreground">
             Page {meta.page} of {meta.totalPages}
           </span>
           <Button
             variant="outline"
             onClick={() => goToPage(meta.page + 1)}
             disabled={meta.page === meta.totalPages}
+            size="sm"
+            className="text-xs sm:text-sm"
           >
             Next
           </Button>

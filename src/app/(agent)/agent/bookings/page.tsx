@@ -257,14 +257,14 @@ export default function AgentBookingsPage() {
           <Calendar className="h-3.5 w-3.5 text-primary" />
           <span className="text-xs font-medium text-primary">Booking Management</span>
         </div>
-        <h1 className="text-3xl font-bold tracking-tight">Your Bookings</h1>
-        <p className="text-muted-foreground mt-1">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Your Bookings</h1>
+        <p className="text-muted-foreground mt-1 text-sm sm:text-base">
           View and manage all bookings for your tours
         </p>
       </motion.div>
 
       {/* Stats Summary */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         {statsConfig.map((stat, index) => {
           const Icon = stat.icon
           const value = stat.key === "totalRevenue"
@@ -315,18 +315,18 @@ export default function AgentBookingsPage() {
             <CardDescription>Manage and track your tour bookings</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            <div className="flex flex-col gap-4 mb-6">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search by reference, customer, or tour..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 h-11 rounded-xl border-border/50 focus:border-primary/50"
+                  className="pl-10 h-11 rounded-xl border-border/50 focus:border-primary/50 w-full"
                 />
               </div>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full sm:w-[180px] h-11 rounded-xl border-border/50">
+                <SelectTrigger className="w-full h-11 rounded-xl border-border/50">
                   <Filter className="h-4 w-4 mr-2" />
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
@@ -357,6 +357,7 @@ export default function AgentBookingsPage() {
               </div>
             ) : (
               <div className="rounded-xl border border-border/50 overflow-hidden">
+                <div className="overflow-x-auto -mx-4 sm:mx-0">
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-muted/30 hover:bg-muted/30">
@@ -480,6 +481,7 @@ export default function AgentBookingsPage() {
                     ))}
                   </TableBody>
                 </Table>
+                </div>
               </div>
             )}
           </CardContent>

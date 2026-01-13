@@ -39,8 +39,8 @@ export default function AgentMessagesPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Messages</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Messages</h1>
+          <p className="text-muted-foreground mt-1 text-sm sm:text-base">
             Communicate with your customers
           </p>
         </div>
@@ -87,7 +87,7 @@ export default function AgentMessagesPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">

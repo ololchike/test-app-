@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from "react"
 import { format } from "date-fns"
-import { Shield, Search, Check, X, Eye } from "lucide-react"
+import { Shield, Search, Check, X, Percent, Loader2 } from "lucide-react"
 import { toast } from "sonner"
-import Link from "next/link"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import {
   Table,
   TableBody,
@@ -20,6 +20,14 @@ import {
 } from "@/components/ui/table"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 interface Agent {
   id: string
@@ -29,6 +37,7 @@ interface Agent {
   country: string | null
   status: string
   isVerified: boolean
+  commissionRate: number
   createdAt: string
   user: {
     email: string
@@ -59,6 +68,13 @@ export default function AdminAgentsPage() {
   const [dialogType, setDialogType] = useState<"verify" | "suspend" | "activate">("verify")
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
+
+  // Commission dialog state
+  const [commissionDialogOpen, setCommissionDialogOpen] = useState(false)
+  const [commissionAgent, setCommissionAgent] = useState<Agent | null>(null)
+  const [newCommissionRate, setNewCommissionRate] = useState("")
+  const [commissionReason, setCommissionReason] = useState("")
+  const [updatingCommission, setUpdatingCommission] = useState(false)
 
   useEffect(() => {
     fetchAgents()
@@ -122,6 +138,52 @@ export default function AdminAgentsPage() {
     }
   }
 
+  async function handleUpdateCommission() {
+    if (!commissionAgent) return
+
+    const rate = parseFloat(newCommissionRate)
+    if (isNaN(rate) || rate < 0 || rate > 50) {
+      toast.error("Commission rate must be between 0% and 50%")
+      return
+    }
+
+    setUpdatingCommission(true)
+    try {
+      const response = await fetch(`/api/admin/agents/${commissionAgent.id}/commission`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          commissionRate: rate,
+          reason: commissionReason || undefined,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to update commission")
+      }
+
+      toast.success(data.message || "Commission rate updated")
+      setCommissionDialogOpen(false)
+      setNewCommissionRate("")
+      setCommissionReason("")
+      fetchAgents()
+    } catch (error) {
+      console.error("Error updating commission:", error)
+      toast.error(error instanceof Error ? error.message : "Failed to update commission")
+    } finally {
+      setUpdatingCommission(false)
+    }
+  }
+
+  const openCommissionDialog = (agent: Agent) => {
+    setCommissionAgent(agent)
+    setNewCommissionRate(agent.commissionRate.toString())
+    setCommissionReason("")
+    setCommissionDialogOpen(true)
+  }
+
   const handleSearch = () => {
     setPage(1)
     fetchAgents()
@@ -135,13 +197,13 @@ export default function AdminAgentsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Agent Management</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">Agent Management</h1>
         <p className="text-muted-foreground mt-2">
-          Manage tour operators and agents
+          Manage tour operators, verification, and commission rates
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-5">
         <Card
           className={`cursor-pointer transition-all hover:shadow-lg ${
             statusFilter === "all" ? "ring-2 ring-primary" : ""
@@ -194,7 +256,7 @@ export default function AdminAgentsPage() {
         <CardHeader>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <CardTitle>Agents</CardTitle>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
               <div className="relative flex-1 sm:w-80">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -205,7 +267,7 @@ export default function AdminAgentsPage() {
                   className="pl-9"
                 />
               </div>
-              <Button onClick={handleSearch} variant="secondary">
+              <Button onClick={handleSearch} variant="secondary" className="w-full sm:w-auto">
                 Search
               </Button>
             </div>
@@ -225,7 +287,8 @@ export default function AdminAgentsPage() {
             </div>
           ) : (
             <>
-              <Table>
+              <div className="overflow-x-auto">
+                <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Business</TableHead>
@@ -233,6 +296,7 @@ export default function AdminAgentsPage() {
                     <TableHead>Location</TableHead>
                     <TableHead>Tours</TableHead>
                     <TableHead>Bookings</TableHead>
+                    <TableHead>Commission</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Verified</TableHead>
                     <TableHead>Joined</TableHead>
@@ -269,6 +333,17 @@ export default function AdminAgentsPage() {
                       </TableCell>
                       <TableCell>{agent._count.tours}</TableCell>
                       <TableCell>{agent._count.bookings}</TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 px-2 font-medium"
+                          onClick={() => openCommissionDialog(agent)}
+                        >
+                          <Percent className="h-3 w-3 mr-1" />
+                          {agent.commissionRate}%
+                        </Button>
+                      </TableCell>
                       <TableCell>
                         <Badge
                           variant="outline"
@@ -341,9 +416,10 @@ export default function AdminAgentsPage() {
                   ))}
                 </TableBody>
               </Table>
+              </div>
 
               {totalPages > 1 && (
-                <div className="flex items-center justify-between mt-4">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4">
                   <p className="text-sm text-muted-foreground">
                     Page {page} of {totalPages}
                   </p>
@@ -400,6 +476,78 @@ export default function AdminAgentsPage() {
         variant={dialogType === "suspend" ? "danger" : "default"}
         isLoading={isProcessing}
       />
+
+      {/* Commission Rate Dialog */}
+      <Dialog open={commissionDialogOpen} onOpenChange={setCommissionDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Update Commission Rate</DialogTitle>
+            <DialogDescription>
+              Set the platform commission percentage for {commissionAgent?.businessName}.
+              This determines how much the platform takes from each booking.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="commissionRate">Commission Rate (%)</Label>
+              <div className="relative">
+                <Input
+                  id="commissionRate"
+                  type="number"
+                  min="0"
+                  max="50"
+                  step="0.5"
+                  value={newCommissionRate}
+                  onChange={(e) => setNewCommissionRate(e.target.value)}
+                  placeholder="e.g., 10"
+                  className="pr-8"
+                />
+                <Percent className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Current rate: {commissionAgent?.commissionRate}%
+              </p>
+            </div>
+
+            {newCommissionRate && !isNaN(parseFloat(newCommissionRate)) && (
+              <div className="bg-muted p-3 rounded-lg text-sm space-y-1">
+                <p className="font-medium">Example calculation for $1,000 booking:</p>
+                <p>Platform fee: ${(1000 * parseFloat(newCommissionRate) / 100).toFixed(2)} ({newCommissionRate}%)</p>
+                <p>Agent receives: ${(1000 - (1000 * parseFloat(newCommissionRate) / 100)).toFixed(2)} ({(100 - parseFloat(newCommissionRate)).toFixed(1)}%)</p>
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label htmlFor="reason">Reason for change (optional)</Label>
+              <Input
+                id="reason"
+                value={commissionReason}
+                onChange={(e) => setCommissionReason(e.target.value)}
+                placeholder="e.g., Performance bonus, new tier, etc."
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setCommissionDialogOpen(false)}
+              disabled={updatingCommission}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleUpdateCommission} disabled={updatingCommission}>
+              {updatingCommission ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Updating...
+                </>
+              ) : (
+                "Update Rate"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

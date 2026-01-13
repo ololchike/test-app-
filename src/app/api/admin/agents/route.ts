@@ -54,7 +54,10 @@ export async function GET(request: NextRequest) {
         },
         skip,
         take: limit,
-      }),
+      }).then(agents => agents.map(agent => ({
+        ...agent,
+        commissionRate: agent.commissionRate,
+      }))),
       prisma.agent.count({ where }),
     ])
 

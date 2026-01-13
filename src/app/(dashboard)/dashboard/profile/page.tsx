@@ -256,16 +256,16 @@ export default function ProfilePage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">My Profile</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">My Profile</h1>
+          <p className="text-muted-foreground mt-1 text-sm sm:text-base">
             Manage your personal information
           </p>
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-3">
         {/* Profile Card */}
-        <div className="md:col-span-1 space-y-6">
+        <div className="lg:col-span-1 space-y-6">
           <Card>
             <CardContent className="pt-6 flex flex-col items-center">
               <div className="relative">
@@ -316,11 +316,11 @@ export default function ProfilePage() {
                   </Button>
                 )}
               </div>
-              <h2 className="text-xl font-semibold mt-4">
+              <h2 className="text-lg sm:text-xl font-semibold mt-4 text-center">
                 {profile.name || "Traveler"}
               </h2>
-              <p className="text-sm text-muted-foreground">{profile.email}</p>
-              <p className="text-xs text-muted-foreground mt-2">
+              <p className="text-sm text-muted-foreground text-center break-all">{profile.email}</p>
+              <p className="text-xs text-muted-foreground mt-2 text-center">
                 Member since {format(new Date(profile.createdAt), "MMMM yyyy")}
               </p>
             </CardContent>
@@ -380,17 +380,17 @@ export default function ProfilePage() {
         </div>
 
         {/* Details Card */}
-        <div className="md:col-span-2">
+        <div className="lg:col-span-2">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
+            <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div>
-                <CardTitle>Personal Information</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-lg sm:text-xl">Personal Information</CardTitle>
+                <CardDescription className="text-sm">
                   Update your personal details
                 </CardDescription>
               </div>
               {!isEditing && (
-                <Button variant="outline" onClick={() => setIsEditing(true)}>
+                <Button variant="outline" onClick={() => setIsEditing(true)} className="w-full sm:w-auto">
                   <Edit className="h-4 w-4 mr-2" />
                   Edit
                 </Button>
@@ -458,8 +458,8 @@ export default function ProfilePage() {
                     />
                   </div>
 
-                  <div className="flex gap-3 pt-4">
-                    <Button onClick={handleSave} disabled={isSaving}>
+                  <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                    <Button onClick={handleSave} disabled={isSaving} className="w-full sm:w-auto">
                       {isSaving && (
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                       )}
@@ -469,6 +469,7 @@ export default function ProfilePage() {
                       variant="outline"
                       onClick={() => setIsEditing(false)}
                       disabled={isSaving}
+                      className="w-full sm:w-auto"
                     >
                       Cancel
                     </Button>
@@ -514,29 +515,29 @@ export default function ProfilePage() {
           {/* Upcoming Trips Preview */}
           <Card className="mt-6">
             <CardHeader>
-              <CardTitle>Quick Overview</CardTitle>
+              <CardTitle className="text-lg sm:text-xl">Quick Overview</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-4 sm:grid-cols-3">
-                <div className="text-center p-4 rounded-lg bg-muted">
-                  <p className="text-3xl font-bold text-primary">
+              <div className="grid gap-4 grid-cols-2 sm:grid-cols-3">
+                <div className="text-center p-3 sm:p-4 rounded-lg bg-muted">
+                  <p className="text-2xl sm:text-3xl font-bold text-primary">
                     {profile.stats.upcomingBookings}
                   </p>
-                  <p className="text-sm text-muted-foreground">Upcoming Trips</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">Upcoming Trips</p>
                 </div>
-                <div className="text-center p-4 rounded-lg bg-muted">
-                  <p className="text-3xl font-bold text-green-600">
+                <div className="text-center p-3 sm:p-4 rounded-lg bg-muted">
+                  <p className="text-2xl sm:text-3xl font-bold text-green-600">
                     {profile.stats.completedBookings}
                   </p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     Completed Trips
                   </p>
                 </div>
-                <div className="text-center p-4 rounded-lg bg-muted">
-                  <p className="text-3xl font-bold text-orange-500">
+                <div className="text-center p-3 sm:p-4 rounded-lg bg-muted col-span-2 sm:col-span-1">
+                  <p className="text-2xl sm:text-3xl font-bold text-orange-500">
                     {profile.stats.savedTours}
                   </p>
-                  <p className="text-sm text-muted-foreground">Saved Tours</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">Saved Tours</p>
                 </div>
               </div>
             </CardContent>

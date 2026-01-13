@@ -288,14 +288,14 @@ export default function AgentContactsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold">Assigned Inquiries</h1>
-        <p className="text-muted-foreground mt-2">
+        <h1 className="text-2xl sm:text-3xl font-bold">Assigned Inquiries</h1>
+        <p className="text-muted-foreground mt-2 text-sm sm:text-base">
           Manage customer inquiries forwarded to you by the admin team
         </p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         {Object.entries(statusConfig).map(([status, config]) => {
           const Icon = config.icon
           const count = statusCounts[status as keyof StatusCounts] || 0
@@ -329,20 +329,20 @@ export default function AgentContactsPage() {
       {/* Filters and Search */}
       <Card>
         <CardHeader>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4">
             <CardTitle>Messages</CardTitle>
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-              <div className="relative flex-1 sm:w-80">
+            <div className="flex flex-col gap-2">
+              <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   placeholder="Search messages..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9"
+                  className="pl-9 w-full"
                 />
               </div>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full sm:w-40">
+                <SelectTrigger className="w-full">
                   <Filter className="mr-2 h-4 w-4" />
                   <SelectValue />
                 </SelectTrigger>
@@ -373,7 +373,7 @@ export default function AgentContactsPage() {
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto -mx-4 sm:mx-0">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -424,7 +424,7 @@ export default function AgentContactsPage() {
 
       {/* Message Detail Modal */}
       <Dialog open={isDetailModalOpen} onOpenChange={setIsDetailModalOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-full">
           {selectedMessage && (
             <>
               <DialogHeader>
@@ -436,7 +436,7 @@ export default function AgentContactsPage() {
 
               <div className="space-y-6">
                 {/* Contact Info */}
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
                   <div>
                     <Label className="text-muted-foreground">Customer Name</Label>
                     <p className="font-medium mt-1">{selectedMessage.name}</p>

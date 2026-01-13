@@ -2,6 +2,8 @@
 
 import { useRef, useState, useEffect } from "react"
 import Link from "next/link"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import {
   MapPin,
   Clock,
@@ -18,8 +20,11 @@ import {
   Award,
   Sparkles,
   ChevronRight,
+  Copy,
+  Loader2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -119,9 +124,29 @@ interface TourDetailContentProps {
 }
 
 export function TourDetailContent({ tour }: TourDetailContentProps) {
+  const { data: session } = useSession()
+  const router = useRouter()
   const bookNowButtonRef = useRef<HTMLButtonElement>(null)
   const [showFloatingButton, setShowFloatingButton] = useState(false)
   const [isWishlisted, setIsWishlisted] = useState(false)
+  const [wishlistLoading, setWishlistLoading] = useState(false)
+
+  // Check if tour is in wishlist on mount
+  useEffect(() => {
+    const checkWishlist = async () => {
+      if (!session?.user) return
+      try {
+        const response = await fetch(`/api/client/wishlist/check?tourId=${tour.id}`)
+        const data = await response.json()
+        if (data.success) {
+          setIsWishlisted(data.isWishlisted)
+        }
+      } catch (error) {
+        console.error("Error checking wishlist:", error)
+      }
+    }
+    checkWishlist()
+  }, [session, tour.id])
 
   // Observe when the Book Now button in the card goes out of view
   useEffect(() => {
@@ -142,6 +167,90 @@ export function TourDetailContent({ tour }: TourDetailContentProps) {
 
     return () => observer.disconnect()
   }, [])
+
+  // Handle wishlist toggle
+  const handleWishlistToggle = async () => {
+    if (!session?.user) {
+      toast.error("Please log in to save tours")
+      router.push(`/login?callbackUrl=/tours/${tour.slug}`)
+      return
+    }
+
+    setWishlistLoading(true)
+    try {
+      if (isWishlisted) {
+        const response = await fetch(`/api/client/wishlist?tourId=${tour.id}`, {
+          method: "DELETE",
+        })
+        const data = await response.json()
+        if (data.success) {
+          setIsWishlisted(false)
+          toast.success("Removed from wishlist")
+        } else {
+          toast.error(data.error || "Failed to remove from wishlist")
+        }
+      } else {
+        const response = await fetch("/api/client/wishlist", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tourId: tour.id }),
+        })
+        const data = await response.json()
+        if (data.success) {
+          setIsWishlisted(true)
+          toast.success("Added to wishlist")
+        } else {
+          toast.error(data.error || "Failed to add to wishlist")
+        }
+      }
+    } catch (error) {
+      console.error("Error toggling wishlist:", error)
+      toast.error("Something went wrong")
+    } finally {
+      setWishlistLoading(false)
+    }
+  }
+
+  // Handle share
+  const handleShare = async () => {
+    const shareData = {
+      title: tour.title,
+      text: `Check out this amazing safari: ${tour.title} - ${tour.destination}`,
+      url: window.location.href,
+    }
+
+    if (navigator.share && navigator.canShare(shareData)) {
+      try {
+        await navigator.share(shareData)
+        toast.success("Shared successfully!")
+      } catch (error) {
+        // User cancelled or error occurred
+        if ((error as Error).name !== "AbortError") {
+          // Fallback to copy link
+          copyToClipboard()
+        }
+      }
+    } else {
+      // Fallback: copy link to clipboard
+      copyToClipboard()
+    }
+  }
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(window.location.href)
+    toast.success("Link copied to clipboard!")
+  }
+
+  // Handle contact
+  const handleContact = () => {
+    if (!session?.user) {
+      toast.error("Please log in to contact the operator")
+      router.push(`/login?callbackUrl=/tours/${tour.slug}`)
+      return
+    }
+    // Navigate to messages with agent context
+    router.push(`/dashboard/messages?agentId=${tour.agent.id}&tourId=${tour.id}`)
+  }
 
   // Prepare tour data for TourCustomizer
   const tourData: TourData = {
@@ -283,12 +392,22 @@ export function TourDetailContent({ tour }: TourDetailContentProps) {
                       "h-10 px-4 border-border/50 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-all",
                       isWishlisted && "bg-rose-50 text-rose-600 border-rose-200"
                     )}
-                    onClick={() => setIsWishlisted(!isWishlisted)}
+                    onClick={handleWishlistToggle}
+                    disabled={wishlistLoading}
                   >
-                    <Heart className={cn("h-4 w-4 mr-2", isWishlisted && "fill-current")} />
+                    {wishlistLoading ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Heart className={cn("h-4 w-4 mr-2", isWishlisted && "fill-current")} />
+                    )}
                     {isWishlisted ? "Saved" : "Save"}
                   </Button>
-                  <Button variant="outline" size="sm" className="h-10 px-4 border-border/50 hover:bg-primary/5 hover:text-primary hover:border-primary/30">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-10 px-4 border-border/50 hover:bg-primary/5 hover:text-primary hover:border-primary/30"
+                    onClick={handleShare}
+                  >
                     <Share2 className="h-4 w-4 mr-2" />
                     Share
                   </Button>
@@ -633,12 +752,22 @@ export function TourDetailContent({ tour }: TourDetailContentProps) {
                           )}
                         </div>
                         <div className="flex gap-3 mt-5">
-                          <Button variant="outline" size="sm" className="h-10 border-border/50 hover:bg-primary/5 hover:text-primary hover:border-primary/30">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-10 border-border/50 hover:bg-primary/5 hover:text-primary hover:border-primary/30"
+                            onClick={handleContact}
+                          >
                             <MessageSquare className="h-4 w-4 mr-2" />
                             Contact
                           </Button>
-                          <Button variant="outline" size="sm" className="h-10 border-border/50 hover:bg-secondary/5 hover:text-secondary hover:border-secondary/30" asChild>
-                            <Link href={`/agents/${tour.agent.id}`}>View Profile</Link>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-10 border-border/50 hover:bg-secondary/5 hover:text-secondary hover:border-secondary/30"
+                            asChild
+                          >
+                            <Link href={`/operators/${tour.agent.id}`}>View Profile</Link>
                           </Button>
                         </div>
                       </div>

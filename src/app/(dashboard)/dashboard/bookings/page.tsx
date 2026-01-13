@@ -213,42 +213,42 @@ export default function BookingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">My Bookings</h1>
-        <p className="text-muted-foreground mt-1">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">My Bookings</h1>
+        <p className="text-muted-foreground mt-1 text-sm sm:text-base">
           View and manage your safari adventures
         </p>
       </div>
 
       {/* Stats Summary */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 grid-cols-2 sm:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
               Upcoming Trips
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{upcomingBookings.length}</div>
+            <div className="text-xl sm:text-2xl font-bold">{upcomingBookings.length}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
               Completed Trips
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{pastBookings.length}</div>
+            <div className="text-xl sm:text-2xl font-bold">{pastBookings.length}</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="col-span-2 sm:col-span-1">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
               Total Spent
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-xl sm:text-2xl font-bold">
               ${bookings.reduce((sum, b) => sum + b.totalAmount, 0).toLocaleString()}
             </div>
           </CardContent>
@@ -258,16 +258,16 @@ export default function BookingsPage() {
       {/* Bookings Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Booking History</CardTitle>
-          <CardDescription>All your safari bookings in one place</CardDescription>
+          <CardTitle className="text-lg sm:text-xl">Booking History</CardTitle>
+          <CardDescription className="text-sm">All your safari bookings in one place</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="mb-4">
-              <TabsTrigger value="all">All ({bookings.length})</TabsTrigger>
-              <TabsTrigger value="upcoming">Upcoming ({upcomingBookings.length})</TabsTrigger>
-              <TabsTrigger value="past">Past ({pastBookings.length})</TabsTrigger>
-              <TabsTrigger value="cancelled">Cancelled ({cancelledBookings.length})</TabsTrigger>
+            <TabsList className="mb-4 flex-wrap h-auto gap-1">
+              <TabsTrigger value="all" className="text-xs sm:text-sm">All ({bookings.length})</TabsTrigger>
+              <TabsTrigger value="upcoming" className="text-xs sm:text-sm">Upcoming ({upcomingBookings.length})</TabsTrigger>
+              <TabsTrigger value="past" className="text-xs sm:text-sm">Past ({pastBookings.length})</TabsTrigger>
+              <TabsTrigger value="cancelled" className="text-xs sm:text-sm">Cancelled ({cancelledBookings.length})</TabsTrigger>
             </TabsList>
 
             <TabsContent value={activeTab} className="mt-0">
@@ -289,25 +289,27 @@ export default function BookingsPage() {
                   </Button>
                 </div>
               ) : (
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Booking</TableHead>
-                        <TableHead>Tour</TableHead>
-                        <TableHead>Dates</TableHead>
-                        <TableHead>Travelers</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="text-right">Amount</TableHead>
-                        <TableHead></TableHead>
-                      </TableRow>
-                    </TableHeader>
+                <div className="overflow-x-auto -mx-4 sm:mx-0">
+                  <div className="inline-block min-w-full align-middle">
+                    <div className="overflow-hidden border rounded-md">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="text-xs sm:text-sm">Booking</TableHead>
+                            <TableHead className="text-xs sm:text-sm">Tour</TableHead>
+                            <TableHead className="text-xs sm:text-sm">Dates</TableHead>
+                            <TableHead className="text-xs sm:text-sm">Travelers</TableHead>
+                            <TableHead className="text-xs sm:text-sm">Status</TableHead>
+                            <TableHead className="text-right text-xs sm:text-sm">Amount</TableHead>
+                            <TableHead className="text-xs sm:text-sm"></TableHead>
+                          </TableRow>
+                        </TableHeader>
                     <TableBody>
                       {filteredBookings.map((booking) => (
                         <TableRow key={booking.id}>
-                          <TableCell>
+                          <TableCell className="whitespace-nowrap">
                             <div>
-                              <div className="font-mono font-medium">
+                              <div className="font-mono font-medium text-xs sm:text-sm">
                                 {booking.bookingReference}
                               </div>
                               <div className="text-xs text-muted-foreground">
@@ -316,8 +318,8 @@ export default function BookingsPage() {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <div className="max-w-[200px]">
-                              <div className="font-medium line-clamp-1">
+                            <div className="min-w-[150px] max-w-[200px]">
+                              <div className="font-medium line-clamp-1 text-xs sm:text-sm">
                                 {booking.tour.title}
                               </div>
                               <div className="text-xs text-muted-foreground flex items-center gap-1">
@@ -326,29 +328,29 @@ export default function BookingsPage() {
                               </div>
                             </div>
                           </TableCell>
-                          <TableCell>
-                            <div className="text-sm">
+                          <TableCell className="whitespace-nowrap">
+                            <div className="text-xs sm:text-sm">
                               {format(new Date(booking.startDate), "MMM d")} -{" "}
                               {format(new Date(booking.endDate), "MMM d, yyyy")}
                             </div>
                             <div className="text-xs text-muted-foreground">
-                              {booking.tour.durationDays} days / {booking.tour.durationNights} nights
+                              {booking.tour.durationDays}d / {booking.tour.durationNights}n
                             </div>
                           </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-1 text-sm">
-                              <Users className="h-4 w-4 text-muted-foreground" />
+                          <TableCell className="whitespace-nowrap">
+                            <div className="flex items-center gap-1 text-xs sm:text-sm">
+                              <Users className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
                               {booking.adults + booking.children}
                             </div>
                           </TableCell>
                           <TableCell>
                             {getStatusBadge(booking.status, booking.paymentStatus)}
                           </TableCell>
-                          <TableCell className="text-right font-medium">
+                          <TableCell className="text-right font-medium whitespace-nowrap text-xs sm:text-sm">
                             ${booking.totalAmount.toLocaleString()}
                           </TableCell>
                           <TableCell>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1 sm:gap-2">
                               <Button variant="ghost" size="sm" asChild>
                                 <Link href={`/booking/confirmation/${booking.id}`}>
                                   <Eye className="h-4 w-4" />
@@ -421,7 +423,9 @@ export default function BookingsPage() {
                         </TableRow>
                       ))}
                     </TableBody>
-                  </Table>
+                      </Table>
+                    </div>
+                  </div>
                 </div>
               )}
             </TabsContent>

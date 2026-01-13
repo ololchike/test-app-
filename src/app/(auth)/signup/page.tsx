@@ -67,11 +67,11 @@ function PasswordStrength({ password }: { password: string }) {
       </div>
 
       {/* Requirements */}
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {requirements.map((req) => (
           <div key={req.label} className="flex items-center gap-2 text-xs">
             <div className={cn(
-              "h-4 w-4 rounded-full flex items-center justify-center",
+              "h-4 w-4 rounded-full flex items-center justify-center flex-shrink-0",
               req.met ? "bg-green-100 dark:bg-green-900/30" : "bg-muted"
             )}>
               {req.met ? (
@@ -80,7 +80,10 @@ function PasswordStrength({ password }: { password: string }) {
                 <X className="h-2.5 w-2.5 text-muted-foreground" />
               )}
             </div>
-            <span className={req.met ? "text-green-600" : "text-muted-foreground"}>
+            <span className={cn(
+              "truncate",
+              req.met ? "text-green-600" : "text-muted-foreground"
+            )}>
               {req.label}
             </span>
           </div>
@@ -155,18 +158,18 @@ export default function SignupPage() {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
-            className="mx-auto w-20 h-20 bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 rounded-full flex items-center justify-center"
+            className="mx-auto w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 rounded-full flex items-center justify-center"
           >
-            <Mail className="h-10 w-10 text-green-600" />
+            <Mail className="h-8 w-8 sm:h-10 sm:w-10 text-green-600" />
           </motion.div>
-          <h1 className="text-3xl font-bold tracking-tight">Check Your Email</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Check Your Email</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
             We&apos;ve sent a verification link to
           </p>
-          <p className="font-semibold text-foreground text-lg">{userEmail}</p>
+          <p className="font-semibold text-foreground text-base sm:text-lg break-all px-4">{userEmail}</p>
         </div>
 
-        <div className="bg-gradient-to-br from-primary/5 to-accent/5 rounded-2xl p-6 space-y-4 border border-primary/10">
+        <div className="bg-gradient-to-br from-primary/5 to-accent/5 rounded-2xl p-4 sm:p-6 space-y-4 border border-primary/10">
           <p className="text-sm text-muted-foreground">
             Click the link in the email to verify your account and start planning your safari adventure.
           </p>
@@ -181,7 +184,7 @@ export default function SignupPage() {
           </p>
           <Button
             variant="outline"
-            className="w-full h-12 rounded-xl border-border/50"
+            className="w-full h-11 sm:h-12 rounded-xl border-border/50 text-sm sm:text-base"
             onClick={() => {
               toast.info("Resend feature coming soon")
             }}
@@ -216,8 +219,8 @@ export default function SignupPage() {
           <Sparkles className="h-3.5 w-3.5 text-primary" />
           <span className="text-xs font-medium text-primary">Start Your Journey</span>
         </motion.div>
-        <h1 className="text-3xl font-bold tracking-tight">Create an account</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Create an account</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">
           Start planning your safari adventure today
         </p>
       </div>
@@ -230,14 +233,14 @@ export default function SignupPage() {
       >
         <Button
           variant="outline"
-          className="w-full h-12 rounded-xl border-border/50 hover:border-primary/30 hover:bg-primary/5 transition-all"
+          className="w-full h-11 sm:h-12 rounded-xl border-border/50 hover:border-primary/30 hover:bg-primary/5 transition-all text-sm sm:text-base"
           onClick={handleGoogleSignIn}
           disabled={isGoogleLoading || isLoading}
         >
           {isGoogleLoading ? (
-            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
           ) : (
-            <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24">
+            <svg className="mr-2 h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 24 24">
               <path
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                 fill="#4285F4"
@@ -290,7 +293,7 @@ export default function SignupPage() {
                       placeholder="John Doe"
                       autoComplete="name"
                       disabled={isLoading || isGoogleLoading}
-                      className="h-12 rounded-xl border-border/50 focus:border-primary/50"
+                      className="h-11 sm:h-12 rounded-xl border-border/50 focus:border-primary/50"
                       {...field}
                     />
                   </FormControl>
@@ -311,7 +314,7 @@ export default function SignupPage() {
                       placeholder="you@example.com"
                       autoComplete="email"
                       disabled={isLoading || isGoogleLoading}
-                      className="h-12 rounded-xl border-border/50 focus:border-primary/50"
+                      className="h-11 sm:h-12 rounded-xl border-border/50 focus:border-primary/50"
                       {...field}
                     />
                   </FormControl>
@@ -333,7 +336,7 @@ export default function SignupPage() {
                         placeholder="Create a strong password"
                         autoComplete="new-password"
                         disabled={isLoading || isGoogleLoading}
-                        className="h-12 rounded-xl border-border/50 focus:border-primary/50 pr-12"
+                        className="h-11 sm:h-12 rounded-xl border-border/50 focus:border-primary/50 pr-12"
                         {...field}
                       />
                       <Button
@@ -371,7 +374,7 @@ export default function SignupPage() {
                         placeholder="Confirm your password"
                         autoComplete="new-password"
                         disabled={isLoading || isGoogleLoading}
-                        className="h-12 rounded-xl border-border/50 focus:border-primary/50 pr-12"
+                        className="h-11 sm:h-12 rounded-xl border-border/50 focus:border-primary/50 pr-12"
                         {...field}
                       />
                       <Button
@@ -399,17 +402,17 @@ export default function SignupPage() {
               control={form.control}
               name="acceptTerms"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4 rounded-xl bg-muted/30 border border-border/50">
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-3 sm:p-4 rounded-xl bg-muted/30 border border-border/50">
                   <FormControl>
                     <Checkbox
                       checked={field.value}
                       onCheckedChange={field.onChange}
                       disabled={isLoading || isGoogleLoading}
-                      className="mt-0.5"
+                      className="mt-0.5 flex-shrink-0"
                     />
                   </FormControl>
                   <div className="space-y-1 leading-none">
-                    <FormLabel className="text-sm font-normal cursor-pointer">
+                    <FormLabel className="text-xs sm:text-sm font-normal cursor-pointer">
                       I agree to the{" "}
                       <Link href="/terms" className="text-primary hover:underline font-medium">
                         Terms of Service
@@ -427,18 +430,18 @@ export default function SignupPage() {
 
             <Button
               type="submit"
-              className="w-full h-12 rounded-xl shadow-glow text-base font-semibold"
+              className="w-full h-11 sm:h-12 rounded-xl shadow-glow text-sm sm:text-base font-semibold"
               disabled={isLoading || isGoogleLoading}
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
                   Creating account...
                 </>
               ) : (
                 <>
                   Create Account
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
                 </>
               )}
             </Button>

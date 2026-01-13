@@ -328,14 +328,14 @@ export default function AdminContactsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold">Contact Messages</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">Contact Messages</h1>
         <p className="text-muted-foreground mt-2">
           Manage and respond to customer inquiries
         </p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
         {Object.entries(statusConfig).map(([status, config]) => {
           const Icon = config.icon
           const count = statusCounts[status as keyof StatusCounts] || 0
@@ -499,7 +499,7 @@ export default function AdminContactsPage() {
 
       {/* Message Detail Modal */}
       <Dialog open={isDetailModalOpen} onOpenChange={setIsDetailModalOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-full">
           {selectedMessage && (
             <>
               <DialogHeader>
@@ -511,7 +511,7 @@ export default function AdminContactsPage() {
 
               <div className="space-y-6">
                 {/* Contact Info */}
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
                   <div>
                     <Label className="text-muted-foreground">Name</Label>
                     <p className="font-medium mt-1">{selectedMessage.name}</p>

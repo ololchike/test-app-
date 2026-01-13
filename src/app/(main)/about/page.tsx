@@ -89,7 +89,7 @@ export default function AboutPage() {
   return (
     <div className="pt-20">
       {/* Hero Section */}
-      <section className="relative py-24 lg:py-32 overflow-hidden">
+      <section className="relative py-16 sm:py-20 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 z-0">
           <Image
             src="https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=2070"
@@ -115,7 +115,7 @@ export default function AboutPage() {
           />
         </div>
 
-        <div className="container relative z-10 mx-auto px-4 lg:px-8">
+        <div className="container relative z-10 mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -132,7 +132,7 @@ export default function AboutPage() {
               <span className="text-white/90 text-sm font-medium">Our Story</span>
             </motion.div>
 
-            <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
+            <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl md:text-5xl lg:text-6xl">
               Connecting Travelers with{" "}
               <span className="relative">
                 <span className="relative z-10 text-accent">Authentic Safari</span>
@@ -140,12 +140,12 @@ export default function AboutPage() {
                   initial={{ scaleX: 0 }}
                   animate={{ scaleX: 1 }}
                   transition={{ duration: 0.8, delay: 0.5 }}
-                  className="absolute bottom-2 left-0 right-0 h-3 bg-accent/30 -z-0 origin-left"
+                  className="absolute bottom-1 sm:bottom-2 left-0 right-0 h-2 sm:h-3 bg-accent/30 -z-0 origin-left"
                 />
               </span>{" "}
               Experiences
             </h1>
-            <p className="mt-6 text-xl text-white/80 leading-relaxed">
+            <p className="mt-4 sm:mt-6 text-lg sm:text-xl text-white/80 leading-relaxed">
               SafariPlus is East Africa's leading platform for discovering and
               booking unforgettable safari adventures with trusted local
               operators.
@@ -154,15 +154,15 @@ export default function AboutPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
-              className="mt-8 flex flex-wrap gap-4"
+              className="mt-6 sm:mt-8 flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4"
             >
-              <Button size="lg" className="h-14 px-8 shadow-glow" asChild>
+              <Button size="lg" className="h-12 sm:h-14 px-6 sm:px-8 w-full sm:w-auto shadow-glow" asChild>
                 <Link href="/tours">
                   Explore Tours
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  <ArrowRight className="ml-2 h-4 sm:h-5 w-4 sm:w-5" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" asChild className="h-14 px-8 bg-white/10 border-white/30 text-white hover:bg-white/20">
+              <Button size="lg" variant="outline" asChild className="h-12 sm:h-14 px-6 sm:px-8 w-full sm:w-auto bg-white/10 border-white/30 text-white hover:bg-white/20">
                 <Link href="/contact">Contact Us</Link>
               </Button>
             </motion.div>
@@ -171,9 +171,9 @@ export default function AboutPage() {
       </section>
 
       {/* Stats Section */}
-      <section className="relative border-b bg-gradient-to-r from-muted/50 via-background to-muted/50 py-16">
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
+      <section className="relative border-b bg-gradient-to-r from-muted/50 via-background to-muted/50 py-12 sm:py-16">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 gap-6 sm:gap-8 md:grid-cols-4">
             {stats.map((stat, index) => (
               <motion.div
                 key={stat.label}
@@ -183,10 +183,10 @@ export default function AboutPage() {
                 transition={{ delay: index * 0.1 }}
                 className="text-center"
               >
-                <div className="text-4xl md:text-5xl font-bold text-gradient">
+                <div className="text-3xl sm:text-4xl md:text-5xl font-bold text-gradient">
                   {stat.value}
                 </div>
-                <div className="mt-2 text-sm text-muted-foreground font-medium">
+                <div className="mt-1 sm:mt-2 text-xs sm:text-sm text-muted-foreground font-medium">
                   {stat.label}
                 </div>
               </motion.div>
@@ -196,22 +196,22 @@ export default function AboutPage() {
       </section>
 
       {/* Story Section */}
-      <section className="py-20 lg:py-28">
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="grid gap-12 lg:grid-cols-2 lg:gap-20 items-center">
+      <section className="py-12 sm:py-16 lg:py-28">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-8 sm:gap-12 lg:grid-cols-2 lg:gap-20 items-center">
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <span className="text-primary font-semibold text-sm uppercase tracking-wider">
+              <span className="text-primary font-semibold text-xs sm:text-sm uppercase tracking-wider">
                 Who We Are
               </span>
-              <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
+              <h2 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight md:text-4xl">
                 Our Story
               </h2>
-              <div className="mt-6 space-y-4 text-muted-foreground text-lg leading-relaxed">
+              <div className="mt-4 sm:mt-6 space-y-3 sm:space-y-4 text-muted-foreground text-base sm:text-lg leading-relaxed">
                 <p>
                   SafariPlus was born from a simple observation: travelers
                   planning African safaris faced overwhelming choices, unclear
@@ -273,7 +273,7 @@ export default function AboutPage() {
       </section>
 
       {/* Mission & Vision */}
-      <section className="bg-secondary py-20 lg:py-28 text-white relative overflow-hidden">
+      <section className="bg-secondary py-12 sm:py-16 lg:py-28 text-white relative overflow-hidden">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <motion.div
             animate={{ x: [0, 50, 0], y: [0, -30, 0] }}
@@ -287,21 +287,21 @@ export default function AboutPage() {
           />
         </div>
 
-        <div className="container relative mx-auto px-4 lg:px-8">
-          <div className="grid gap-12 lg:grid-cols-2">
+        <div className="container relative mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-6 sm:gap-8 lg:gap-12 lg:grid-cols-2">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="p-8 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10"
+              className="p-6 sm:p-8 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10"
             >
-              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-orange-500">
-                <Target className="h-7 w-7 text-white" />
+              <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-orange-500">
+                <Target className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
               </div>
-              <h2 className="mt-6 text-2xl font-bold sm:text-3xl">
+              <h2 className="mt-4 sm:mt-6 text-xl sm:text-2xl font-bold md:text-3xl">
                 Our Mission
               </h2>
-              <p className="mt-4 text-white/80 text-lg leading-relaxed">
+              <p className="mt-3 sm:mt-4 text-white/80 text-base sm:text-lg leading-relaxed">
                 To democratize access to authentic safari experiences by
                 connecting travelers with trusted local operators, making
                 African adventures accessible, transparent, and unforgettable.
@@ -312,15 +312,15 @@ export default function AboutPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="p-8 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10"
+              className="p-6 sm:p-8 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10"
             >
-              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-accent to-yellow-500">
-                <Award className="h-7 w-7 text-white" />
+              <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-xl bg-gradient-to-br from-accent to-yellow-500">
+                <Award className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
               </div>
-              <h2 className="mt-6 text-2xl font-bold sm:text-3xl">
+              <h2 className="mt-4 sm:mt-6 text-xl sm:text-2xl font-bold md:text-3xl">
                 Our Vision
               </h2>
-              <p className="mt-4 text-white/80 text-lg leading-relaxed">
+              <p className="mt-3 sm:mt-4 text-white/80 text-base sm:text-lg leading-relaxed">
                 To become the world's most trusted platform for African safari
                 bookings, setting the standard for quality, sustainability, and
                 authentic travel experiences.
@@ -331,26 +331,26 @@ export default function AboutPage() {
       </section>
 
       {/* Values Section */}
-      <section className="py-20 lg:py-28">
-        <div className="container mx-auto px-4 lg:px-8">
+      <section className="py-12 sm:py-16 lg:py-28">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center max-w-2xl mx-auto mb-16"
+            className="text-center max-w-2xl mx-auto mb-8 sm:mb-12 lg:mb-16"
           >
-            <span className="text-primary font-semibold text-sm uppercase tracking-wider">
+            <span className="text-primary font-semibold text-xs sm:text-sm uppercase tracking-wider">
               What We Believe
             </span>
-            <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
+            <h2 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight md:text-4xl">
               Our Values
             </h2>
-            <p className="mt-4 text-muted-foreground text-lg">
+            <p className="mt-3 sm:mt-4 text-muted-foreground text-base sm:text-lg">
               The principles that guide everything we do
             </p>
           </motion.div>
 
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {values.map((value, index) => (
               <motion.div
                 key={value.title}
@@ -364,17 +364,17 @@ export default function AboutPage() {
                   transition={{ duration: 0.3 }}
                 >
                   <Card className="h-full border-border/50 hover:border-primary/30 hover:shadow-premium-lg transition-all duration-300">
-                    <CardContent className="p-8">
+                    <CardContent className="p-5 sm:p-6 lg:p-8">
                       <div className={cn(
-                        "flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br",
+                        "flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-xl bg-gradient-to-br",
                         value.color
                       )}>
-                        <value.icon className="h-7 w-7 text-white" />
+                        <value.icon className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
                       </div>
-                      <h3 className="mt-6 text-xl font-bold">
+                      <h3 className="mt-4 sm:mt-6 text-lg sm:text-xl font-bold">
                         {value.title}
                       </h3>
-                      <p className="mt-3 text-muted-foreground leading-relaxed">
+                      <p className="mt-2 sm:mt-3 text-sm sm:text-base text-muted-foreground leading-relaxed">
                         {value.description}
                       </p>
                     </CardContent>
@@ -387,26 +387,26 @@ export default function AboutPage() {
       </section>
 
       {/* Team Section */}
-      <section className="bg-muted/30 py-20 lg:py-28">
-        <div className="container mx-auto px-4 lg:px-8">
+      <section className="bg-muted/30 py-12 sm:py-16 lg:py-28">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center max-w-2xl mx-auto mb-16"
+            className="text-center max-w-2xl mx-auto mb-8 sm:mb-12 lg:mb-16"
           >
-            <span className="text-primary font-semibold text-sm uppercase tracking-wider">
+            <span className="text-primary font-semibold text-xs sm:text-sm uppercase tracking-wider">
               The People Behind SafariPlus
             </span>
-            <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
+            <h2 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight md:text-4xl">
               Meet Our Team
             </h2>
-            <p className="mt-4 text-muted-foreground text-lg">
+            <p className="mt-3 sm:mt-4 text-muted-foreground text-base sm:text-lg">
               Passionate professionals dedicated to your safari experience
             </p>
           </motion.div>
 
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:gap-6 lg:gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {team.map((member, index) => (
               <motion.div
                 key={member.name}
@@ -428,12 +428,12 @@ export default function AboutPage() {
                         className="object-cover transition-transform duration-500 hover:scale-110"
                       />
                     </div>
-                    <CardContent className="p-6">
-                      <h3 className="text-lg font-bold">{member.name}</h3>
-                      <p className="text-sm font-medium text-primary mt-1">
+                    <CardContent className="p-4 sm:p-6">
+                      <h3 className="text-base sm:text-lg font-bold">{member.name}</h3>
+                      <p className="text-xs sm:text-sm font-medium text-primary mt-1">
                         {member.role}
                       </p>
-                      <p className="mt-3 text-sm text-muted-foreground">
+                      <p className="mt-2 sm:mt-3 text-xs sm:text-sm text-muted-foreground">
                         {member.bio}
                       </p>
                     </CardContent>
@@ -446,13 +446,13 @@ export default function AboutPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 lg:py-28">
-        <div className="container mx-auto px-4 lg:px-8">
+      <section className="py-12 sm:py-16 lg:py-28">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-primary via-primary/90 to-secondary p-10 lg:p-16 text-center text-white"
+            className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-r from-primary via-primary/90 to-secondary p-8 sm:p-10 lg:p-16 text-center text-white"
           >
             {/* Animated background */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -472,33 +472,33 @@ export default function AboutPage() {
               <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-                className="mx-auto h-20 w-20 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center mb-8"
+                className="mx-auto h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center mb-6 sm:mb-8"
               >
-                <Users className="h-10 w-10" />
+                <Users className="h-8 w-8 sm:h-10 sm:w-10" />
               </motion.div>
-              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
+              <h2 className="text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl lg:text-5xl">
                 Ready to Start Your Safari Adventure?
               </h2>
-              <p className="mx-auto mt-6 max-w-2xl text-xl text-white/80">
+              <p className="mx-auto mt-4 sm:mt-6 max-w-2xl text-base sm:text-lg lg:text-xl text-white/80">
                 Join thousands of travelers who have discovered the magic of East
                 Africa with SafariPlus. Browse our tours and start planning your
                 dream safari today.
               </p>
-              <div className="mt-10 flex flex-wrap justify-center gap-4">
+              <div className="mt-6 sm:mt-8 lg:mt-10 flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-4">
                 <Button
                   size="lg"
-                  className="h-14 px-8 bg-white text-primary hover:bg-white/90 shadow-2xl"
+                  className="h-12 sm:h-14 px-6 sm:px-8 w-full sm:w-auto bg-white text-primary hover:bg-white/90 shadow-2xl"
                   asChild
                 >
                   <Link href="/tours">
                     Browse Tours
-                    <ArrowRight className="ml-2 h-5 w-5" />
+                    <ArrowRight className="ml-2 h-4 sm:h-5 w-4 sm:w-5" />
                   </Link>
                 </Button>
                 <Button
                   size="lg"
                   variant="outline"
-                  className="h-14 px-8 border-white/30 text-white hover:bg-white/10"
+                  className="h-12 sm:h-14 px-6 sm:px-8 w-full sm:w-auto border-white/30 text-white hover:bg-white/10"
                   asChild
                 >
                   <Link href="/become-agent">Become an Operator</Link>
