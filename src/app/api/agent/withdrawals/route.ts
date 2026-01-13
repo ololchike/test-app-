@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
+import { WithdrawalMethod, getEnumValues } from "@/lib/constants"
 
 /**
  * Withdrawal Request Schema
@@ -10,7 +11,7 @@ import { z } from "zod"
 const withdrawalSchema = z.object({
   amount: z.number().positive("Amount must be positive"),
   currency: z.enum(["USD", "KES"]).default("USD"),
-  method: z.enum(["mpesa", "bank"]),
+  method: z.enum(getEnumValues(WithdrawalMethod) as [string, ...string[]]),
   mpesaPhone: z.string().optional(),
   bankDetails: z
     .object({

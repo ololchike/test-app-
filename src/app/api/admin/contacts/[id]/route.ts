@@ -3,11 +3,12 @@ import { z } from "zod"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { createLogger } from "@/lib/logger"
+import { AdminContactStatuses, ContactMessageStatus } from "@/lib/constants"
 
 const log = createLogger("Admin Contact Detail API")
 
 const updateContactMessageSchema = z.object({
-  status: z.enum(["NEW", "READ", "IN_PROGRESS", "RESOLVED", "CLOSED"]).optional(),
+  status: z.enum(AdminContactStatuses as unknown as [string, ...string[]]).optional(),
   adminNotes: z.string().optional(),
 })
 
@@ -36,11 +37,11 @@ export async function GET(
     }
 
     // Mark as read if it's new
-    if (message.status === "NEW") {
+    if (message.status === ContactMessageStatus.NEW) {
       await prisma.contactMessage.update({
         where: { id },
         data: {
-          status: "READ",
+          status: ContactMessageStatus.READ,
         },
       })
     }

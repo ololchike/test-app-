@@ -4,11 +4,12 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { createLogger } from "@/lib/logger"
 import { sendEmail } from "@/lib/email"
+import { AgentContactStatuses } from "@/lib/constants"
 
 const log = createLogger("Agent Contact Detail API")
 
 const updateContactMessageSchema = z.object({
-  status: z.enum(["ACKNOWLEDGED", "IN_PROGRESS", "NEEDS_INFO", "RESOLVED"]),
+  status: z.enum(AgentContactStatuses as unknown as [string, ...string[]]),
   agentResponse: z.string().optional(), // Optional now since we're using chat interface
 })
 

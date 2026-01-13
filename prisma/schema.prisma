@@ -166,20 +166,20 @@ model Agent {
 }
 
 model BankDetails {
-  id            String   @id @default(cuid())
-  agentId       String   @unique
-  bankName      String?
-  accountNumber String?
-  accountName   String?
-  branchCode    String?
-  swiftCode     String?
-  mpesaNumber   String?
-  mpesaName     String?
-  preferredMethod String  @default("mpesa") // "mpesa" | "bank"
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id              String           @id @default(cuid())
+  agentId         String           @unique
+  bankName        String?
+  accountNumber   String?
+  accountName     String?
+  branchCode      String?
+  swiftCode       String?
+  mpesaNumber     String?
+  mpesaName       String?
+  preferredMethod WithdrawalMethod @default(MPESA)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
 
-  agent         Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  agent           Agent            @relation(fields: [agentId], references: [id], onDelete: Cascade)
 }
 
 // ============================================================================
@@ -208,6 +208,36 @@ enum TourType {
   FAMILY
   LUXURY
   BUDGET
+}
+
+enum DifficultyLevel {
+  EASY
+  MODERATE
+  CHALLENGING
+}
+
+enum AccommodationTier {
+  BUDGET
+  MID_RANGE
+  LUXURY
+  ULTRA_LUXURY
+}
+
+enum WithdrawalMethod {
+  MPESA
+  BANK
+}
+
+enum ContactReplyRole {
+  ADMIN
+  AGENT
+}
+
+enum EarningType {
+  BOOKING
+  BONUS
+  ADJUSTMENT
+  REFUND
 }
 
 model Tour {
@@ -253,7 +283,7 @@ model Tour {
 
   // Categorization
   tourType         String    @default("[]") // JSON array of TourType values
-  difficulty       String?     // Easy, Moderate, Challenging
+  difficulty       DifficultyLevel?
   bestSeason       String    @default("[]") // JSON array of months
 
   // Status
@@ -320,7 +350,7 @@ model AccommodationOption {
   dayNumber    Int?     // If null, applies to all days
   name         String
   description  String?
-  tier         String   // budget, mid-range, luxury, ultra-luxury
+  tier         AccommodationTier
   pricePerNight Float
   images       String    @default("[]") // JSON array
   amenities    String    @default("[]") // JSON array
@@ -545,16 +575,16 @@ model Payment {
 // ============================================================================
 
 model AgentEarning {
-  id          String   @id @default(cuid())
+  id          String      @id @default(cuid())
   agentId     String
   bookingId   String?
   amount      Float
-  currency    String   @default("USD")
+  currency    String      @default("USD")
   description String?
-  type        String   // "booking", "bonus", "adjustment"
-  createdAt   DateTime @default(now())
+  type        EarningType @default(BOOKING)
+  createdAt   DateTime    @default(now())
 
-  agent       Agent    @relation(fields: [agentId], references: [id])
+  agent       Agent       @relation(fields: [agentId], references: [id])
 
   @@index([agentId])
   @@index([createdAt])
@@ -573,7 +603,7 @@ model WithdrawalRequest {
   agentId       String
   amount        Float
   currency      String           @default("USD")
-  method        String           // "mpesa" | "bank"
+  method        WithdrawalMethod
   status        WithdrawalStatus @default(PENDING)
 
   // Payment details (JSON)
@@ -861,14 +891,14 @@ model ContactMessage {
 }
 
 model ContactMessageReply {
-  id              String         @id @default(cuid())
+  id               String           @id @default(cuid())
   contactMessageId String
-  contactMessage  ContactMessage @relation(fields: [contactMessageId], references: [id], onDelete: Cascade)
-  senderId        String
-  sender          User           @relation(fields: [senderId], references: [id])
-  senderRole      String         // "ADMIN" or "AGENT"
-  message         String
-  createdAt       DateTime       @default(now())
+  contactMessage   ContactMessage   @relation(fields: [contactMessageId], references: [id], onDelete: Cascade)
+  senderId         String
+  sender           User             @relation(fields: [senderId], references: [id])
+  senderRole       ContactReplyRole
+  message          String
+  createdAt        DateTime         @default(now())
 
   @@index([contactMessageId])
   @@index([senderId])

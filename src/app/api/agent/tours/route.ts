@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
+import { DifficultyLevel, getEnumValues } from "@/lib/constants"
 
 // Validation schema for tour creation
 const createTourSchema = z.object({
@@ -17,7 +18,7 @@ const createTourSchema = z.object({
   infantPrice: z.number().min(0).optional().nullable(),
   singleSupplement: z.number().min(0).optional().nullable(),
   maxGroupSize: z.number().int().min(1).max(50).default(12),
-  difficulty: z.enum(["Easy", "Moderate", "Challenging"]).default("Moderate"),
+  difficulty: z.enum(getEnumValues(DifficultyLevel) as [string, ...string[]]).default(DifficultyLevel.MODERATE),
   tourType: z.array(z.string()).min(1, "Select at least one tour type"),
   highlights: z.array(z.string()).optional(),
   included: z.array(z.string()).optional(),

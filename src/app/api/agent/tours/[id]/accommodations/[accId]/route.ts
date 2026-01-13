@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
+import { AccommodationTier, getEnumValues } from "@/lib/constants"
 
 const updateAccommodationSchema = z.object({
   name: z.string().min(2).optional(),
   description: z.string().optional().nullable(),
-  tier: z.enum(["budget", "mid-range", "luxury", "ultra-luxury"]).optional(),
+  tier: z.enum(getEnumValues(AccommodationTier) as [string, ...string[]]).optional(),
   pricePerNight: z.number().min(0).optional(),
   images: z.array(z.string().url()).optional(),
   amenities: z.array(z.string()).optional(),

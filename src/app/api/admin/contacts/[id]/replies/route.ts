@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { createLogger } from "@/lib/logger"
 import { sendEmail } from "@/lib/email"
+import { ContactReplyRole } from "@/lib/constants"
 
 const log = createLogger("Admin Contact Replies API")
 
@@ -116,7 +117,7 @@ export async function POST(
       data: {
         contactMessageId: id,
         senderId: session.user.id,
-        senderRole: "ADMIN",
+        senderRole: ContactReplyRole.ADMIN,
         message: message.trim(),
       },
       include: {
