@@ -77,7 +77,15 @@ export const metadata: Metadata = {
     shortcut: "/favicon-16x16.png",
     apple: "/apple-touch-icon.png",
   },
-  manifest: "/site.webmanifest",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "SafariPlus",
+  },
+  formatDetection: {
+    telephone: false,
+  },
 }
 
 export const viewport: Viewport = {

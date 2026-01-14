@@ -6,11 +6,13 @@ import { TourCard } from "@/components/tours/tour-card"
 import { TourFilters, TourFiltersSidebar } from "@/components/tours/tour-filters"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Pagination } from "@/components/ui/pagination"
-import { Loader2, Map, Search, Compass, Filter, Grid3X3, List, Sparkles } from "lucide-react"
+import { Loader2, Map, Search, Compass, Filter, Grid3X3, List, Sparkles, ChevronDown } from "lucide-react"
+import { toast } from "sonner"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
+import { SocialProofBanner } from "@/components/trust/social-proof-banner"
 
 interface Tour {
   id: string
@@ -125,16 +127,21 @@ function ToursContent() {
     hasMore: false,
   })
   const [isLoading, setIsLoading] = useState(true)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+  const [currentPage, setCurrentPage] = useState(1)
 
+  // Fetch tours when filters change (reset to page 1)
   useEffect(() => {
     const fetchTours = async () => {
       setIsLoading(true)
       setError(null)
+      setCurrentPage(1)
 
       try {
         const params = new URLSearchParams(searchParams.toString())
+        params.set("page", "1")
         const response = await fetch(`/api/tours?${params.toString()}`)
 
         if (!response.ok) {
@@ -156,6 +163,36 @@ function ToursContent() {
 
     fetchTours()
   }, [searchParams])
+
+  // Load more tours
+  const handleLoadMore = async () => {
+    if (isLoadingMore || !pagination.hasMore) return
+
+    setIsLoadingMore(true)
+    const nextPage = currentPage + 1
+
+    try {
+      const params = new URLSearchParams(searchParams.toString())
+      params.set("page", nextPage.toString())
+      const response = await fetch(`/api/tours?${params.toString()}`)
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch more tours")
+      }
+
+      const data: ToursResponse = await response.json()
+      setTours(prev => [...prev, ...data.tours])
+      setPagination(data.pagination)
+      setCurrentPage(nextPage)
+    } catch (err) {
+      if (process.env.NODE_ENV === "development") {
+        console.error("Error loading more tours:", err)
+      }
+      toast.error("Failed to load more tours")
+    } finally {
+      setIsLoadingMore(false)
+    }
+  }
 
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams.toString())
@@ -259,6 +296,9 @@ function ToursContent() {
           </motion.div>
         </div>
       </div>
+
+      {/* Social Proof Banner */}
+      <SocialProofBanner variant="compact" />
 
       {/* Filters and Results */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
@@ -439,8 +479,41 @@ function ToursContent() {
                     ))}
                   </div>
 
-                  {/* Pagination */}
-                  {pagination.totalPages > 1 && (
+                  {/* Load More Button */}
+                  {pagination.hasMore && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.3 }}
+                      className="mt-12 flex flex-col items-center gap-4"
+                    >
+                      <p className="text-sm text-muted-foreground">
+                        Showing {tours.length} of {pagination.total} tours
+                      </p>
+                      <Button
+                        onClick={handleLoadMore}
+                        disabled={isLoadingMore}
+                        size="lg"
+                        variant="outline"
+                        className="min-w-[200px] h-12 rounded-xl border-primary/30 hover:bg-primary/5 hover:text-primary hover:border-primary/50 transition-all"
+                      >
+                        {isLoadingMore ? (
+                          <>
+                            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                            Loading...
+                          </>
+                        ) : (
+                          <>
+                            Load More Tours
+                            <ChevronDown className="ml-2 h-5 w-5" />
+                          </>
+                        )}
+                      </Button>
+                    </motion.div>
+                  )}
+
+                  {/* Traditional Pagination (fallback) */}
+                  {!pagination.hasMore && pagination.totalPages > 1 && tours.length < pagination.total && (
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}

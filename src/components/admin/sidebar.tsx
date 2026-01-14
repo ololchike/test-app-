@@ -20,6 +20,10 @@ import {
   HelpCircle,
   Mail,
   Star,
+  Percent,
+  Globe,
+  Newspaper,
+  HelpCircleIcon,
 } from "lucide-react"
 import { signOut } from "next-auth/react"
 import { cn } from "@/lib/utils"
@@ -96,6 +100,31 @@ const adminNavItems = [
         href: "/admin/withdrawals",
         icon: CreditCard,
         badge: 5,
+      },
+      {
+        title: "Commission Tiers",
+        href: "/admin/commission-tiers",
+        icon: Percent,
+      },
+    ],
+  },
+  {
+    section: "Content",
+    items: [
+      {
+        title: "Destinations",
+        href: "/admin/destinations",
+        icon: Globe,
+      },
+      {
+        title: "Blog Posts",
+        href: "/admin/blog",
+        icon: Newspaper,
+      },
+      {
+        title: "FAQs",
+        href: "/admin/faqs",
+        icon: HelpCircleIcon,
       },
     ],
   },

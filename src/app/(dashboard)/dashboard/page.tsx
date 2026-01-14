@@ -19,6 +19,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
+import { PendingReviewsCard } from "@/components/reviews"
 
 async function getDashboardData(userId: string) {
   const now = new Date()
@@ -375,6 +376,9 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Pending Reviews */}
+      <PendingReviewsCard />
 
       {/* Recommended Tours */}
       {recommendedTours.length > 0 && (

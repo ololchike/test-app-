@@ -12,6 +12,7 @@ import { toast } from "sonner"
 import { motion } from "framer-motion"
 
 import { loginSchema, type LoginInput } from "@/lib/validations/auth"
+import { useBotProtection } from "@/lib/hooks/use-bot-protection"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -71,6 +72,7 @@ function LoginForm() {
   const [isLoading, setIsLoading] = React.useState(false)
   const [isGoogleLoading, setIsGoogleLoading] = React.useState(false)
   const [showPassword, setShowPassword] = React.useState(false)
+  const { honeypotProps, checkIsBot } = useBotProtection()
 
   const form = useForm({
     resolver: zodResolver(loginSchema),
@@ -82,6 +84,14 @@ function LoginForm() {
   })
 
   async function onSubmit(data: LoginInput) {
+    // Bot protection check
+    if (checkIsBot()) {
+      // Silently fail for bots - don't give them feedback
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      toast.error("Unable to sign in. Please try again.")
+      return
+    }
+
     setIsLoading(true)
 
     try {
@@ -218,6 +228,14 @@ function LoginForm() {
       >
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            {/* Honeypot field - hidden from users, bots will fill it */}
+            <input
+              type="text"
+              name="website"
+              placeholder="Your website"
+              {...honeypotProps}
+            />
+
             <FormField
               control={form.control}
               name="email"

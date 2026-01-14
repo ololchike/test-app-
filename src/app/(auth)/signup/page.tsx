@@ -10,6 +10,7 @@ import { toast } from "sonner"
 import { motion } from "framer-motion"
 
 import { signupSchema, type SignupInput } from "@/lib/validations/auth"
+import { useBotProtection } from "@/lib/hooks/use-bot-protection"
 import { signupAction } from "@/lib/actions/auth"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -100,6 +101,7 @@ export default function SignupPage() {
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false)
   const [registrationSuccess, setRegistrationSuccess] = React.useState(false)
   const [userEmail, setUserEmail] = React.useState("")
+  const { honeypotProps, checkIsBot } = useBotProtection()
 
   const form = useForm<SignupInput>({
     resolver: zodResolver(signupSchema),
@@ -115,6 +117,14 @@ export default function SignupPage() {
   const watchPassword = form.watch("password")
 
   async function onSubmit(data: SignupInput) {
+    // Bot protection check
+    if (checkIsBot()) {
+      // Silently fail for bots - don't give them feedback
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      toast.error("Unable to create account. Please try again.")
+      return
+    }
+
     setIsLoading(true)
 
     try {
@@ -282,6 +292,14 @@ export default function SignupPage() {
       >
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            {/* Honeypot field - hidden from users, bots will fill it */}
+            <input
+              type="text"
+              name="company"
+              placeholder="Your company"
+              {...honeypotProps}
+            />
+
             <FormField
               control={form.control}
               name="name"

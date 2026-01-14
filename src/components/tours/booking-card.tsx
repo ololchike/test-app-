@@ -20,6 +20,8 @@ import {
 } from "@/components/ui/collapsible"
 import { cn } from "@/lib/utils"
 import { BookingState, PricingBreakdown, ActivityAddon } from "./tour-customizer"
+import { TrustBadges } from "@/components/trust/trust-badges"
+import { FreeCancellationBadge } from "@/components/trust/free-cancellation-badge"
 
 interface BookingCardProps {
   basePrice: number
@@ -36,6 +38,7 @@ interface BookingCardProps {
   isLoading: boolean
   endDate: Date | undefined
   bookNowButtonRef?: RefObject<HTMLButtonElement | null>
+  freeCancellationDays?: number
 }
 
 export function BookingCard({
@@ -53,6 +56,7 @@ export function BookingCard({
   isLoading,
   endDate,
   bookNowButtonRef,
+  freeCancellationDays = 48,
 }: BookingCardProps) {
   const [isAccommodationOpen, setIsAccommodationOpen] = useState(false)
   const [isAddonsOpen, setIsAddonsOpen] = useState(false)
@@ -329,10 +333,7 @@ export function BookingCard({
             You won&apos;t be charged yet. Review your booking on the next page.
           </p>
 
-          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-            <Shield className="h-4 w-4" />
-            <span>Free cancellation up to 30 days before</span>
-          </div>
+          <FreeCancellationBadge days={freeCancellationDays} variant="inline" />
         </CardFooter>
       </Card>
 
@@ -350,6 +351,11 @@ export function BookingCard({
           <p className="font-medium text-foreground">Support</p>
           <p>24/7 assistance</p>
         </div>
+      </div>
+
+      {/* Payment Methods */}
+      <div className="mt-3 pt-3 border-t border-border/50">
+        <TrustBadges variant="payment-only" />
       </div>
     </div>
   )

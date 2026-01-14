@@ -25,6 +25,10 @@ import { Separator } from "@/components/ui/separator"
 import { OrderSummary } from "@/components/checkout/order-summary"
 import { PaymentMethodSelector, PaymentMethod } from "@/components/checkout/payment-method-selector"
 import { TravelerForm, TravelerFormData } from "@/components/checkout/traveler-form"
+import { TrustBadges } from "@/components/trust/trust-badges"
+import { GuaranteesSection } from "@/components/trust/guarantees-section"
+import { CartTracker } from "@/components/engagement/cart-tracker"
+import { useAbandonedCart } from "@/lib/hooks/use-abandoned-cart"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 
@@ -234,6 +238,8 @@ export default function CheckoutPage() {
 
       // Redirect to Pesapal
       if (result.redirectUrl) {
+        // Clear abandoned cart since payment is being processed
+        clearCart()
         toast.success("Redirecting to payment...")
         window.location.href = result.redirectUrl
       } else {
@@ -372,8 +378,24 @@ export default function CheckoutPage() {
   }
 
   const isFormValid = form.formState.isValid && acceptedTerms && !phoneNumberError
+  const { clearCart } = useAbandonedCart()
+
+  // Generate slug from tour title
+  const tourSlug = booking.tour.title.toLowerCase().replace(/\s+/g, "-")
 
   return (
+    <>
+      {/* Track cart for abandoned cart recovery */}
+      <CartTracker
+        bookingId={booking.id}
+        tourId={booking.id} // Using booking ID since tour ID not available
+        tourSlug={tourSlug}
+        tourTitle={booking.tour.title}
+        tourImage={booking.tour.coverImage || ""}
+        departureDate={booking.startDate}
+        travelers={booking.adults + booking.children + booking.infants}
+        totalPrice={booking.totalAmount}
+      />
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30 relative">
       {/* Background Shapes */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -611,6 +633,14 @@ export default function CheckoutPage() {
                       </div>
                     ))}
                   </div>
+
+                  {/* Trust Badges */}
+                  <div className="mt-4 pt-4 border-t border-border/50">
+                    <TrustBadges variant="compact" showLabels={false} />
+                  </div>
+
+                  {/* Guarantees */}
+                  <GuaranteesSection variant="checkout" />
                 </div>
               </motion.div>
             </motion.div>
@@ -618,5 +648,6 @@ export default function CheckoutPage() {
         </div>
       </div>
     </div>
+    </>
   )
 }

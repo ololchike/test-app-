@@ -4,9 +4,9 @@ import { motion } from "framer-motion"
 import Image from "next/image"
 import Link from "next/link"
 import { format } from "date-fns"
-import { Search, MapPin, Calendar as CalendarIcon, Users, ArrowRight, Play, Sparkles } from "lucide-react"
+import { Search, Calendar as CalendarIcon, ArrowRight, Play, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { SearchWithSuggestions } from "@/components/search"
 import { Badge } from "@/components/ui/badge"
 import { Calendar } from "@/components/ui/calendar"
 import {
@@ -27,7 +27,6 @@ interface HeroSectionProps {
 }
 
 export function HeroSection({ stats }: HeroSectionProps) {
-  const [destination, setDestination] = useState("")
   const [date, setDate] = useState<Date | undefined>(undefined)
 
   const statItems = [
@@ -150,15 +149,11 @@ export function HeroSection({ stats }: HeroSectionProps) {
                   <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Destination
                   </label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-primary" />
-                    <Input
-                      placeholder="Where do you want to go?"
-                      className="pl-10 h-12 border-0 bg-muted/50 text-base font-medium focus-visible:ring-primary"
-                      value={destination}
-                      onChange={(e) => setDestination(e.target.value)}
-                    />
-                  </div>
+                  <SearchWithSuggestions
+                    placeholder="Where do you want to go?"
+                    variant="hero"
+                    className="w-full"
+                  />
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -193,7 +188,7 @@ export function HeroSection({ stats }: HeroSectionProps) {
                     &nbsp;
                   </label>
                   <Button asChild size="lg" className="w-full h-12 text-base font-semibold shadow-glow">
-                    <Link href={`/tours${destination ? `?destination=${destination}` : ""}`}>
+                    <Link href="/tours">
                       <Search className="h-5 w-5 mr-2" />
                       Search Tours
                     </Link>

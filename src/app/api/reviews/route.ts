@@ -3,6 +3,7 @@ import { z } from "zod"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { createLogger } from "@/lib/logger"
+import { REFERRAL_CONFIG } from "@/lib/referral"
 
 const log = createLogger("Reviews API")
 
@@ -80,8 +81,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create review and update tour rating in a transaction
-    const review = await prisma.$transaction(async (tx) => {
+    // Determine reward amount based on whether photos were included
+    const hasPhotos = data.images && data.images.length > 0
+    const rewardAmount = hasPhotos
+      ? REFERRAL_CONFIG.reviewCredit + REFERRAL_CONFIG.photoBonus
+      : REFERRAL_CONFIG.reviewCredit
+
+    // Create review, reward, and update tour rating in a transaction
+    const { review, creditAmount } = await prisma.$transaction(async (tx) => {
       // Create the review
       const newReview = await tx.review.create({
         data: {
@@ -105,6 +112,32 @@ export async function POST(request: NextRequest) {
         },
       })
 
+      // Create review reward
+      await tx.reviewReward.create({
+        data: {
+          userId: session.user.id,
+          reviewId: newReview.id,
+          creditAmount: rewardAmount,
+          hasPhotos,
+        },
+      })
+
+      // Add referral credit to user's account
+      const expiryDate = new Date()
+      expiryDate.setDate(expiryDate.getDate() + REFERRAL_CONFIG.creditExpiryDays)
+
+      await tx.referralCredit.create({
+        data: {
+          userId: session.user.id,
+          amount: rewardAmount,
+          source: "REVIEW",
+          expiresAt: expiryDate,
+          description: hasPhotos
+            ? `Review reward with photo bonus for ${booking.tour.title}`
+            : `Review reward for ${booking.tour.title}`,
+        },
+      })
+
       // Recalculate tour average rating
       const avgRating = await tx.review.aggregate({
         where: {
@@ -118,14 +151,18 @@ export async function POST(request: NextRequest) {
       // Note: Tour model doesn't have averageRating/reviewCount fields yet
       // We'll calculate these on-the-fly when fetching tours
 
-      return newReview
+      return { review: newReview, creditAmount: rewardAmount }
     })
 
     return NextResponse.json(
       {
         success: true,
         data: review,
-        message: "Review submitted successfully"
+        reward: {
+          amount: creditAmount,
+          hasPhotoBonus: hasPhotos,
+        },
+        message: `Review submitted successfully! You earned $${creditAmount} credit.`
       },
       { status: 201 }
     )

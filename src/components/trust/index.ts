@@ -1,0 +1,6 @@
+export { TrustBadges } from "./trust-badges"
+export { SocialProofBanner } from "./social-proof-banner"
+export { FreeCancellationBadge } from "./free-cancellation-badge"
+export { MpesaHeroBanner } from "./mpesa-hero-banner"
+export { PriceComparison } from "./price-comparison"
+export { GuaranteesSection } from "./guarantees-section"

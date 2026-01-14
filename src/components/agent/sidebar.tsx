@@ -19,6 +19,7 @@ import {
   Star,
   Headphones,
   Sparkles,
+  Megaphone,
 } from "lucide-react"
 import { signOut } from "next-auth/react"
 import { cn } from "@/lib/utils"
@@ -101,6 +102,11 @@ const agentNavItems: NavItem[] = [
     title: "Contacts",
     href: "/agent/contacts",
     icon: Headphones,
+  },
+  {
+    title: "Marketing",
+    href: "/agent/marketing",
+    icon: Megaphone,
   },
 ]
 

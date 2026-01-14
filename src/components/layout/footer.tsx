@@ -8,6 +8,7 @@ import {
   Phone,
   MapPin,
 } from "lucide-react"
+import { TrustBadges } from "@/components/trust/trust-badges"
 
 const footerNavigation = {
   tours: [
@@ -103,6 +104,11 @@ export function Footer() {
                   <span className="sr-only">{item.name}</span>
                 </a>
               ))}
+            </div>
+
+            {/* Trust Badges */}
+            <div className="mt-6">
+              <TrustBadges variant="footer" />
             </div>
           </div>
 

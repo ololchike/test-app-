@@ -12,6 +12,7 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
+  Gift,
 } from "lucide-react"
 import { signOut } from "next-auth/react"
 import { cn } from "@/lib/utils"
@@ -52,6 +53,12 @@ const clientNavItems = [
     href: "/dashboard/messages",
     icon: MessageSquare,
     showUnreadBadge: true,
+  },
+  {
+    title: "Refer & Earn",
+    href: "/dashboard/referrals",
+    icon: Gift,
+    showUnreadBadge: false,
   },
   {
     title: "Profile",

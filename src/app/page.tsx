@@ -23,8 +23,17 @@ import { Badge } from "@/components/ui/badge"
 import { prisma } from "@/lib/prisma"
 import { HeroSection } from "@/components/home/hero-section"
 import { TrustIndicators } from "@/components/home/trust-indicators"
+import { TrustBadges } from "@/components/trust/trust-badges"
+import { SocialProofBanner } from "@/components/trust/social-proof-banner"
+import { MpesaHeroBanner } from "@/components/trust/mpesa-hero-banner"
+import { GuaranteesSection } from "@/components/trust/guarantees-section"
+import { RecentlyViewed } from "@/components/discovery/recently-viewed"
 import { FeaturedDestinations } from "@/components/home/featured-destinations"
 import { FeaturedTours } from "@/components/home/featured-tours"
+import { FeaturedCollections } from "@/components/collections"
+import { defaultCollections } from "@/lib/data/collections"
+import { FeaturedDeals } from "@/components/deals"
+import { defaultDeals } from "@/lib/data/deals"
 import { HowItWorks } from "@/components/home/how-it-works"
 import { Testimonials } from "@/components/home/testimonials"
 import { CTASection } from "@/components/home/cta-section"
@@ -144,7 +153,34 @@ async function getHomePageData() {
       }),
     ])
 
+    // Get featured collections with tour counts
+    const featuredCollectionsData = defaultCollections.filter(c => c.featured).slice(0, 6)
+    const collectionsWithCounts = await Promise.all(
+      featuredCollectionsData.map(async (collection) => {
+        const where: Record<string, unknown> = { status: "ACTIVE" }
+        if (collection.filterCriteria.country?.length) {
+          where.country = { in: collection.filterCriteria.country }
+        }
+        if (collection.filterCriteria.maxPrice) {
+          where.basePrice = { lte: collection.filterCriteria.maxPrice }
+        }
+        if (collection.filterCriteria.tourType?.length) {
+          where.OR = collection.filterCriteria.tourType.map(type => ({
+            tourType: { contains: type }
+          }))
+        }
+        const tourCount = await prisma.tour.count({ where })
+        return { ...collection, tourCount }
+      })
+    )
+
+    // Get featured deals (filter active ones)
+    const now = new Date()
+    const featuredDealsData = defaultDeals.filter(d => d.featured && new Date(d.endDate) >= now).slice(0, 3)
+
     return {
+      collections: collectionsWithCounts,
+      deals: featuredDealsData,
       featuredTours: featuredTours.map((tour) => {
         const avgRating = tour.reviews.length > 0
           ? Math.round((tour.reviews.reduce((sum, r) => sum + r.rating, 0) / tour.reviews.length) * 10) / 10
@@ -194,6 +230,8 @@ async function getHomePageData() {
     console.error("Error fetching homepage data:", error)
     // Return fallback data
     return {
+      collections: defaultCollections.filter(c => c.featured).slice(0, 6).map(c => ({ ...c, tourCount: 0 })),
+      deals: defaultDeals.filter(d => d.featured).slice(0, 3),
       featuredTours: [],
       destinations: [],
       testimonials: [],
@@ -208,7 +246,7 @@ async function getHomePageData() {
 }
 
 export default async function HomePage() {
-  const { featuredTours, destinations, testimonials, stats } = await getHomePageData()
+  const { collections, deals, featuredTours, destinations, testimonials, stats } = await getHomePageData()
 
   return (
     <div className="min-h-screen bg-background">
@@ -217,20 +255,41 @@ export default async function HomePage() {
       {/* Hero Section */}
       <HeroSection stats={stats} />
 
+      {/* M-Pesa Hero Banner */}
+      <MpesaHeroBanner variant="full" />
+
+      {/* Trust Badges - KATO, TATO, Payment Methods */}
+      <TrustBadges variant="full" />
+
+      {/* Social Proof - Live Stats */}
+      <SocialProofBanner variant="full" />
+
       {/* Trust Indicators */}
       <TrustIndicators />
 
       {/* Featured Destinations */}
       <FeaturedDestinations destinations={destinations} />
 
+      {/* Curated Collections */}
+      <FeaturedCollections collections={collections} />
+
       {/* Featured Tours */}
       <FeaturedTours tours={featuredTours} />
+
+      {/* Deals & Offers */}
+      <FeaturedDeals deals={deals} />
+
+      {/* Recently Viewed Tours */}
+      <RecentlyViewed variant="horizontal" />
 
       {/* How It Works */}
       <HowItWorks />
 
       {/* Testimonials */}
       <Testimonials testimonials={testimonials} />
+
+      {/* Guarantees */}
+      <GuaranteesSection variant="full" />
 
       {/* CTA Section */}
       <CTASection />

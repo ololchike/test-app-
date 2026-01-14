@@ -37,6 +37,7 @@ import {
   HelpCircle,
   Mail,
   Star,
+  Percent,
 } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
 import { useState } from "react"
@@ -75,6 +76,7 @@ const mobileNavItems = [
     items: [
       { title: "Transactions", href: "/admin/transactions", icon: DollarSign },
       { title: "Withdrawals", href: "/admin/withdrawals", icon: CreditCard },
+      { title: "Commission Tiers", href: "/admin/commission-tiers", icon: Percent },
     ],
   },
   {

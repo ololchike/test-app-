@@ -160,6 +160,7 @@ model Agent {
   withdrawals        WithdrawalRequest[]
   bankDetails        BankDetails?
   assignedMessages   ContactMessage[]
+  promoCodes         PromoCode[]
 
   @@index([userId])
   @@index([status])
@@ -539,11 +540,16 @@ model Payment {
   amount             Float
   currency           String        @default("USD")
   method             PaymentMethod
+  gateway            String        @default("PESAPAL") // PESAPAL | FLUTTERWAVE
 
   // Pesapal
   pesapalTrackingId  String?
   pesapalMerchantRef String?
   pesapalOrderId     String?
+
+  // Flutterwave
+  flutterwaveRef     String?
+  flutterwaveTxId    String?
 
   // Status
   status             PaymentStatus @default(PENDING)
@@ -568,6 +574,7 @@ model Payment {
 
   @@index([bookingId])
   @@index([pesapalTrackingId])
+  @@index([flutterwaveRef])
   @@index([status])
 }
 
@@ -785,6 +792,23 @@ model PlatformSettings {
   updatedAt             DateTime @updatedAt
 }
 
+// Commission tiers - automatic commission rates based on performance
+model CommissionTier {
+  id               String   @id @default(cuid())
+  name             String   // "Bronze", "Silver", "Gold", "Platinum"
+  minBookings      Int      // Minimum bookings to qualify
+  minRevenue       Float?   // Optional: Minimum revenue to qualify
+  commissionRate   Float    // Commission rate for this tier (e.g., 12.0 for 12%)
+  description      String?
+  color            String?  // For UI display (e.g., "#CD7F32" for bronze)
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([minBookings])
+  @@index([isActive])
+}
+
 // ============================================================================
 // AUDIT LOG
 // ============================================================================
@@ -920,4 +944,432 @@ model SiteContent {
   updatedAt DateTime @updatedAt
 
   @@index([key])
+}
+
+// ============================================================================
+// CURATED COLLECTIONS
+// ============================================================================
+
+model Collection {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String?
+  coverImage  String?
+  icon        String?  // Lucide icon name
+
+  // Filter criteria (JSON)
+  filterCriteria String @default("{}") // JSON: { tourType: [], country: [], minPrice, maxPrice, etc. }
+
+  // Display options
+  featured    Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+
+  // Stats (cached)
+  tourCount   Int      @default(0)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([slug])
+  @@index([featured])
+  @@index([isActive])
+}
+
+// ============================================================================
+// DEALS & OFFERS
+// ============================================================================
+
+enum DealType {
+  PERCENTAGE_OFF
+  FIXED_AMOUNT_OFF
+  EARLY_BIRD
+  LAST_MINUTE
+  FLASH_SALE
+  SEASONAL
+}
+
+model Deal {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String?
+
+  // Deal type and value
+  type        DealType
+  discountValue Float   // Percentage or fixed amount
+
+  // Validity
+  startDate   DateTime
+  endDate     DateTime
+
+  // Applicability
+  tourId      String?  // If null, applies to multiple tours
+  tourIds     String   @default("[]") // JSON array of tour IDs
+  minBookingValue Float? // Minimum order value
+  maxUses     Int?     // Maximum number of uses
+  usedCount   Int      @default(0)
+
+  // Display
+  coverImage  String?
+  badge       String?  // "Hot Deal", "Limited Time", etc.
+  featured    Boolean  @default(false)
+  isActive    Boolean  @default(true)
+
+  // Coupon code (optional)
+  couponCode  String?  @unique
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([slug])
+  @@index([startDate, endDate])
+  @@index([featured])
+  @@index([isActive])
+  @@index([couponCode])
+}
+
+// ============================================================================
+// REFERRAL PROGRAM
+// ============================================================================
+
+enum ReferralStatus {
+  PENDING      // Referral link shared, waiting for signup
+  SIGNED_UP    // Referred user signed up
+  BOOKED       // Referred user made a booking
+  COMPLETED    // Booking completed, rewards issued
+  EXPIRED      // Referral expired (no action within timeframe)
+}
+
+model Referral {
+  id              String         @id @default(cuid())
+  referrerId      String         // User who referred
+  referredEmail   String?        // Email of person being referred
+  referredUserId  String?        // User ID once they sign up
+  referralCode    String         @unique // Unique code for tracking
+
+  // Status tracking
+  status          ReferralStatus @default(PENDING)
+  signedUpAt      DateTime?
+  bookedAt        DateTime?
+  completedAt     DateTime?
+
+  // Rewards
+  referrerReward  Float          @default(0) // Credit earned by referrer
+  referredReward  Float          @default(0) // Discount for referred user
+  rewardIssued    Boolean        @default(false)
+
+  // Tracking
+  bookingId       String?        // Associated booking if any
+
+  createdAt       DateTime       @default(now())
+  expiresAt       DateTime       // When the referral expires
+  updatedAt       DateTime       @updatedAt
+
+  @@index([referrerId])
+  @@index([referralCode])
+  @@index([referredEmail])
+  @@index([status])
+}
+
+// User referral credits/wallet
+model ReferralCredit {
+  id          String   @id @default(cuid())
+  userId      String
+  amount      Float
+  type        String   @default("EARNED") // "EARNED" | "REDEEMED" | "EXPIRED"
+  source      String   @default("REFERRAL") // "REFERRAL" | "REVIEW" | "PROMO"
+  description String?
+  referralId  String?  // Related referral if applicable
+  bookingId   String?  // Booking where credit was used
+  expiresAt   DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([type])
+  @@index([source])
+}
+
+// ============================================================================
+// REVIEW INCENTIVES
+// ============================================================================
+
+model ReviewReward {
+  id          String   @id @default(cuid())
+  userId      String
+  reviewId    String   @unique
+
+  // Reward details
+  creditAmount Float   @default(0) // Credit earned
+  bonusAmount  Float   @default(0) // Bonus for photo review
+  hasPhotos   Boolean  @default(false) // Whether the review included photos
+
+  // Status
+  isIssued    Boolean  @default(true) // Automatically issued
+  issuedAt    DateTime @default(now())
+
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([reviewId])
+}
+
+// ============================================================================
+// PROMO CODES (Agent-created)
+// ============================================================================
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED_AMOUNT
+}
+
+model PromoCode {
+  id          String       @id @default(cuid())
+  agentId     String
+  code        String       @unique
+
+  // Discount details
+  discountType   DiscountType @default(PERCENTAGE)
+  discountValue  Float        // Percentage (0-100) or fixed amount
+
+  // Restrictions
+  minBookingAmount Float?     // Minimum booking amount to apply
+  maxDiscountAmount Float?    // Cap on discount (for percentage discounts)
+  maxUses     Int?            // Total number of uses allowed (null = unlimited)
+  usesPerUser Int           @default(1) // Uses per user
+
+  // Validity
+  validFrom   DateTime      @default(now())
+  validUntil  DateTime?     // null = no expiry
+
+  // Tour restrictions (null = all agent's tours)
+  tourIds     String[]      // Specific tour IDs this code applies to
+
+  // Usage tracking
+  usedCount   Int           @default(0)
+
+  // Status
+  isActive    Boolean       @default(true)
+
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Relations
+  agent       Agent         @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  usages      PromoCodeUsage[]
+
+  @@index([agentId])
+  @@index([code])
+  @@index([isActive])
+}
+
+model PromoCodeUsage {
+  id          String    @id @default(cuid())
+  promoCodeId String
+  userId      String
+  bookingId   String?
+
+  discountApplied Float   // Actual discount amount applied
+
+  createdAt   DateTime  @default(now())
+
+  promoCode   PromoCode @relation(fields: [promoCodeId], references: [id], onDelete: Cascade)
+
+  @@unique([promoCodeId, userId, bookingId])
+  @@index([promoCodeId])
+  @@index([userId])
+}
+
+// ============================================================================
+// CONTENT & SEO
+// ============================================================================
+
+// Destination Guides - Rich SEO content for each destination
+model DestinationGuide {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+
+  // Basic Info
+  name            String   // e.g., "Kenya", "Masai Mara"
+  country         String   // Parent country
+  region          String?  // Optional region within country
+
+  // Hero Section
+  heroImage       String?
+  heroTitle       String?  // Custom title for hero
+  heroSubtitle    String?
+
+  // Content Sections (Rich HTML/Markdown)
+  overview        String?  @db.Text // Main introduction (500+ words)
+  highlights      String[] // Key highlights as bullet points
+
+  // Detailed Sections
+  wildlife        String?  @db.Text // Wildlife & animals section
+  bestTimeToVisit String?  @db.Text // Best seasons, weather info
+  attractions     String?  @db.Text // Must-see attractions
+  activities      String?  @db.Text // Things to do
+  accommodation   String?  @db.Text // Where to stay
+  travelTips      String?  @db.Text // Practical tips
+  gettingThere    String?  @db.Text // How to get there
+
+  // Quick Facts
+  bestMonths      String[] // e.g., ["July", "August", "September"]
+  avgTemperature  String?  // e.g., "20-28°C"
+  currency        String?  // e.g., "KES"
+  language        String?  // e.g., "English, Swahili"
+  timezone        String?  // e.g., "EAT (UTC+3)"
+  visaInfo        String?  @db.Text
+
+  // Gallery
+  images          String[]
+  videoUrl        String?
+
+  // Map
+  latitude        Float?
+  longitude       Float?
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+  metaKeywords    String[]
+
+  // Status
+  isPublished     Boolean  @default(false)
+  isFeatured      Boolean  @default(false)
+  viewCount       Int      @default(0)
+
+  // Relations
+  faqs            DestinationFAQ[]
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  publishedAt     DateTime?
+
+  @@index([slug])
+  @@index([country])
+  @@index([isPublished])
+  @@index([isFeatured])
+}
+
+// FAQs for Destination Guides (for FAQ Schema markup)
+model DestinationFAQ {
+  id              String   @id @default(cuid())
+  destinationId   String
+
+  question        String
+  answer          String   @db.Text
+
+  order           Int      @default(0)
+  isPublished     Boolean  @default(true)
+
+  destination     DestinationGuide @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([destinationId])
+  @@index([order])
+}
+
+// Blog System
+model BlogCategory {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  name            String
+  description     String?
+  image           String?
+  color           String?  // Brand color for category
+
+  order           Int      @default(0)
+  isActive        Boolean  @default(true)
+
+  posts           BlogPost[]
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([slug])
+  @@index([isActive])
+}
+
+model BlogPost {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+
+  // Content
+  title           String
+  excerpt         String?  @db.Text // Short summary for listings
+  content         String   @db.Text // Full post content (HTML/Markdown)
+
+  // Media
+  coverImage      String?
+  images          String[]
+  videoUrl        String?
+
+  // Author
+  authorId        String?  // null = SafariPlus team
+  authorName      String?  // Override name for guest authors
+  authorBio       String?
+  authorAvatar    String?
+
+  // Categorization
+  categoryId      String?
+  tags            String[]
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+  metaKeywords    String[]
+  canonicalUrl    String?
+
+  // Status
+  status          BlogPostStatus @default(DRAFT)
+  isFeatured      Boolean  @default(false)
+
+  // Engagement
+  viewCount       Int      @default(0)
+  readingTime     Int?     // Estimated minutes to read
+
+  // Related content
+  relatedTourIds  String[] // Related tour IDs
+  relatedDestinations String[] // Related destination slugs
+
+  // Relations
+  category        BlogCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  publishedAt     DateTime?
+
+  @@index([slug])
+  @@index([categoryId])
+  @@index([status])
+  @@index([isFeatured])
+  @@index([publishedAt])
+}
+
+enum BlogPostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+// Site-wide FAQs (for homepage and general FAQ page)
+model SiteFAQ {
+  id              String   @id @default(cuid())
+
+  category        String   @default("general") // "general", "booking", "payment", "tours", etc.
+  question        String
+  answer          String   @db.Text
+
+  order           Int      @default(0)
+  isPublished     Boolean  @default(true)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([category])
+  @@index([order])
+  @@index([isPublished])
 }

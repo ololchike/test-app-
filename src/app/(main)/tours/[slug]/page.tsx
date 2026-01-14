@@ -6,6 +6,7 @@ import { TourDetailContent, TourDetailData } from "@/components/tours/tour-detai
 import { TourCard } from "@/components/tours/tour-card"
 import { TourStructuredData } from "@/components/seo/tour-structured-data"
 import { TourGallery } from "@/components/tours/tour-gallery"
+import { TourViewTracker } from "@/components/discovery/tour-view-tracker"
 import { prisma } from "@/lib/prisma"
 
 async function getTour(slug: string) {
@@ -285,6 +286,16 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
   return (
     <>
       <TourStructuredData tour={tour} slug={slug} />
+      <TourViewTracker
+        tour={{
+          id: tour.id,
+          slug: tour.slug,
+          title: tour.title,
+          destination: tour.destination,
+          coverImage: tour.coverImage || tour.images[0] || "",
+          basePrice: tour.basePrice,
+        }}
+      />
       <div className="pt-16">
         {/* Breadcrumb */}
         <div className="bg-gradient-to-r from-muted/50 to-transparent py-3 sm:py-4 border-b border-border/30">

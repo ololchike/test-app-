@@ -2,12 +2,15 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { Heart, MapPin, Star, Clock, Users, CheckCircle, Sparkles } from "lucide-react"
+import { Heart, MapPin, Star, Clock, Users, CheckCircle, Sparkles, GitCompare, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { useState } from "react"
 import { motion } from "framer-motion"
+import { SpotsLeftBadge, RecentBookingsBadge } from "@/components/urgency"
+import { useComparison, ComparisonTour } from "@/lib/contexts/comparison-context"
+import { toast } from "sonner"
 
 interface TourCardProps {
   tour: {
@@ -28,6 +31,10 @@ interface TourCardProps {
       businessName: string
       isVerified: boolean
     }
+    // Urgency data
+    spotsLeft?: number
+    maxGroupSize?: number
+    recentBookings?: number
   }
   variant?: "default" | "horizontal"
   index?: number
@@ -36,8 +43,40 @@ interface TourCardProps {
 export function TourCard({ tour, variant = "default", index = 0 }: TourCardProps) {
   const [isWishlisted, setIsWishlisted] = useState(false)
   const [imageLoaded, setImageLoaded] = useState(false)
+  const { addTour, removeTour, isTourSelected, canAddMore } = useComparison()
 
+  const isInComparison = isTourSelected(tour.id)
   const duration = `${tour.durationDays} Days / ${tour.durationNights} Nights`
+
+  const handleCompareClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    if (isInComparison) {
+      removeTour(tour.id)
+      toast.success("Removed from comparison")
+    } else if (canAddMore) {
+      const comparisonTour: ComparisonTour = {
+        id: tour.id,
+        slug: tour.slug,
+        title: tour.title,
+        destination: tour.destination,
+        country: tour.country,
+        coverImage: tour.coverImage,
+        basePrice: tour.basePrice,
+        durationDays: tour.durationDays,
+        durationNights: tour.durationNights,
+        tourType: tour.tourType,
+        rating: tour.rating,
+        reviewCount: tour.reviewCount,
+        agent: tour.agent || { businessName: "Unknown", isVerified: false },
+      }
+      addTour(comparisonTour)
+      toast.success("Added to comparison")
+    } else {
+      toast.error("Maximum 4 tours can be compared at once")
+    }
+  }
 
   if (variant === "horizontal") {
     return (
@@ -75,21 +114,40 @@ export function TourCard({ tour, variant = "default", index = 0 }: TourCardProps
               </Badge>
             )}
 
-            <motion.button
-              whileTap={{ scale: 0.9 }}
-              className="absolute top-3 right-3 h-10 w-10 rounded-full bg-white/90 backdrop-blur-sm shadow-lg flex items-center justify-center hover:bg-white transition-all duration-300"
-              onClick={(e) => {
-                e.preventDefault()
-                setIsWishlisted(!isWishlisted)
-              }}
-            >
-              <Heart
+            <div className="absolute top-3 right-3 flex flex-col gap-2">
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                className="h-10 w-10 rounded-full bg-white/90 backdrop-blur-sm shadow-lg flex items-center justify-center hover:bg-white transition-all duration-300"
+                onClick={(e) => {
+                  e.preventDefault()
+                  setIsWishlisted(!isWishlisted)
+                }}
+              >
+                <Heart
+                  className={cn(
+                    "h-5 w-5 transition-all duration-300",
+                    isWishlisted ? "fill-rose-500 text-rose-500 scale-110" : "text-gray-600"
+                  )}
+                />
+              </motion.button>
+              <motion.button
+                whileTap={{ scale: 0.9 }}
                 className={cn(
-                  "h-5 w-5 transition-all duration-300",
-                  isWishlisted ? "fill-rose-500 text-rose-500 scale-110" : "text-gray-600"
+                  "h-10 w-10 rounded-full backdrop-blur-sm shadow-lg flex items-center justify-center transition-all duration-300",
+                  isInComparison
+                    ? "bg-primary text-white"
+                    : "bg-white/90 hover:bg-white text-gray-600"
                 )}
-              />
-            </motion.button>
+                onClick={handleCompareClick}
+                title={isInComparison ? "Remove from comparison" : "Add to comparison"}
+              >
+                {isInComparison ? (
+                  <Check className="h-5 w-5" />
+                ) : (
+                  <GitCompare className="h-5 w-5" />
+                )}
+              </motion.button>
+            </div>
           </div>
 
           <div className="flex-1 p-5 flex flex-col justify-between">
@@ -125,6 +183,25 @@ export function TourCard({ tour, variant = "default", index = 0 }: TourCardProps
                   </Badge>
                 ))}
               </div>
+
+              {/* Urgency Indicators */}
+              {(tour.spotsLeft !== undefined || tour.recentBookings !== undefined) && (
+                <div className="flex flex-wrap items-center gap-3 mt-3">
+                  {tour.spotsLeft !== undefined && (
+                    <SpotsLeftBadge
+                      spots={tour.spotsLeft}
+                      maxSpots={tour.maxGroupSize}
+                      className="text-xs"
+                    />
+                  )}
+                  {tour.recentBookings !== undefined && tour.recentBookings > 0 && (
+                    <RecentBookingsBadge
+                      count={tour.recentBookings}
+                      variant="compact"
+                    />
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="flex items-center justify-between mt-5 pt-4 border-t border-border/50">
@@ -197,21 +274,40 @@ export function TourCard({ tour, variant = "default", index = 0 }: TourCardProps
               </Badge>
             )}
 
-            <motion.button
-              whileTap={{ scale: 0.9 }}
-              className="absolute top-3 right-3 h-10 w-10 rounded-full bg-white/90 backdrop-blur-sm shadow-lg flex items-center justify-center hover:bg-white transition-all duration-300 opacity-0 group-hover:opacity-100"
-              onClick={(e) => {
-                e.preventDefault()
-                setIsWishlisted(!isWishlisted)
-              }}
-            >
-              <Heart
+            <div className="absolute top-3 right-3 flex flex-col gap-2">
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                className="h-10 w-10 rounded-full bg-white/90 backdrop-blur-sm shadow-lg flex items-center justify-center hover:bg-white transition-all duration-300 opacity-0 group-hover:opacity-100"
+                onClick={(e) => {
+                  e.preventDefault()
+                  setIsWishlisted(!isWishlisted)
+                }}
+              >
+                <Heart
+                  className={cn(
+                    "h-5 w-5 transition-all duration-300",
+                    isWishlisted ? "fill-rose-500 text-rose-500 scale-110" : "text-gray-600"
+                  )}
+                />
+              </motion.button>
+              <motion.button
+                whileTap={{ scale: 0.9 }}
                 className={cn(
-                  "h-5 w-5 transition-all duration-300",
-                  isWishlisted ? "fill-rose-500 text-rose-500 scale-110" : "text-gray-600"
+                  "h-10 w-10 rounded-full backdrop-blur-sm shadow-lg flex items-center justify-center transition-all duration-300",
+                  isInComparison
+                    ? "bg-primary text-white opacity-100"
+                    : "bg-white/90 hover:bg-white text-gray-600 opacity-0 group-hover:opacity-100"
                 )}
-              />
-            </motion.button>
+                onClick={handleCompareClick}
+                title={isInComparison ? "Remove from comparison" : "Add to comparison"}
+              >
+                {isInComparison ? (
+                  <Check className="h-5 w-5" />
+                ) : (
+                  <GitCompare className="h-5 w-5" />
+                )}
+              </motion.button>
+            </div>
 
             {/* Tour types on image */}
             <div className="absolute bottom-4 left-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
@@ -251,6 +347,25 @@ export function TourCard({ tour, variant = "default", index = 0 }: TourCardProps
               <Clock className="h-3.5 w-3.5 text-primary/60" />
               <span>{duration}</span>
             </div>
+
+            {/* Urgency Indicators */}
+            {(tour.spotsLeft !== undefined || tour.recentBookings !== undefined) && (
+              <div className="flex flex-wrap items-center gap-3 mt-3">
+                {tour.spotsLeft !== undefined && (
+                  <SpotsLeftBadge
+                    spots={tour.spotsLeft}
+                    maxSpots={tour.maxGroupSize}
+                    className="text-xs"
+                  />
+                )}
+                {tour.recentBookings !== undefined && tour.recentBookings > 0 && (
+                  <RecentBookingsBadge
+                    count={tour.recentBookings}
+                    variant="compact"
+                  />
+                )}
+              </div>
+            )}
 
             <div className="flex items-center justify-between mt-4 pt-4 border-t border-border/50">
               {tour.rating !== undefined && tour.rating > 0 ? (
