@@ -148,16 +148,21 @@ interface WebhookPayload {
 
 export class FlutterwaveClient {
   private config: FlutterwaveConfig
+  private initialized: boolean = false
 
   constructor(config: FlutterwaveConfig) {
-    if (!config.publicKey || !config.secretKey) {
+    this.config = config
+    // Defer validation until actual use to avoid build-time errors
+    this.initialized = !!(config.publicKey && config.secretKey)
+  }
+
+  private ensureInitialized(): void {
+    if (!this.config.publicKey || !this.config.secretKey) {
       throw new Error("Flutterwave public key and secret key are required")
     }
-    if (!config.apiUrl) {
+    if (!this.config.apiUrl) {
       throw new Error("Flutterwave API URL is required")
     }
-
-    this.config = config
   }
 
   /**
@@ -167,6 +172,8 @@ export class FlutterwaveClient {
    * @returns Redirect URL for customer payment
    */
   async initiatePayment(payment: PaymentRequest): Promise<PaymentResponse> {
+    this.ensureInitialized()
+
     // Validate payment data
     if (!payment.tx_ref || !payment.amount || !payment.currency) {
       throw new Error("Transaction reference, amount, and currency are required")
@@ -225,6 +232,8 @@ export class FlutterwaveClient {
    * @returns Transaction verification details
    */
   async verifyTransaction(transactionId: number | string): Promise<TransactionVerifyResponse> {
+    this.ensureInitialized()
+
     if (!transactionId) {
       throw new Error("Transaction ID is required")
     }
@@ -266,6 +275,8 @@ export class FlutterwaveClient {
    * @returns Transaction verification details
    */
   async verifyTransactionByRef(txRef: string): Promise<TransactionVerifyResponse> {
+    this.ensureInitialized()
+
     if (!txRef) {
       throw new Error("Transaction reference is required")
     }
@@ -320,6 +331,8 @@ export class FlutterwaveClient {
    * Used for frontend integration with Flutterwave inline
    */
   getInlineConfig(payment: PaymentRequest): Record<string, unknown> {
+    this.ensureInitialized()
+
     return {
       public_key: this.config.publicKey,
       tx_ref: payment.tx_ref,
@@ -340,6 +353,7 @@ export class FlutterwaveClient {
    * Get the public key for frontend use
    */
   getPublicKey(): string {
+    this.ensureInitialized()
     return this.config.publicKey
   }
 }

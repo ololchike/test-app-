@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { UserRole } from "@prisma/client"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
@@ -8,7 +9,7 @@ export async function PATCH(
 ) {
   try {
     const session = await auth()
-    if (!session?.user || session.user.role !== "ADMIN") {
+    if (!session?.user || session.user.role !== UserRole.ADMIN) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -27,6 +28,23 @@ export async function PATCH(
     // Build update object
     const updateData: any = {}
     if (role !== undefined) {
+      // CRITICAL: Prevent creating more than one admin
+      if (role === UserRole.ADMIN) {
+        // Check if there's already an admin (other than the current user being modified)
+        const existingAdmin = await prisma.user.findFirst({
+          where: {
+            role: UserRole.ADMIN,
+            id: { not: id }, // Exclude the user being modified
+          },
+        })
+
+        if (existingAdmin) {
+          return NextResponse.json(
+            { error: "Only one admin account is allowed in the system" },
+            { status: 400 }
+          )
+        }
+      }
       updateData.role = role
     }
     if (status !== undefined) {

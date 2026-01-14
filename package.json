@@ -17,7 +17,12 @@
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset --force",
     "vercel:env:pull:dev": "vercel env pull .env.development --environment=preview",
-    "vercel:env:pull:prod": "vercel env pull .env.production --environment=production"
+    "vercel:env:pull:prod": "vercel env pull .env.production --environment=production",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:debug": "playwright test --debug",
+    "test:e2e:report": "playwright show-report"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

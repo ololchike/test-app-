@@ -1,11 +1,8 @@
+"use client"
+
 import Link from "next/link"
 import { WifiOff, RefreshCw, Home } from "lucide-react"
 import { Button } from "@/components/ui/button"
-
-export const metadata = {
-  title: "Offline - SafariPlus",
-  description: "You are currently offline",
-}
 
 export default function OfflinePage() {
   return (
