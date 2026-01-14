@@ -155,7 +155,7 @@ export default function AdminReviewsPage() {
               <div>
                 <p className="text-sm text-muted-foreground">All Reviews</p>
                 <p className="text-2xl font-bold mt-1">
-                  {approvalCounts.approved || 0 + approvalCounts.pending || 0}
+                  {(approvalCounts.approved || 0) + (approvalCounts.pending || 0)}
                 </p>
               </div>
               <Star className="h-8 w-8 text-amber-500" />

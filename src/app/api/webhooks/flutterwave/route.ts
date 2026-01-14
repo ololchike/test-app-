@@ -8,6 +8,12 @@ import {
   type WebhookPayload,
 } from "@/lib/flutterwave"
 import { createLogger } from "@/lib/logger"
+import { EarningType } from "@/lib/constants"
+import { sendBookingConfirmationEmail } from "@/lib/email"
+import { renderToBuffer } from "@react-pdf/renderer"
+import { ItineraryPDF } from "@/lib/pdf/itinerary-template"
+import { format } from "date-fns"
+import React from "react"
 
 const log = createLogger("Flutterwave Webhook")
 
@@ -59,11 +65,60 @@ export async function POST(request: NextRequest) {
     const { data } = payload
     const txRef = data.tx_ref
 
-    // Find payment by Flutterwave reference
+    // Find payment by Flutterwave reference with full booking details
     const payment = await prisma.payment.findFirst({
       where: { flutterwaveRef: txRef },
       include: {
-        booking: true,
+        booking: {
+          include: {
+            tour: {
+              select: {
+                id: true,
+                title: true,
+                destination: true,
+                durationDays: true,
+                durationNights: true,
+                itinerary: {
+                  orderBy: { dayNumber: "asc" },
+                },
+              },
+            },
+            agent: {
+              select: {
+                id: true,
+                businessName: true,
+                businessEmail: true,
+                businessPhone: true,
+              },
+            },
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+            accommodations: {
+              include: {
+                accommodationOption: {
+                  select: {
+                    name: true,
+                    tier: true,
+                  },
+                },
+              },
+            },
+            activities: {
+              include: {
+                activityAddon: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     })
 
@@ -133,21 +188,93 @@ export async function POST(request: NextRequest) {
 
     // Update booking status based on payment status
     if (mappedStatus === "COMPLETED") {
-      await prisma.booking.update({
-        where: { id: payment.booking.id },
-        data: {
-          paymentStatus: "COMPLETED",
+      // Check if this is a balance payment (tx_ref contains "FLW-BAL")
+      const isBalancePayment = payment.flutterwaveRef?.includes("FLW-BAL")
+
+      // Use transaction to ensure all updates succeed or fail together
+      await prisma.$transaction(async (tx) => {
+        // Prepare booking update data
+        const bookingUpdateData: {
+          status: "CONFIRMED"
+          paymentStatus: "COMPLETED"
+          balancePaidAt?: Date
+        } = {
           status: "CONFIRMED",
-        },
+          paymentStatus: "COMPLETED",
+        }
+
+        // If this is a balance payment, set the balancePaidAt timestamp
+        if (isBalancePayment) {
+          bookingUpdateData.balancePaidAt = new Date()
+          log.info(`Balance payment completed for booking: ${payment.booking.bookingReference}`)
+        }
+
+        // Update booking status
+        await tx.booking.update({
+          where: { id: payment.booking.id },
+          data: bookingUpdateData,
+        })
+
+        // Create agent earning record
+        // For balance payments, calculate earnings on the balance amount only
+        const earningsAmount = isBalancePayment
+          ? payment.amount * (1 - (payment.booking.platformCommission || 12) / 100)
+          : payment.booking.agentEarnings
+
+        await tx.agentEarning.create({
+          data: {
+            agentId: payment.booking.agentId,
+            bookingId: payment.booking.id,
+            amount: earningsAmount,
+            currency: payment.booking.currency,
+            description: isBalancePayment
+              ? `Balance payment earnings from booking ${payment.booking.bookingReference}`
+              : `Earnings from booking ${payment.booking.bookingReference}`,
+            type: EarningType.BOOKING,
+          },
+        })
+
+        // Create audit log
+        await tx.auditLog.create({
+          data: {
+            userId: payment.booking.userId,
+            action: isBalancePayment ? "BALANCE_PAYMENT_COMPLETED" : "PAYMENT_COMPLETED",
+            resource: "Payment",
+            resourceId: payment.id,
+            metadata: {
+              bookingId: payment.booking.id,
+              bookingReference: payment.booking.bookingReference,
+              amount: payment.amount,
+              currency: payment.currency,
+              method: mappedMethod,
+              gateway: "FLUTTERWAVE",
+              flutterwaveTxId: String(transactionData.id),
+              isBalancePayment: isBalancePayment,
+            },
+          },
+        })
       })
 
       log.info(`Payment ${payment.id} completed successfully`, {
         bookingId: payment.booking.id,
         amount: `${transactionData.currency} ${transactionData.amount}`,
+        isBalancePayment: isBalancePayment,
       })
 
-      // TODO: Send confirmation email
-      // TODO: Update agent earnings
+      // Send confirmation email with PDF itinerary (non-blocking)
+      // Only send for initial payment, not balance payment (user already has itinerary)
+      if (!isBalancePayment) {
+        sendConfirmationEmailWithPDF(payment.booking)
+          .then(() => {
+            log.info(`Confirmation email sent for booking: ${payment.booking.bookingReference}`)
+          })
+          .catch((error) => {
+            log.error("Error sending confirmation email", error)
+          })
+      } else {
+        log.info(`Balance paid for booking: ${payment.booking.bookingReference} - skipping full itinerary email`)
+        // TODO: Send balance payment confirmation email (simpler template)
+      }
     } else if (mappedStatus === "FAILED") {
       await prisma.booking.update({
         where: { id: payment.booking.id },
@@ -186,4 +313,173 @@ export async function GET(request: NextRequest) {
     status: "ok",
     message: "Flutterwave webhook endpoint is active",
   })
+}
+
+// Type for booking with included relations for email/PDF generation
+interface BookingWithRelations {
+  id: string
+  bookingReference: string
+  startDate: Date
+  endDate: Date
+  adults: number
+  children: number
+  baseAmount: number
+  accommodationAmount: number
+  activitiesAmount: number
+  taxAmount: number
+  totalAmount: number
+  currency: string
+  contactName: string
+  contactEmail: string
+  contactPhone: string
+  specialRequests: string | null
+  userId: string
+  agentId: string
+  status: string
+  paymentStatus: string
+  paymentType: string
+  agentEarnings: number
+  platformCommission: number
+  tour: {
+    id: string
+    title: string
+    destination: string
+    durationDays: number
+    durationNights: number
+    itinerary: Array<{
+      dayNumber: number
+      title: string
+      description: string | null
+      location: string | null
+      meals: string
+      activities: string
+      overnight: string | null
+    }>
+  }
+  agent: {
+    id: string
+    businessName: string
+    businessEmail: string | null
+    businessPhone: string | null
+  }
+  user: {
+    id: string
+    name: string | null
+    email: string
+  }
+  accommodations: Array<{
+    dayNumber: number
+    price: number
+    accommodationOption: {
+      name: string
+      tier: string
+    }
+  }>
+  activities: Array<{
+    price: number
+    activityAddon: {
+      name: string
+    }
+  }>
+}
+
+// Type for itinerary day
+interface ItineraryDay {
+  dayNumber: number
+  title: string
+  description: string
+  location: string | null
+  meals: string[]
+  activities: string[]
+  overnight: string | null
+}
+
+/**
+ * Send confirmation email with PDF itinerary
+ */
+async function sendConfirmationEmailWithPDF(booking: BookingWithRelations) {
+  try {
+    // Parse itinerary JSON fields
+    const itinerary: ItineraryDay[] = booking.tour.itinerary.map((day) => ({
+      dayNumber: day.dayNumber,
+      title: day.title,
+      description: day.description || "",
+      location: day.location,
+      meals: JSON.parse(day.meals || "[]") as string[],
+      activities: JSON.parse(day.activities || "[]") as string[],
+      overnight: day.overnight,
+    }))
+
+    // Calculate pricing breakdown
+    const baseTotal = Math.round(
+      booking.baseAmount -
+        (booking.baseAmount * 0.3 * booking.children) /
+          (booking.adults + booking.children * 0.7)
+    )
+    const childTotal = booking.baseAmount - baseTotal
+    const accommodationTotal = booking.accommodationAmount
+    const addonsTotal = booking.activitiesAmount
+    const serviceFee = booking.taxAmount
+    const total = booking.totalAmount
+
+    // Prepare booking data for PDF
+    const pdfData = {
+      booking: {
+        bookingReference: booking.bookingReference,
+        startDate: booking.startDate.toISOString(),
+        endDate: booking.endDate.toISOString(),
+        adults: booking.adults,
+        children: booking.children,
+        totalAmount: booking.totalAmount,
+        contactName: booking.contactName,
+        contactEmail: booking.contactEmail,
+        contactPhone: booking.contactPhone,
+        specialRequests: booking.specialRequests,
+        status: booking.status,
+        paymentStatus: booking.paymentStatus,
+        paymentType: booking.paymentType,
+        tour: {
+          title: booking.tour.title,
+          destination: booking.tour.destination,
+          durationDays: booking.tour.durationDays,
+          durationNights: booking.tour.durationNights,
+        },
+        agent: booking.agent,
+        accommodations: booking.accommodations,
+        activities: booking.activities,
+      },
+      itinerary,
+      pricing: {
+        baseTotal,
+        childTotal,
+        accommodationTotal,
+        addonsTotal,
+        serviceFee,
+        total,
+      },
+    }
+
+    // Generate PDF buffer
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const pdfElement = React.createElement(ItineraryPDF, pdfData) as any
+    const pdfBuffer = await renderToBuffer(pdfElement)
+
+    // Send confirmation email
+    await sendBookingConfirmationEmail({
+      to: booking.contactEmail,
+      bookingReference: booking.bookingReference,
+      customerName: booking.contactName,
+      tourTitle: booking.tour.title,
+      startDate: format(new Date(booking.startDate), "MMM d, yyyy"),
+      endDate: format(new Date(booking.endDate), "MMM d, yyyy"),
+      adults: booking.adults,
+      children: booking.children,
+      totalAmount: booking.totalAmount,
+      agentName: booking.agent.businessName,
+      pdfBuffer: pdfBuffer,
+    })
+  } catch (error) {
+    log.error("Error in sendConfirmationEmailWithPDF:", error)
+    throw error
+  }
 }

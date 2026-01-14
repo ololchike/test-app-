@@ -3,7 +3,7 @@
 import { useRef, useEffect } from "react"
 import { useMessages } from "@/hooks/use-messages"
 import { useSession } from "next-auth/react"
-import { format, isToday, isYesterday, isSameDay } from "date-fns"
+import { format, isToday, isYesterday } from "date-fns"
 import { Loader2, CheckCheck, Check } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -18,7 +18,7 @@ export function MessageThread({ conversationId }: MessageThreadProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const { messages, conversation, isLoading, hasMore, loadMore } = useMessages({
+  const { messages, isLoading, hasMore, loadMore } = useMessages({
     conversationId,
     onNewMessage: () => {
       // Scroll to bottom on new message
@@ -88,10 +88,6 @@ export function MessageThread({ conversationId }: MessageThreadProps) {
       groupedMessages[groupedMessages.length - 1].messages.push(message)
     }
   })
-
-  const otherParticipant = conversation?.participants.find(
-    (p) => p.userId !== session?.user?.id
-  )?.user
 
   return (
     <div

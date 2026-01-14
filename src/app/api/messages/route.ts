@@ -114,16 +114,19 @@ export async function GET(request: NextRequest) {
       }).catch(console.error)
     }
 
+    // Get the cursor BEFORE reversing (oldest message in this batch)
+    const nextCursor =
+      messages.length > 0
+        ? messages[messages.length - 1].createdAt.toISOString()
+        : null
+
     return NextResponse.json({
       success: true,
       data: {
         conversation,
         messages: messages.reverse(), // Return in chronological order
         hasMore: messages.length === limit,
-        nextCursor:
-          messages.length > 0
-            ? messages[messages.length - 1].createdAt.toISOString()
-            : null,
+        nextCursor,
       },
     })
   } catch (error) {

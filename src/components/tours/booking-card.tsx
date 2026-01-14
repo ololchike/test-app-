@@ -1,8 +1,8 @@
 "use client"
 
-import { Calendar as CalendarIcon, Minus, Plus, Shield, ChevronDown, ChevronUp, Sparkles, Check } from "lucide-react"
-import { format } from "date-fns"
-import { useState, RefObject } from "react"
+import { Calendar as CalendarIcon, Minus, Plus, Shield, ChevronDown, ChevronUp, Sparkles, Check, AlertCircle } from "lucide-react"
+import { format, startOfDay } from "date-fns"
+import { useState, RefObject, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
@@ -24,6 +24,7 @@ import { TrustBadges } from "@/components/trust/trust-badges"
 import { FreeCancellationBadge } from "@/components/trust/free-cancellation-badge"
 
 interface BookingCardProps {
+  tourSlug: string
   basePrice: number
   durationNights: number
   maxGroupSize: number
@@ -39,9 +40,21 @@ interface BookingCardProps {
   endDate: Date | undefined
   bookNowButtonRef?: RefObject<HTMLButtonElement | null>
   freeCancellationDays?: number
+  dateError?: string | null
+  onClearDateError?: () => void
+}
+
+interface AvailabilityData {
+  date: string
+  available: boolean
+  type: string
+  spotsAvailable: number
+  bookedSpots: number
+  reason?: string
 }
 
 export function BookingCard({
+  tourSlug,
   basePrice,
   durationNights,
   maxGroupSize,
@@ -57,11 +70,76 @@ export function BookingCard({
   endDate,
   bookNowButtonRef,
   freeCancellationDays = 48,
+  dateError,
+  onClearDateError,
 }: BookingCardProps) {
   const [isAccommodationOpen, setIsAccommodationOpen] = useState(false)
   const [isAddonsOpen, setIsAddonsOpen] = useState(false)
+  const [availability, setAvailability] = useState<AvailabilityData[]>([])
+  const [availabilityLoading, setAvailabilityLoading] = useState(true)
+  const dateFieldRef = useRef<HTMLButtonElement>(null)
+
+  // Scroll to date field when there's an error
+  useEffect(() => {
+    if (dateError && dateFieldRef.current) {
+      dateFieldRef.current.scrollIntoView({ behavior: "smooth", block: "center" })
+      dateFieldRef.current.focus()
+    }
+  }, [dateError])
+
+  // Clear error when date is selected
+  const handleDateChange = (date: Date | undefined) => {
+    if (date && onClearDateError) {
+      onClearDateError()
+    }
+    onStartDateChange(date)
+  }
 
   const totalGuests = bookingState.adults + bookingState.children
+
+  // Fetch availability data from public API
+  useEffect(() => {
+    const fetchAvailability = async () => {
+      try {
+        setAvailabilityLoading(true)
+        const response = await fetch(`/api/tours/${tourSlug}/availability?guests=${totalGuests}`)
+        if (response.ok) {
+          const data = await response.json()
+          setAvailability(data.data?.availability || [])
+        }
+      } catch (error) {
+        console.error("Error fetching availability:", error)
+      } finally {
+        setAvailabilityLoading(false)
+      }
+    }
+
+    fetchAvailability()
+  }, [tourSlug, totalGuests])
+
+  // Check if a date is disabled based on availability
+  const isDateDisabled = (date: Date): boolean => {
+    // Past dates are always disabled
+    if (date < startOfDay(new Date())) {
+      return true
+    }
+
+    // If no availability data yet, allow all future dates
+    if (availabilityLoading || availability.length === 0) {
+      return false
+    }
+
+    const dateStr = format(date, "yyyy-MM-dd")
+    const availEntry = availability.find((a) => a.date === dateStr)
+
+    // If no entry found, date is available by default
+    if (!availEntry) {
+      return false
+    }
+
+    // Date is disabled if not available
+    return !availEntry.available
+  }
 
   return (
     <div className="sticky top-24">
@@ -79,17 +157,21 @@ export function BookingCard({
         <CardContent className="space-y-4">
           {/* Date Selection */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium">Travel Date</Label>
+            <Label className={cn("text-sm font-medium", dateError && "text-destructive")}>
+              Travel Date {dateError && <span className="text-destructive">*</span>}
+            </Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
+                  ref={dateFieldRef}
                   variant="outline"
                   className={cn(
                     "w-full h-12 justify-start text-left font-normal rounded-xl border-border/50 hover:border-primary/50 transition-all gap-3",
-                    !bookingState.startDate && "text-muted-foreground"
+                    !bookingState.startDate && "text-muted-foreground",
+                    dateError && "border-destructive ring-2 ring-destructive/20 hover:border-destructive"
                   )}
                 >
-                  <CalendarIcon className="h-5 w-5 text-primary shrink-0" />
+                  <CalendarIcon className={cn("h-5 w-5 shrink-0", dateError ? "text-destructive" : "text-primary")} />
                   {bookingState.startDate ? (
                     <span className="font-medium">
                       {format(bookingState.startDate, "MMM d")} -{" "}
@@ -104,12 +186,51 @@ export function BookingCard({
                 <Calendar
                   mode="single"
                   selected={bookingState.startDate}
-                  onSelect={onStartDateChange}
-                  disabled={(date) => date < new Date()}
+                  onSelect={handleDateChange}
+                  disabled={isDateDisabled}
+                  modifiers={{
+                    limited: (date) => {
+                      const dateStr = format(date, "yyyy-MM-dd")
+                      const availEntry = availability.find((a) => a.date === dateStr)
+                      return availEntry?.type === "LIMITED" && availEntry.available
+                    },
+                    blocked: (date) => {
+                      const dateStr = format(date, "yyyy-MM-dd")
+                      const availEntry = availability.find((a) => a.date === dateStr)
+                      return availEntry?.type === "BLOCKED"
+                    },
+                  }}
+                  modifiersClassNames={{
+                    limited: "bg-yellow-100 text-yellow-900 dark:bg-yellow-900/20 dark:text-yellow-400",
+                    blocked: "bg-red-100 text-red-900 line-through dark:bg-red-900/20 dark:text-red-400",
+                  }}
                   initialFocus
                 />
+                {availabilityLoading && (
+                  <div className="p-3 text-sm text-muted-foreground text-center border-t">
+                    Loading availability...
+                  </div>
+                )}
+                {!availabilityLoading && availability.length > 0 && (
+                  <div className="p-3 text-xs text-muted-foreground border-t space-y-1">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-yellow-100 border border-yellow-300 rounded"></div>
+                      <span>Limited availability</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="w-3 h-3" />
+                      <span>Blocked dates are disabled</span>
+                    </div>
+                  </div>
+                )}
               </PopoverContent>
             </Popover>
+            {dateError && (
+              <p className="text-sm text-destructive flex items-center gap-1.5 mt-1">
+                <AlertCircle className="h-4 w-4" />
+                {dateError}
+              </p>
+            )}
           </div>
 
           {/* Guest Selection */}
@@ -324,7 +445,7 @@ export function BookingCard({
             className="w-full"
             size="lg"
             onClick={onBooking}
-            disabled={!bookingState.startDate || isLoading}
+            disabled={isLoading}
           >
             {isLoading ? "Processing..." : "Book Now"}
           </Button>

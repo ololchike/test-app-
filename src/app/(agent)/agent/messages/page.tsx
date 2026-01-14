@@ -1,7 +1,8 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { MessageSquare, Send, Search, Users, Clock } from "lucide-react"
+import { useEffect, useState, Suspense } from "react"
+import { useSearchParams, useRouter } from "next/navigation"
+import { MessageSquare, Users, Clock, Loader2 } from "lucide-react"
 import {
   Card,
   CardContent,
@@ -9,14 +10,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
 import { ChatContainer } from "@/components/messages/chat-container"
 import { useUnreadCount, useConversations } from "@/hooks/use-messages"
+import { toast } from "sonner"
 
-export default function AgentMessagesPage() {
+function AgentMessagesContent() {
   const { unreadCount } = useUnreadCount()
-  const { conversations } = useConversations()
+  const { conversations, refetch: refetchConversations } = useConversations()
   const [hasPusherConfig, setHasPusherConfig] = useState(true)
+  const [initialConversationId, setInitialConversationId] = useState<string | undefined>()
+  const [isCreatingConversation, setIsCreatingConversation] = useState(false)
+  const searchParams = useSearchParams()
+  const router = useRouter()
 
   // Check if Pusher is configured
   useEffect(() => {
@@ -27,6 +32,50 @@ export default function AgentMessagesPage() {
       setHasPusherConfig(false)
     }
   }, [])
+
+  // Handle query parameters for starting new conversations (e.g., from booking details)
+  useEffect(() => {
+    const clientId = searchParams.get("clientId")
+    const bookingRef = searchParams.get("bookingRef")
+
+    if (clientId && !isCreatingConversation) {
+      setIsCreatingConversation(true)
+
+      // Build subject based on context
+      let subject = ""
+      if (bookingRef) {
+        subject = `Regarding booking ${bookingRef}`
+      }
+
+      // Create or get existing conversation with the client
+      fetch("/api/messages/conversations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          recipientId: clientId,
+          subject: subject || undefined,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            setInitialConversationId(data.data.id)
+            refetchConversations()
+            // Clear query params from URL without page reload
+            router.replace("/agent/messages", { scroll: false })
+          } else {
+            toast.error(data.error || "Failed to start conversation")
+          }
+        })
+        .catch((error) => {
+          console.error("Error creating conversation:", error)
+          toast.error("Failed to start conversation")
+        })
+        .finally(() => {
+          setIsCreatingConversation(false)
+        })
+    }
+  }, [searchParams, router, refetchConversations, isCreatingConversation])
 
   const activeConversations = conversations.filter(
     (c) => c.lastMessage !== null
@@ -133,7 +182,28 @@ export default function AgentMessagesPage() {
       </div>
 
       {/* Chat Container */}
-      <ChatContainer />
+      {isCreatingConversation ? (
+        <Card className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+            <p className="mt-2 text-muted-foreground">Starting conversation...</p>
+          </div>
+        </Card>
+      ) : (
+        <ChatContainer initialConversationId={initialConversationId} />
+      )}
     </div>
+  )
+}
+
+export default function AgentMessagesPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    }>
+      <AgentMessagesContent />
+    </Suspense>
   )
 }

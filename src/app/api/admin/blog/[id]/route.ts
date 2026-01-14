@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
+import { BlogPostStatus } from "@prisma/client"
 
 const updatePostSchema = z.object({
   title: z.string().min(1).optional(),
@@ -20,11 +21,12 @@ const updatePostSchema = z.object({
   metaDescription: z.string().nullable().optional(),
   metaKeywords: z.array(z.string()).optional(),
   canonicalUrl: z.string().nullable().optional(),
-  status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]).optional(),
+  status: z.enum(["DRAFT", "PENDING_APPROVAL", "PUBLISHED", "REJECTED", "ARCHIVED"]).optional(),
   isFeatured: z.boolean().optional(),
   readingTime: z.number().optional(),
   relatedTourIds: z.array(z.string()).optional(),
   relatedDestinations: z.array(z.string()).optional(),
+  rejectionReason: z.string().nullable().optional(),
 })
 
 // GET /api/admin/blog/[id] - Get a blog post by ID
@@ -44,6 +46,13 @@ export async function GET(
       where: { id },
       include: {
         category: true,
+        submitter: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
       },
     })
 
@@ -105,10 +114,21 @@ export async function PUT(
       }
     }
 
-    // Handle publishedAt
+    // Handle publishedAt and review tracking
     const updateData: Record<string, unknown> = { ...validatedData }
-    if (validatedData.status === "PUBLISHED" && existing.status !== "PUBLISHED") {
+
+    // If publishing, set publishedAt
+    if (validatedData.status === BlogPostStatus.PUBLISHED && existing.status !== BlogPostStatus.PUBLISHED) {
       updateData.publishedAt = new Date()
+    }
+
+    // If approving or rejecting, track the reviewer
+    if (
+      (validatedData.status === BlogPostStatus.PUBLISHED || validatedData.status === BlogPostStatus.REJECTED) &&
+      existing.status === BlogPostStatus.PENDING_APPROVAL
+    ) {
+      updateData.reviewedBy = session.user.id
+      updateData.reviewedAt = new Date()
     }
 
     // Calculate reading time if content changed

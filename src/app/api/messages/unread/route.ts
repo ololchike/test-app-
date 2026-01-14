@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
 // GET - Get total unread message count for current user
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const session = await auth()
     if (!session?.user?.id) {

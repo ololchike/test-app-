@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
+import { BlogPostStatus, BlogSubmitterType } from "@prisma/client"
 
 const createPostSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -20,11 +21,13 @@ const createPostSchema = z.object({
   metaDescription: z.string().optional(),
   metaKeywords: z.array(z.string()).optional(),
   canonicalUrl: z.string().optional(),
-  status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]).optional(),
+  status: z.enum(["DRAFT", "PENDING_APPROVAL", "PUBLISHED", "REJECTED", "ARCHIVED"]).optional(),
   isFeatured: z.boolean().optional(),
   readingTime: z.number().optional(),
   relatedTourIds: z.array(z.string()).optional(),
   relatedDestinations: z.array(z.string()).optional(),
+  submittedBy: z.enum(["ADMIN", "AGENT", "CLIENT"]).optional(),
+  rejectionReason: z.string().optional(),
 })
 
 // GET /api/admin/blog - List all blog posts (admin)
@@ -65,6 +68,13 @@ export async function GET(request: Request) {
             id: true,
             name: true,
             color: true,
+          },
+        },
+        submitter: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
           },
         },
       },
@@ -114,8 +124,10 @@ export async function POST(request: Request) {
       data: {
         ...validatedData,
         authorId: session.user.id,
+        submitterId: session.user.id,
+        submittedBy: BlogSubmitterType.ADMIN,
         readingTime,
-        publishedAt: validatedData.status === "PUBLISHED" ? new Date() : null,
+        publishedAt: validatedData.status === BlogPostStatus.PUBLISHED ? new Date() : null,
       },
     })
 

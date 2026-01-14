@@ -30,6 +30,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 
 interface Booking {
@@ -64,6 +73,15 @@ export default function BookingsPage() {
   const [activeTab, setActiveTab] = useState("all")
   const [downloadingId, setDownloadingId] = useState<string | null>(null)
   const [refreshingId, setRefreshingId] = useState<string | null>(null)
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
+  const [bookingToCancel, setBookingToCancel] = useState<Booking | null>(null)
+  const [cancellationReason, setCancellationReason] = useState("")
+  const [isCancelling, setIsCancelling] = useState(false)
+  const [refundInfo, setRefundInfo] = useState<{
+    percentage: number
+    amount: number
+    message: string
+  } | null>(null)
 
   useEffect(() => {
     async function fetchBookings() {
@@ -139,6 +157,88 @@ export default function BookingsPage() {
       toast.error("Failed to refresh payment status")
     } finally {
       setRefreshingId(null)
+    }
+  }
+
+  const handleOpenCancelDialog = (booking: Booking) => {
+    setBookingToCancel(booking)
+    setCancellationReason("")
+    setRefundInfo(null)
+    setCancelDialogOpen(true)
+
+    // Calculate refund info based on booking dates
+    const now = new Date()
+    const startDate = new Date(booking.startDate)
+    const daysUntilStart = Math.ceil((startDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+    const freeCancellationDays = 14 // Default, should come from tour
+
+    let refundPercentage = 0
+    let refundAmount = 0
+
+    if (daysUntilStart >= freeCancellationDays) {
+      refundPercentage = 100
+      refundAmount = booking.totalAmount
+    } else if (daysUntilStart >= 7) {
+      refundPercentage = 50
+      refundAmount = Math.round(booking.totalAmount * 0.5)
+    } else if (daysUntilStart >= 3) {
+      refundPercentage = 25
+      refundAmount = Math.round(booking.totalAmount * 0.25)
+    }
+
+    setRefundInfo({
+      percentage: refundPercentage,
+      amount: refundAmount,
+      message: refundPercentage === 100
+        ? "Full refund will be processed"
+        : refundPercentage > 0
+          ? `${refundPercentage}% refund ($${refundAmount.toLocaleString()}) will be processed`
+          : "No refund applicable based on cancellation policy",
+    })
+  }
+
+  const handleCancelBooking = async () => {
+    if (!bookingToCancel) return
+
+    setIsCancelling(true)
+
+    try {
+      const response = await fetch(`/api/bookings/${bookingToCancel.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          reason: cancellationReason || "Cancelled by user",
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        toast.error(data.error || "Failed to cancel booking")
+        return
+      }
+
+      toast.success("Booking cancelled successfully", {
+        description: data.refund.message,
+      })
+
+      // Update the booking in the list
+      setBookings((prev) =>
+        prev.map((b) =>
+          b.id === bookingToCancel.id
+            ? { ...b, status: "CANCELLED" }
+            : b
+        )
+      )
+
+      setCancelDialogOpen(false)
+      setBookingToCancel(null)
+      setCancellationReason("")
+    } catch (error) {
+      console.error("Error cancelling booking:", error)
+      toast.error("Failed to cancel booking")
+    } finally {
+      setIsCancelling(false)
     }
   }
 
@@ -418,6 +518,19 @@ export default function BookingsPage() {
                                   </Link>
                                 </Button>
                               )}
+                              {/* Cancel Booking - Only show for confirmed/pending bookings that haven't started yet */}
+                              {(booking.status === "CONFIRMED" || booking.status === "PENDING") &&
+                                new Date(booking.startDate) > now && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleOpenCancelDialog(booking)}
+                                    title="Cancel booking"
+                                    className="text-destructive hover:text-destructive"
+                                  >
+                                    <XCircle className="h-4 w-4" />
+                                  </Button>
+                                )}
                             </div>
                           </TableCell>
                         </TableRow>
@@ -432,6 +545,126 @@ export default function BookingsPage() {
           </Tabs>
         </CardContent>
       </Card>
+
+      {/* Cancel Booking Dialog */}
+      <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <XCircle className="h-5 w-5 text-destructive" />
+              Cancel Booking
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to cancel this booking?
+            </DialogDescription>
+          </DialogHeader>
+
+          {bookingToCancel && (
+            <div className="space-y-4">
+              {/* Booking Details */}
+              <div className="p-3 rounded-lg bg-muted/50 space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Booking Reference</span>
+                  <span className="font-mono font-medium">{bookingToCancel.bookingReference}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Tour</span>
+                  <span className="font-medium">{bookingToCancel.tour.title}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Start Date</span>
+                  <span className="font-medium">
+                    {format(new Date(bookingToCancel.startDate), "MMM d, yyyy")}
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Total Amount</span>
+                  <span className="font-medium">${bookingToCancel.totalAmount.toLocaleString()}</span>
+                </div>
+              </div>
+
+              {/* Refund Policy */}
+              {refundInfo && (
+                <div className={`p-4 rounded-lg border ${
+                  refundInfo.percentage === 100
+                    ? "bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-900"
+                    : refundInfo.percentage > 0
+                      ? "bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900"
+                      : "bg-destructive/10 border-destructive/20"
+                }`}>
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className={`h-5 w-5 shrink-0 mt-0.5 ${
+                      refundInfo.percentage === 100
+                        ? "text-green-600"
+                        : refundInfo.percentage > 0
+                          ? "text-amber-600"
+                          : "text-destructive"
+                    }`} />
+                    <div>
+                      <p className={`font-semibold ${
+                        refundInfo.percentage === 100
+                          ? "text-green-800 dark:text-green-200"
+                          : refundInfo.percentage > 0
+                            ? "text-amber-800 dark:text-amber-200"
+                            : "text-destructive"
+                      }`}>
+                        Refund Policy
+                      </p>
+                      <p className={`text-sm mt-1 ${
+                        refundInfo.percentage === 100
+                          ? "text-green-700 dark:text-green-300"
+                          : refundInfo.percentage > 0
+                            ? "text-amber-700 dark:text-amber-300"
+                            : "text-destructive/80"
+                      }`}>
+                        {refundInfo.message}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Cancellation Reason */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">
+                  Reason for Cancellation (Optional)
+                </label>
+                <Textarea
+                  placeholder="Please let us know why you're cancelling..."
+                  value={cancellationReason}
+                  onChange={(e) => setCancellationReason(e.target.value)}
+                  rows={3}
+                  className="resize-none"
+                />
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setCancelDialogOpen(false)}
+              disabled={isCancelling}
+            >
+              Keep Booking
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleCancelBooking}
+              disabled={isCancelling}
+            >
+              {isCancelling ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Cancelling...
+                </>
+              ) : (
+                "Cancel Booking"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

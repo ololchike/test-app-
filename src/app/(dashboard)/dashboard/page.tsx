@@ -20,6 +20,7 @@ import Image from "next/image"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { PendingReviewsCard } from "@/components/reviews"
+import { SectionError } from "@/components/error"
 
 async function getDashboardData(userId: string) {
   const now = new Date()
@@ -146,6 +147,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stats Grid */}
+      <SectionError name="Stats">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
           {
@@ -223,9 +225,11 @@ export default async function DashboardPage() {
           </Card>
         ))}
       </div>
+      </SectionError>
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Upcoming Bookings */}
+        <SectionError name="Upcoming Trips">
         <Card className="border-border/50 hover:shadow-premium transition-all duration-300">
           <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
@@ -311,8 +315,10 @@ export default async function DashboardPage() {
             )}
           </CardContent>
         </Card>
+        </SectionError>
 
         {/* Quick Actions */}
+        <SectionError name="Quick Actions">
         <Card className="border-border/50 hover:shadow-premium transition-all duration-300">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
@@ -375,13 +381,17 @@ export default async function DashboardPage() {
             ))}
           </CardContent>
         </Card>
+        </SectionError>
       </div>
 
       {/* Pending Reviews */}
-      <PendingReviewsCard />
+      <SectionError name="Pending Reviews">
+        <PendingReviewsCard />
+      </SectionError>
 
       {/* Recommended Tours */}
       {recommendedTours.length > 0 && (
+        <SectionError name="Recommended Tours">
         <Card className="border-border/50 hover:shadow-premium transition-all duration-300">
           <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
@@ -443,6 +453,7 @@ export default async function DashboardPage() {
             </div>
           </CardContent>
         </Card>
+        </SectionError>
       )}
     </div>
   )

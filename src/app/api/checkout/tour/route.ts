@@ -73,6 +73,8 @@ export async function GET(request: NextRequest) {
         description: addon.description,
         price: addon.price,
         duration: addon.duration,
+        maxCapacity: addon.maxCapacity,
+        dayAvailable: JSON.parse(addon.dayAvailable || "[]"),
         images: JSON.parse(addon.images || "[]"),
       })),
     }

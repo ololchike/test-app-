@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSession } from "next-auth/react"
 import { MessageSquare, ArrowLeft, User } from "lucide-react"
 import { ConversationList } from "./conversation-list"
 import { MessageThread } from "./message-thread"
@@ -24,10 +23,12 @@ export function ChatContainer({
   const [selectedConversationId, setSelectedConversationId] = useState<
     string | undefined
   >(initialConversationId)
-  const [conversation, setConversation] = useState<any>(null)
+  const [conversation, setConversation] = useState<{
+    subject?: string | null
+    otherParticipants?: Array<{ name?: string | null; avatar?: string | null }>
+  } | null>(null)
   const [isLoadingConversation, setIsLoadingConversation] = useState(false)
   const [isMobileView, setIsMobileView] = useState(false)
-  const { data: session } = useSession()
 
   // Handle responsive view
   useEffect(() => {

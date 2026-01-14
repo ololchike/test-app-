@@ -34,13 +34,19 @@ interface BookingSummaryProps {
     addonsTotal: number
     serviceFee: number
     total: number
+    discount?: number
   }
   adults: number
   children: number
+  infants?: number
   accommodations: Record<string, string>
   accommodationOptions: AccommodationOption[]
-  addons: string[]
+  addons: Array<{ id: string; quantity: number }> | string[]
   activityAddons: ActivityAddon[]
+  promoCode?: {
+    code: string
+    discountAmount: number
+  }
 }
 
 export function BookingSummary({
@@ -48,10 +54,12 @@ export function BookingSummary({
   pricing,
   adults,
   children,
+  infants = 0,
   accommodations,
   accommodationOptions,
   addons,
   activityAddons,
+  promoCode,
 }: BookingSummaryProps) {
   const totalGuests = adults + children
 
@@ -62,9 +70,12 @@ export function BookingSummary({
   }).filter(Boolean) as (AccommodationOption & { dayNumber: number })[]
 
   // Get selected addons details
-  const selectedAddons = addons.map((addonId) => {
-    return activityAddons.find((a) => a.id === addonId)
-  }).filter(Boolean) as ActivityAddon[]
+  const selectedAddons = addons.map((addon) => {
+    const addonId = typeof addon === 'string' ? addon : addon.id
+    const quantity = typeof addon === 'string' ? totalGuests : addon.quantity
+    const addonData = activityAddons.find((a) => a.id === addonId)
+    return addonData ? { ...addonData, quantity } : null
+  }).filter(Boolean) as (ActivityAddon & { quantity: number })[]
 
   return (
     <Card className="shadow-lg">
@@ -135,9 +146,9 @@ export function BookingSummary({
               {selectedAddons.map((addon) => (
                 <div key={addon.id} className="flex justify-between text-sm">
                   <span className="text-muted-foreground">
-                    {addon.name} (${addon.price} x {totalGuests})
+                    {addon.name} (${addon.price} x {addon.quantity})
                   </span>
-                  <span>${(addon.price * totalGuests).toLocaleString()}</span>
+                  <span>${(addon.price * addon.quantity).toLocaleString()}</span>
                 </div>
               ))}
               <div className="flex justify-between text-sm font-medium">
@@ -155,6 +166,20 @@ export function BookingSummary({
           <span className="text-muted-foreground">Service fee (5%)</span>
           <span>${pricing.serviceFee.toLocaleString()}</span>
         </div>
+
+        {/* Promo Discount */}
+        {promoCode && pricing.discount && pricing.discount > 0 && (
+          <>
+            <Separator />
+            <div className="flex justify-between text-sm">
+              <span className="text-green-600 font-medium flex items-center gap-1">
+                <CheckCircle className="h-3 w-3" />
+                Promo ({promoCode.code})
+              </span>
+              <span className="text-green-600 font-medium">-${pricing.discount.toLocaleString()}</span>
+            </div>
+          </>
+        )}
 
         <Separator />
 

@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
+import {
+  broadcastNewMessage,
+  notifyUser,
+} from "@/lib/pusher/server"
 
 // GET - List user's conversations
 export async function GET(request: NextRequest) {
@@ -189,11 +193,20 @@ export async function POST(request: NextRequest) {
     if (existingConversation) {
       // If there's an initial message, add it
       if (initialMessage) {
-        await prisma.message.create({
+        const message = await prisma.message.create({
           data: {
             conversationId: existingConversation.id,
             senderId: session.user.id,
             content: initialMessage,
+          },
+          include: {
+            sender: {
+              select: {
+                id: true,
+                name: true,
+                avatar: true,
+              },
+            },
           },
         })
 
@@ -201,6 +214,26 @@ export async function POST(request: NextRequest) {
           where: { id: existingConversation.id },
           data: { lastMessageAt: new Date() },
         })
+
+        // Send Pusher notifications for the message
+        broadcastNewMessage(existingConversation.id, {
+          id: message.id,
+          content: message.content,
+          senderId: message.senderId,
+          createdAt: message.createdAt,
+          sender: message.sender,
+        }).catch(console.error)
+
+        // Notify the recipient
+        notifyUser(recipientId, {
+          conversationId: existingConversation.id,
+          message: {
+            id: message.id,
+            content: message.content,
+            senderId: message.senderId,
+            senderName: message.sender.name,
+          },
+        }).catch(console.error)
       }
 
       return NextResponse.json({
@@ -243,9 +276,41 @@ export async function POST(request: NextRequest) {
         messages: {
           orderBy: { createdAt: "desc" },
           take: 1,
+          include: {
+            sender: {
+              select: {
+                id: true,
+                name: true,
+                avatar: true,
+              },
+            },
+          },
         },
       },
     })
+
+    // If there's an initial message, send Pusher notifications
+    if (initialMessage && conversation.messages.length > 0) {
+      const message = conversation.messages[0]
+
+      broadcastNewMessage(conversation.id, {
+        id: message.id,
+        content: message.content,
+        senderId: message.senderId,
+        createdAt: message.createdAt,
+        sender: message.sender,
+      }).catch(console.error)
+
+      notifyUser(recipientId, {
+        conversationId: conversation.id,
+        message: {
+          id: message.id,
+          content: message.content,
+          senderId: message.senderId,
+          senderName: message.sender.name,
+        },
+      }).catch(console.error)
+    }
 
     return NextResponse.json(
       {

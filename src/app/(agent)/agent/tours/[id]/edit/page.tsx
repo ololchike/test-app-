@@ -493,8 +493,20 @@ export default function EditTourPage({ params }: EditTourPageProps) {
       const data = await res.json()
 
       if (!res.ok) {
-        if (data.details) {
-          toast.error(data.details.join(", "))
+        if (data.details && Array.isArray(data.details)) {
+          // Show detailed validation errors
+          const errorList = data.details.join("\n")
+          toast.error(
+            <div>
+              <p className="font-semibold mb-2">Tour is not ready to publish:</p>
+              <ul className="list-disc list-inside text-sm space-y-1">
+                {data.details.map((error: string, i: number) => (
+                  <li key={i}>{error}</li>
+                ))}
+              </ul>
+            </div>,
+            { duration: 8000 }
+          )
         } else {
           throw new Error(data.error || "Failed to publish tour")
         }
@@ -608,14 +620,30 @@ export default function EditTourPage({ params }: EditTourPageProps) {
             </Link>
           </Button>
           {tour.status === "DRAFT" || tour.status === "PAUSED" ? (
-            <Button size="sm" onClick={handlePublish} disabled={isPublishing}>
-              {isPublishing ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <Globe className="h-4 w-4 mr-2" />
+            <div className="relative group">
+              <Button size="sm" onClick={handlePublish} disabled={isPublishing}>
+                {isPublishing ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Globe className="h-4 w-4 mr-2" />
+                )}
+                Publish
+              </Button>
+              {/* Tooltip for unpublishable tours */}
+              {(!tour.title || tour.title.length < 5 ||
+                !tour.description || tour.description.length < 50 ||
+                !tour.destination || !tour.country ||
+                tour.basePrice <= 0 || tour.durationDays < 1 ||
+                tour.tourType.length === 0 || itinerary.length === 0 ||
+                (!tour.coverImage && tour.images.length === 0)) && (
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-10">
+                  <div className="bg-gray-900 text-white text-xs rounded py-2 px-3 whitespace-nowrap">
+                    Complete all requirements in Settings tab
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                  </div>
+                </div>
               )}
-              Publish
-            </Button>
+            </div>
           ) : (
             <Button size="sm" variant="outline" onClick={handleUnpublish} disabled={isPublishing}>
               {isPublishing ? (
@@ -1569,6 +1597,111 @@ export default function EditTourPage({ params }: EditTourPageProps) {
                   {tour.status}
                 </Badge>
               </div>
+
+              {/* Publish Requirements Checklist */}
+              {(tour.status === "DRAFT" || tour.status === "PAUSED") && (
+                <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+                  <h4 className="font-semibold mb-3 flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 text-primary" />
+                    Publishing Requirements
+                  </h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center gap-2">
+                      {tour.title && tour.title.length >= 5 ? (
+                        <Check className="h-4 w-4 text-green-600" />
+                      ) : (
+                        <X className="h-4 w-4 text-red-600" />
+                      )}
+                      <span className={tour.title && tour.title.length >= 5 ? "text-green-700" : "text-red-700"}>
+                        Tour title (minimum 5 characters)
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {tour.description && tour.description.length >= 50 ? (
+                        <Check className="h-4 w-4 text-green-600" />
+                      ) : (
+                        <X className="h-4 w-4 text-red-600" />
+                      )}
+                      <span className={tour.description && tour.description.length >= 50 ? "text-green-700" : "text-red-700"}>
+                        Tour description (minimum 50 characters)
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {tour.destination ? (
+                        <Check className="h-4 w-4 text-green-600" />
+                      ) : (
+                        <X className="h-4 w-4 text-red-600" />
+                      )}
+                      <span className={tour.destination ? "text-green-700" : "text-red-700"}>
+                        Destination specified
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {tour.country ? (
+                        <Check className="h-4 w-4 text-green-600" />
+                      ) : (
+                        <X className="h-4 w-4 text-red-600" />
+                      )}
+                      <span className={tour.country ? "text-green-700" : "text-red-700"}>
+                        Country specified
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {tour.basePrice > 0 ? (
+                        <Check className="h-4 w-4 text-green-600" />
+                      ) : (
+                        <X className="h-4 w-4 text-red-600" />
+                      )}
+                      <span className={tour.basePrice > 0 ? "text-green-700" : "text-red-700"}>
+                        Price set (greater than 0)
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {tour.durationDays >= 1 ? (
+                        <Check className="h-4 w-4 text-green-600" />
+                      ) : (
+                        <X className="h-4 w-4 text-red-600" />
+                      )}
+                      <span className={tour.durationDays >= 1 ? "text-green-700" : "text-red-700"}>
+                        Duration (at least 1 day)
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {tour.tourType.length > 0 ? (
+                        <Check className="h-4 w-4 text-green-600" />
+                      ) : (
+                        <X className="h-4 w-4 text-red-600" />
+                      )}
+                      <span className={tour.tourType.length > 0 ? "text-green-700" : "text-red-700"}>
+                        At least one tour type selected
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {itinerary.length > 0 ? (
+                        <Check className="h-4 w-4 text-green-600" />
+                      ) : (
+                        <X className="h-4 w-4 text-red-600" />
+                      )}
+                      <span className={itinerary.length > 0 ? "text-green-700" : "text-red-700"}>
+                        At least one itinerary day added
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {(tour.coverImage || tour.images.length > 0) ? (
+                        <Check className="h-4 w-4 text-green-600" />
+                      ) : (
+                        <X className="h-4 w-4 text-red-600" />
+                      )}
+                      <span className={(tour.coverImage || tour.images.length > 0) ? "text-green-700" : "text-red-700"}>
+                        At least one image uploaded
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-3">
+                    Complete all requirements to publish your tour
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
 

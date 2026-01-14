@@ -48,9 +48,10 @@ interface CheckoutData {
   endDate: Date | null
   adults: number
   children: number
+  infants: number
   accommodations: Record<string, string>
   accommodationOptions: AccommodationOption[]
-  addons: string[]
+  addons: Array<{ id: string; quantity: number }>
   activityAddons: ActivityAddon[]
   pricing: {
     baseTotal: number
@@ -59,6 +60,13 @@ interface CheckoutData {
     addonsTotal: number
     serviceFee: number
     total: number
+    discount: number
+  }
+  promoCode?: {
+    id: string
+    code: string
+    discountAmount: number
+    discountType: string
   }
 }
 
@@ -70,6 +78,10 @@ function CheckoutContent() {
   const [error, setError] = useState<string | null>(null)
   const [userDataPrefilled, setUserDataPrefilled] = useState(false)
   const [paymentType, setPaymentType] = useState<"FULL" | "DEPOSIT">("FULL")
+  const [promoCode, setPromoCode] = useState("")
+  const [isValidatingPromo, setIsValidatingPromo] = useState(false)
+  const [promoError, setPromoError] = useState<string | null>(null)
+  const [appliedPromo, setAppliedPromo] = useState<CheckoutData["promoCode"] | null>(null)
 
   // Form state
   const [travelers, setTravelers] = useState<Array<{
@@ -136,6 +148,7 @@ function CheckoutContent() {
         const startDateStr = searchParams.get("startDate")
         const adults = parseInt(searchParams.get("adults") || "2", 10)
         const children = parseInt(searchParams.get("children") || "0", 10)
+        const infants = parseInt(searchParams.get("infants") || "0", 10)
         const accommodationsStr = searchParams.get("accommodations")
         const addonsStr = searchParams.get("addons")
 
@@ -155,7 +168,9 @@ function CheckoutContent() {
         const startDate = new Date(startDateStr)
         const endDate = addDays(startDate, tour.durationNights)
         const accommodations = accommodationsStr ? JSON.parse(accommodationsStr) : {}
-        const addons = addonsStr ? addonsStr.split(",").filter(Boolean) : []
+        const addons: Array<{ id: string; quantity: number }> = addonsStr
+          ? addonsStr.split(",").filter(Boolean).map(id => ({ id, quantity: adults + children }))
+          : []
 
         // Calculate pricing
         const baseTotal = tour.basePrice * adults
@@ -174,11 +189,10 @@ function CheckoutContent() {
         // Calculate addons total
         let addonsTotal = 0
         const activityAddons: ActivityAddon[] = tour.activityAddons || []
-        const totalGuests = adults + children
-        addons.forEach((addonId) => {
-          const addon = activityAddons.find((a: ActivityAddon) => a.id === addonId)
+        addons.forEach((addonItem) => {
+          const addon = activityAddons.find((a: ActivityAddon) => a.id === addonItem.id)
           if (addon) {
-            addonsTotal += addon.price * totalGuests
+            addonsTotal += addon.price * addonItem.quantity
           }
         })
 
@@ -192,6 +206,7 @@ function CheckoutContent() {
           endDate,
           adults,
           children,
+          infants,
           accommodations,
           accommodationOptions,
           addons,
@@ -203,6 +218,7 @@ function CheckoutContent() {
             addonsTotal,
             serviceFee,
             total,
+            discount: 0,
           },
         })
 
@@ -237,6 +253,94 @@ function CheckoutContent() {
 
     loadCheckoutData()
   }, [searchParams])
+
+  const handleApplyPromo = async () => {
+    if (!promoCode.trim()) {
+      setPromoError("Please enter a promo code")
+      return
+    }
+
+    if (!checkoutData?.tour) {
+      setPromoError("Tour data not loaded")
+      return
+    }
+
+    setIsValidatingPromo(true)
+    setPromoError(null)
+
+    try {
+      const response = await fetch("/api/promo/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: promoCode,
+          tourId: checkoutData.tour.id,
+          bookingAmount: checkoutData.pricing.total,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok || !data.valid) {
+        setPromoError(data.error || "Invalid promo code")
+        setAppliedPromo(null)
+        return
+      }
+
+      // Apply the promo discount
+      const discountAmount = data.promoCode.discountAmount
+      const newTotal = Math.max(0, checkoutData.pricing.total - discountAmount)
+
+      setAppliedPromo({
+        id: data.promoCode.id,
+        code: data.promoCode.code,
+        discountAmount,
+        discountType: data.promoCode.discountType,
+      })
+
+      setCheckoutData({
+        ...checkoutData,
+        pricing: {
+          ...checkoutData.pricing,
+          discount: discountAmount,
+          total: newTotal,
+        },
+        promoCode: {
+          id: data.promoCode.id,
+          code: data.promoCode.code,
+          discountAmount,
+          discountType: data.promoCode.discountType,
+        },
+      })
+
+      setPromoError(null)
+    } catch (error) {
+      console.error("Error validating promo code:", error)
+      setPromoError("Failed to validate promo code")
+    } finally {
+      setIsValidatingPromo(false)
+    }
+  }
+
+  const handleRemovePromo = () => {
+    if (!checkoutData || !appliedPromo) return
+
+    const originalTotal = checkoutData.pricing.total + appliedPromo.discountAmount
+
+    setCheckoutData({
+      ...checkoutData,
+      pricing: {
+        ...checkoutData.pricing,
+        discount: 0,
+        total: originalTotal,
+      },
+      promoCode: undefined,
+    })
+
+    setAppliedPromo(null)
+    setPromoCode("")
+    setPromoError(null)
+  }
 
   const validateForm = () => {
     const errors: typeof formErrors = {}
@@ -323,11 +427,13 @@ function CheckoutContent() {
           endDate: checkoutData.endDate,
           adults: checkoutData.adults,
           children: checkoutData.children,
+          infants: checkoutData.infants,
           accommodations: checkoutData.accommodations,
           addons: checkoutData.addons,
           travelers,
           contact,
           pricing: checkoutData.pricing,
+          promoCodeId: appliedPromo?.id,
           // Payment type info
           paymentType,
           depositAmount: paymentType === "DEPOSIT" ? depositAmount : null,
@@ -417,6 +523,7 @@ function CheckoutContent() {
                   <p className="text-xs sm:text-sm text-muted-foreground">
                     {checkoutData.adults} adult{checkoutData.adults > 1 ? "s" : ""}
                     {checkoutData.children > 0 && `, ${checkoutData.children} child${checkoutData.children > 1 ? "ren" : ""}`}
+                    {checkoutData.infants > 0 && `, ${checkoutData.infants} infant${checkoutData.infants > 1 ? "s" : ""}`}
                   </p>
                 </div>
               </div>
@@ -463,6 +570,65 @@ function CheckoutContent() {
               <p className="text-xs text-muted-foreground mt-2">
                 Special requests cannot be guaranteed but we&apos;ll do our best to accommodate them.
               </p>
+            </div>
+
+            {/* Promo Code Section */}
+            <div className="bg-background rounded-xl p-4 sm:p-6 shadow-sm">
+              <h2 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4">Promo Code</h2>
+              <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
+                Have a discount code? Apply it here to save on your booking.
+              </p>
+
+              {appliedPromo ? (
+                <div className="flex items-center justify-between p-3 sm:p-4 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <div>
+                      <p className="font-semibold text-sm sm:text-base">{appliedPromo.code}</p>
+                      <p className="text-xs sm:text-sm text-green-600">
+                        ${appliedPromo.discountAmount.toLocaleString()} discount applied
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleRemovePromo}
+                    className="text-destructive hover:text-destructive"
+                  >
+                    Remove
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Enter promo code"
+                      value={promoCode}
+                      onChange={(e) => {
+                        setPromoCode(e.target.value.toUpperCase())
+                        setPromoError(null)
+                      }}
+                      className="flex-1 px-3 py-2 text-sm sm:text-base rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+                      disabled={isValidatingPromo}
+                    />
+                    <Button
+                      onClick={handleApplyPromo}
+                      disabled={isValidatingPromo || !promoCode.trim()}
+                      className="px-4 sm:px-6"
+                    >
+                      {isValidatingPromo ? "Validating..." : "Apply"}
+                    </Button>
+                  </div>
+                  {promoError && (
+                    <p className="text-xs sm:text-sm text-destructive flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                      {promoError}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Payment Options - Only show if deposit is enabled */}
@@ -554,10 +720,12 @@ function CheckoutContent() {
                 pricing={checkoutData.pricing}
                 adults={checkoutData.adults}
                 children={checkoutData.children}
+                infants={checkoutData.infants}
                 accommodations={checkoutData.accommodations}
                 accommodationOptions={checkoutData.accommodationOptions}
                 addons={checkoutData.addons}
                 activityAddons={checkoutData.activityAddons}
+                promoCode={appliedPromo ? { code: appliedPromo.code, discountAmount: appliedPromo.discountAmount } : undefined}
               />
 
               {/* Trust Indicators */}

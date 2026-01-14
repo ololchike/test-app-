@@ -1483,10 +1483,114 @@ export default function CreateTourPage() {
                 </CardContent>
               </Card>
 
+              {/* Publishing Requirements Checklist */}
+              <Card className="border-primary/20 bg-primary/5">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Check className="h-4 w-4" />
+                    Publishing Requirements
+                  </CardTitle>
+                  <CardDescription>
+                    These items are required to publish your tour
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2 text-sm">
+                  <div className="flex items-center gap-2">
+                    {formData.title && formData.title.length >= 5 ? (
+                      <Check className="h-4 w-4 text-green-600" />
+                    ) : (
+                      <X className="h-4 w-4 text-red-600" />
+                    )}
+                    <span className={formData.title && formData.title.length >= 5 ? "text-green-700" : "text-red-700"}>
+                      Title (minimum 5 characters) {formData.title ? "✓" : "- Required"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {stripHtml(formData.description).length >= 50 ? (
+                      <Check className="h-4 w-4 text-green-600" />
+                    ) : (
+                      <X className="h-4 w-4 text-red-600" />
+                    )}
+                    <span className={stripHtml(formData.description).length >= 50 ? "text-green-700" : "text-red-700"}>
+                      Description (minimum 50 characters) {stripHtml(formData.description).length >= 50 ? "✓" : "- Required"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {formData.destination ? (
+                      <Check className="h-4 w-4 text-green-600" />
+                    ) : (
+                      <X className="h-4 w-4 text-red-600" />
+                    )}
+                    <span className={formData.destination ? "text-green-700" : "text-red-700"}>
+                      Destination {formData.destination ? "✓" : "- Required"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {formData.country ? (
+                      <Check className="h-4 w-4 text-green-600" />
+                    ) : (
+                      <X className="h-4 w-4 text-red-600" />
+                    )}
+                    <span className={formData.country ? "text-green-700" : "text-red-700"}>
+                      Country {formData.country ? "✓" : "- Required"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {formData.basePrice > 0 ? (
+                      <Check className="h-4 w-4 text-green-600" />
+                    ) : (
+                      <X className="h-4 w-4 text-red-600" />
+                    )}
+                    <span className={formData.basePrice > 0 ? "text-green-700" : "text-red-700"}>
+                      Price (greater than 0) {formData.basePrice > 0 ? "✓" : "- Required"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {formData.durationDays >= 1 ? (
+                      <Check className="h-4 w-4 text-green-600" />
+                    ) : (
+                      <X className="h-4 w-4 text-red-600" />
+                    )}
+                    <span className={formData.durationDays >= 1 ? "text-green-700" : "text-red-700"}>
+                      Duration (at least 1 day) {formData.durationDays >= 1 ? "✓" : "- Required"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {formData.tourType.length > 0 ? (
+                      <Check className="h-4 w-4 text-green-600" />
+                    ) : (
+                      <X className="h-4 w-4 text-red-600" />
+                    )}
+                    <span className={formData.tourType.length > 0 ? "text-green-700" : "text-red-700"}>
+                      At least one tour type {formData.tourType.length > 0 ? "✓" : "- Required"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {formData.itinerary.length > 0 ? (
+                      <Check className="h-4 w-4 text-green-600" />
+                    ) : (
+                      <X className="h-4 w-4 text-red-600" />
+                    )}
+                    <span className={formData.itinerary.length > 0 ? "text-green-700" : "text-red-700"}>
+                      At least one itinerary day {formData.itinerary.length > 0 ? "✓" : "- Required"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {(formData.coverImage || formData.images.length > 0) ? (
+                      <Check className="h-4 w-4 text-green-600" />
+                    ) : (
+                      <X className="h-4 w-4 text-red-600" />
+                    )}
+                    <span className={(formData.coverImage || formData.images.length > 0) ? "text-green-700" : "text-red-700"}>
+                      At least one image {(formData.coverImage || formData.images.length > 0) ? "✓" : "- Required"}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+
               <div className="rounded-lg bg-muted p-4">
                 <p className="text-sm text-muted-foreground">
-                  Your tour will be saved as a <strong>Draft</strong>. You can edit it and add
-                  an itinerary before publishing it to make it visible to travelers.
+                  Your tour will be saved as a <strong>Draft</strong>. You can edit it later and publish it once all requirements are met.
                 </p>
               </div>
             </div>

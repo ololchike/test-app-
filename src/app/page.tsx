@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { prisma } from "@/lib/prisma"
+import { SectionError } from "@/components/error"
 import { HeroSection } from "@/components/home/hero-section"
 import { TrustIndicators } from "@/components/home/trust-indicators"
 import { TrustBadges } from "@/components/trust/trust-badges"
@@ -253,46 +254,74 @@ export default async function HomePage() {
       <Navbar />
 
       {/* Hero Section */}
-      <HeroSection stats={stats} />
+      <SectionError name="Hero">
+        <HeroSection stats={stats} />
+      </SectionError>
 
       {/* M-Pesa Hero Banner */}
-      <MpesaHeroBanner variant="full" />
+      <SectionError name="M-Pesa Banner">
+        <MpesaHeroBanner variant="full" />
+      </SectionError>
 
       {/* Trust Badges - KATO, TATO, Payment Methods */}
-      <TrustBadges variant="full" />
+      <SectionError name="Trust Badges">
+        <TrustBadges variant="full" />
+      </SectionError>
 
       {/* Social Proof - Live Stats */}
-      <SocialProofBanner variant="full" />
+      <SectionError name="Social Proof">
+        <SocialProofBanner variant="full" />
+      </SectionError>
 
       {/* Trust Indicators */}
-      <TrustIndicators />
+      <SectionError name="Trust Indicators">
+        <TrustIndicators />
+      </SectionError>
 
       {/* Featured Destinations */}
-      <FeaturedDestinations destinations={destinations} />
+      <SectionError name="Featured Destinations">
+        <FeaturedDestinations destinations={destinations} />
+      </SectionError>
 
       {/* Curated Collections */}
-      <FeaturedCollections collections={collections} />
+      <SectionError name="Collections">
+        <FeaturedCollections collections={collections} />
+      </SectionError>
 
       {/* Featured Tours */}
-      <FeaturedTours tours={featuredTours} />
+      <SectionError name="Featured Tours">
+        <FeaturedTours tours={featuredTours} />
+      </SectionError>
 
       {/* Deals & Offers */}
-      <FeaturedDeals deals={deals} />
+      <SectionError name="Deals">
+        <FeaturedDeals deals={deals} />
+      </SectionError>
 
       {/* Recently Viewed Tours */}
-      <RecentlyViewed variant="horizontal" />
+      <SectionError name="Recently Viewed">
+        <RecentlyViewed variant="horizontal" />
+      </SectionError>
 
       {/* How It Works */}
-      <HowItWorks />
+      <SectionError name="How It Works">
+        <HowItWorks />
+      </SectionError>
 
       {/* Testimonials */}
-      <Testimonials testimonials={testimonials} />
+      <SectionError name="Testimonials">
+        <Testimonials testimonials={testimonials} />
+      </SectionError>
 
       {/* Guarantees */}
-      <GuaranteesSection variant="full" />
+      <SectionError name="Guarantees">
+        <GuaranteesSection variant="full" />
+      </SectionError>
 
       {/* CTA Section */}
-      <CTASection />
+      <SectionError name="CTA">
+        <CTASection />
+      </SectionError>
 
       <Footer />
     </div>

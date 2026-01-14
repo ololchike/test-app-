@@ -14,6 +14,7 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:seed:dev": "tsx prisma/seed.ts",
     "db:seed:prod": "tsx prisma/seed.prod.ts",
+    "db:seed:blog": "tsx prisma/seed-blog.ts",
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset --force",
     "vercel:env:pull:dev": "vercel env pull .env.development --environment=preview",

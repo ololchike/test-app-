@@ -33,7 +33,7 @@ export function WithdrawalForm({
 
   // Form state
   const [amount, setAmount] = useState("")
-  const [method, setMethod] = useState<"mpesa" | "bank">("mpesa")
+  const [method, setMethod] = useState<"MPESA" | "BANK">("MPESA")
   const [mpesaPhone, setMpesaPhone] = useState("")
   const [bankName, setBankName] = useState("")
   const [accountNumber, setAccountNumber] = useState("")
@@ -73,7 +73,7 @@ export function WithdrawalForm({
         method,
       }
 
-      if (method === "mpesa") {
+      if (method === "MPESA") {
         if (!mpesaPhone) {
           toast({
             title: "Missing Information",
@@ -185,15 +185,15 @@ export function WithdrawalForm({
           {/* Payment Method */}
           <div className="space-y-2">
             <Label>Payment Method</Label>
-            <RadioGroup value={method} onValueChange={(value: any) => setMethod(value)}>
+            <RadioGroup value={method} onValueChange={(value: "MPESA" | "BANK") => setMethod(value)}>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="mpesa" id="mpesa" />
+                <RadioGroupItem value="MPESA" id="mpesa" />
                 <Label htmlFor="mpesa" className="font-normal cursor-pointer">
                   M-Pesa
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="bank" id="bank" />
+                <RadioGroupItem value="BANK" id="bank" />
                 <Label htmlFor="bank" className="font-normal cursor-pointer">
                   Bank Transfer
                 </Label>
@@ -202,7 +202,7 @@ export function WithdrawalForm({
           </div>
 
           {/* M-Pesa Details */}
-          {method === "mpesa" && (
+          {method === "MPESA" && (
             <div className="space-y-2">
               <Label htmlFor="mpesaPhone">M-Pesa Phone Number</Label>
               <Input
@@ -220,7 +220,7 @@ export function WithdrawalForm({
           )}
 
           {/* Bank Details */}
-          {method === "bank" && (
+          {method === "BANK" && (
             <div className="space-y-3">
               <div className="space-y-2">
                 <Label htmlFor="bankName">Bank Name</Label>

@@ -7,6 +7,7 @@ import { TourCard } from "@/components/tours/tour-card"
 import { TourStructuredData } from "@/components/seo/tour-structured-data"
 import { TourGallery } from "@/components/tours/tour-gallery"
 import { TourViewTracker } from "@/components/discovery/tour-view-tracker"
+import { SectionError } from "@/components/error"
 import { prisma } from "@/lib/prisma"
 
 async function getTour(slug: string) {
@@ -319,36 +320,42 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
       </div>
 
       {/* Image Gallery */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-        <TourGallery images={tour.images} title={tour.title} />
-      </div>
+      <SectionError name="Image Gallery" minHeight="min-h-[300px]">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+          <TourGallery images={tour.images} title={tour.title} />
+        </div>
+      </SectionError>
 
       {/* Main Content - Client Component for Interactivity */}
-      <TourDetailContent tour={tour} />
+      <SectionError name="Tour Details" minHeight="min-h-[400px]">
+        <TourDetailContent tour={tour} />
+      </SectionError>
 
       {/* Similar Tours Section */}
       {similarTours.length > 0 && (
-        <section className="py-12 sm:py-16 bg-gradient-to-b from-muted/30 to-transparent">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="mb-10">
-              <span className="text-primary font-semibold text-sm uppercase tracking-wider">
-                Discover More
-              </span>
-              <h2 className="mt-2 text-3xl font-bold tracking-tight">
-                You might also like
-              </h2>
-              <p className="text-muted-foreground mt-2 max-w-2xl">
-                Similar tours in {tour.destination} and nearby destinations
-              </p>
-            </div>
+        <SectionError name="Similar Tours">
+          <section className="py-12 sm:py-16 bg-gradient-to-b from-muted/30 to-transparent">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="mb-10">
+                <span className="text-primary font-semibold text-sm uppercase tracking-wider">
+                  Discover More
+                </span>
+                <h2 className="mt-2 text-3xl font-bold tracking-tight">
+                  You might also like
+                </h2>
+                <p className="text-muted-foreground mt-2 max-w-2xl">
+                  Similar tours in {tour.destination} and nearby destinations
+                </p>
+              </div>
 
-            <div className="grid gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {similarTours.map((similarTour, index) => (
-                <TourCard key={similarTour.id} tour={similarTour} index={index} />
-              ))}
+              <div className="grid gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {similarTours.map((similarTour, index) => (
+                  <TourCard key={similarTour.id} tour={similarTour} index={index} />
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        </SectionError>
       )}
       </div>
     </>

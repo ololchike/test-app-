@@ -19,6 +19,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
+import { SectionError } from "@/components/error"
 
 async function getAgentDashboardData(userId: string) {
   const agent = await prisma.agent.findUnique({
@@ -207,6 +208,7 @@ export default async function AgentDashboardPage() {
       </div>
 
       {/* Stats Grid */}
+      <SectionError name="Stats">
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         {statsConfig.map((stat, index) => {
           const value = stats[stat.key as keyof typeof stats]
@@ -260,9 +262,11 @@ export default async function AgentDashboardPage() {
           )
         })}
       </div>
+      </SectionError>
 
       <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
         {/* Recent Bookings */}
+        <SectionError name="Recent Bookings" className="lg:col-span-2">
         <Card className="lg:col-span-2 border-border/50 hover:shadow-premium transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
@@ -354,8 +358,10 @@ export default async function AgentDashboardPage() {
             )}
           </CardContent>
         </Card>
+        </SectionError>
 
         {/* Quick Actions */}
+        <SectionError name="Quick Actions">
         <Card className="border-border/50 hover:shadow-premium transition-all duration-300">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -387,10 +393,12 @@ export default async function AgentDashboardPage() {
             ))}
           </CardContent>
         </Card>
+        </SectionError>
       </div>
 
       {/* Top Performing Tours */}
       {topTours.length > 0 && (
+        <SectionError name="Top Tours">
         <Card className="border-border/50 hover:shadow-premium transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
@@ -452,6 +460,7 @@ export default async function AgentDashboardPage() {
             </div>
           </CardContent>
         </Card>
+        </SectionError>
       )}
     </div>
   )

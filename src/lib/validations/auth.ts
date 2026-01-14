@@ -94,9 +94,9 @@ export const agentSignupSchema = z.object({
 
   // Certifications
   licenseNumber: z.string().optional(),
-  katoMember: z.boolean().default(false),
-  tatoMember: z.boolean().default(false),
-  autoMember: z.boolean().default(false),
+  katoMember: z.boolean(),
+  tatoMember: z.boolean(),
+  autoMember: z.boolean(),
 
   acceptTerms: z.boolean().refine((val) => val === true, {
     message: "You must accept the terms and conditions",

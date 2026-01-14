@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useCallback, useRef } from "react"
+import { useEffect, useState, useCallback } from "react"
 import {
   getPusherClient,
   PUSHER_EVENTS,
@@ -45,6 +45,28 @@ interface UseMessagesOptions {
   onNewMessage?: (message: Message) => void
 }
 
+interface ConversationListItem {
+  id: string
+  subject: string | null
+  bookingId: string | null
+  lastMessageAt: string
+  lastMessage: {
+    id: string
+    content: string
+    createdAt: string
+    senderId: string
+    isRead: boolean
+  } | null
+  unreadCount: number
+  otherParticipants: Array<{
+    id: string
+    name: string | null
+    avatar: string | null
+    role: string
+  }>
+  createdAt: string
+}
+
 export function useMessages({ conversationId, onNewMessage }: UseMessagesOptions) {
   const [messages, setMessages] = useState<Message[]>([])
   const [conversation, setConversation] = useState<Conversation | null>(null)
@@ -52,7 +74,6 @@ export function useMessages({ conversationId, onNewMessage }: UseMessagesOptions
   const [error, setError] = useState<string | null>(null)
   const [hasMore, setHasMore] = useState(false)
   const [nextCursor, setNextCursor] = useState<string | null>(null)
-  const channelRef = useRef<ReturnType<Exclude<ReturnType<typeof getPusherClient>, null>["subscribe"]> | null>(null)
 
   // Fetch initial messages
   const fetchMessages = useCallback(async (cursor?: string) => {
@@ -79,7 +100,7 @@ export function useMessages({ conversationId, onNewMessage }: UseMessagesOptions
       } else {
         setError(data.error)
       }
-    } catch (err) {
+    } catch {
       setError("Failed to fetch messages")
     } finally {
       setIsLoading(false)
@@ -216,7 +237,7 @@ export function useUnreadCount() {
 
 // Hook for conversations list
 export function useConversations() {
-  const [conversations, setConversations] = useState<any[]>([])
+  const [conversations, setConversations] = useState<ConversationListItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [meta, setMeta] = useState({ page: 1, total: 0, totalPages: 0 })
@@ -236,7 +257,7 @@ export function useConversations() {
       } else {
         setError(data.error)
       }
-    } catch (err) {
+    } catch {
       setError("Failed to fetch conversations")
     } finally {
       setIsLoading(false)

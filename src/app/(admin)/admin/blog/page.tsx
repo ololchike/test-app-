@@ -15,6 +15,8 @@ import {
   Clock,
   Archive,
   Star,
+  XCircle,
+  User,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -59,14 +61,21 @@ interface BlogPost {
   title: string
   excerpt: string | null
   coverImage: string | null
-  status: "DRAFT" | "PUBLISHED" | "ARCHIVED"
+  status: "DRAFT" | "PENDING_APPROVAL" | "PUBLISHED" | "REJECTED" | "ARCHIVED"
   isFeatured: boolean
   viewCount: number
   readingTime: number | null
+  submittedBy: "ADMIN" | "AGENT" | "CLIENT"
+  rejectionReason: string | null
   category: {
     id: string
     name: string
     color: string | null
+  } | null
+  submitter: {
+    id: string
+    name: string | null
+    email: string
   } | null
   createdAt: string
   updatedAt: string
@@ -178,18 +187,59 @@ export default function AdminBlogPage() {
     }
   }
 
+  const handleReject = async (postId: string, reason: string) => {
+    try {
+      const response = await fetch(`/api/admin/blog/${postId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: "REJECTED",
+          rejectionReason: reason
+        }),
+      })
+
+      if (response.ok) {
+        toast.success("Post rejected")
+        fetchPosts()
+      } else {
+        toast.error("Failed to reject post")
+      }
+    } catch (error) {
+      console.error("Error rejecting post:", error)
+      toast.error("Failed to reject post")
+    }
+  }
+
   const publishedCount = posts.filter((p) => p.status === "PUBLISHED").length
+  const pendingCount = posts.filter((p) => p.status === "PENDING_APPROVAL").length
   const draftCount = posts.filter((p) => p.status === "DRAFT").length
-  const archivedCount = posts.filter((p) => p.status === "ARCHIVED").length
+  const rejectedCount = posts.filter((p) => p.status === "REJECTED").length
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "PUBLISHED":
         return <Badge className="bg-green-600">Published</Badge>
+      case "PENDING_APPROVAL":
+        return <Badge className="bg-amber-600">Pending</Badge>
       case "DRAFT":
         return <Badge variant="secondary">Draft</Badge>
+      case "REJECTED":
+        return <Badge variant="destructive">Rejected</Badge>
       case "ARCHIVED":
         return <Badge variant="outline">Archived</Badge>
+      default:
+        return null
+    }
+  }
+
+  const getSubmitterBadge = (submittedBy: string) => {
+    switch (submittedBy) {
+      case "ADMIN":
+        return <Badge variant="outline" className="text-xs">Admin</Badge>
+      case "AGENT":
+        return <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">Agent</Badge>
+      case "CLIENT":
+        return <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200">Client</Badge>
       default:
         return null
     }
@@ -213,14 +263,23 @@ export default function AdminBlogPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 md:gap-4 md:grid-cols-5">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Posts</CardTitle>
+            <CardTitle className="text-sm font-medium">Total</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{posts.length}</div>
+          </CardContent>
+        </Card>
+        <Card className={pendingCount > 0 ? "border-amber-500/50 bg-amber-50/50 dark:bg-amber-950/20" : ""}>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Pending</CardTitle>
+            <Clock className="h-4 w-4 text-amber-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{pendingCount}</div>
           </CardContent>
         </Card>
         <Card>
@@ -235,7 +294,7 @@ export default function AdminBlogPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Drafts</CardTitle>
-            <Clock className="h-4 w-4 text-yellow-600" />
+            <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{draftCount}</div>
@@ -243,11 +302,11 @@ export default function AdminBlogPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Archived</CardTitle>
-            <Archive className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Rejected</CardTitle>
+            <XCircle className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{archivedCount}</div>
+            <div className="text-2xl font-bold">{rejectedCount}</div>
           </CardContent>
         </Card>
       </div>
@@ -271,12 +330,15 @@ export default function AdminBlogPage() {
               </Button>
             </form>
 
-            <Tabs value={statusFilter} onValueChange={setStatusFilter}>
-              <TabsList>
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="published">Published</TabsTrigger>
-                <TabsTrigger value="draft">Drafts</TabsTrigger>
-                <TabsTrigger value="archived">Archived</TabsTrigger>
+            <Tabs value={statusFilter} onValueChange={setStatusFilter} className="w-full sm:w-auto">
+              <TabsList className="w-full sm:w-auto overflow-x-auto">
+                <TabsTrigger value="all" className="text-xs sm:text-sm">All</TabsTrigger>
+                <TabsTrigger value="pending_approval" className="text-xs sm:text-sm">
+                  Pending {pendingCount > 0 && <span className="ml-1 text-amber-600">({pendingCount})</span>}
+                </TabsTrigger>
+                <TabsTrigger value="published" className="text-xs sm:text-sm">Published</TabsTrigger>
+                <TabsTrigger value="draft" className="text-xs sm:text-sm">Drafts</TabsTrigger>
+                <TabsTrigger value="rejected" className="text-xs sm:text-sm">Rejected</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
@@ -309,6 +371,7 @@ export default function AdminBlogPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Post</TableHead>
+                  <TableHead>Submitted By</TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Views</TableHead>
@@ -352,6 +415,16 @@ export default function AdminBlogPage() {
                       </div>
                     </TableCell>
                     <TableCell>
+                      <div className="flex flex-col gap-1">
+                        {getSubmitterBadge(post.submittedBy)}
+                        {post.submitter && post.submittedBy !== "ADMIN" && (
+                          <span className="text-xs text-muted-foreground truncate max-w-[120px]" title={post.submitter.email}>
+                            {post.submitter.name || post.submitter.email}
+                          </span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
                       {post.category ? (
                         <Badge
                           variant="outline"
@@ -366,7 +439,16 @@ export default function AdminBlogPage() {
                         <span className="text-muted-foreground">-</span>
                       )}
                     </TableCell>
-                    <TableCell>{getStatusBadge(post.status)}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-col gap-1">
+                        {getStatusBadge(post.status)}
+                        {post.status === "REJECTED" && post.rejectionReason && (
+                          <span className="text-xs text-muted-foreground truncate max-w-[100px]" title={post.rejectionReason}>
+                            {post.rejectionReason}
+                          </span>
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell>{post.viewCount.toLocaleString()}</TableCell>
                     <TableCell>
                       {post.publishedAt
@@ -395,6 +477,29 @@ export default function AdminBlogPage() {
                               Edit
                             </Link>
                           </DropdownMenuItem>
+                          {post.status === "PENDING_APPROVAL" && (
+                            <>
+                              <DropdownMenuItem
+                                onClick={() => toggleStatus(post, "PUBLISHED")}
+                                className="text-green-600"
+                              >
+                                <CheckCircle className="h-4 w-4 mr-2" />
+                                Approve & Publish
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  const reason = prompt("Enter rejection reason:")
+                                  if (reason) {
+                                    handleReject(post.id, reason)
+                                  }
+                                }}
+                                className="text-destructive"
+                              >
+                                <XCircle className="h-4 w-4 mr-2" />
+                                Reject
+                              </DropdownMenuItem>
+                            </>
+                          )}
                           {post.status === "DRAFT" && (
                             <DropdownMenuItem
                               onClick={() => toggleStatus(post, "PUBLISHED")}

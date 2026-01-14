@@ -89,12 +89,19 @@ interface TourCustomizerProps {
     handleBooking: () => void
     isLoading: boolean
     endDate: Date | undefined
+    dateError: string | null
+    clearDateError: () => void
   }) => ReactNode
 }
 
 export function TourCustomizer({ tour, children }: TourCustomizerProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [dateError, setDateError] = useState<string | null>(null)
+
+  const clearDateError = useCallback(() => {
+    setDateError(null)
+  }, [])
 
   // Initialize accommodations with defaults from itinerary
   const initialAccommodations = useMemo(() => {
@@ -270,8 +277,14 @@ export function TourCustomizer({ tour, children }: TourCustomizerProps) {
 
   // Handle booking
   const handleBooking = useCallback(() => {
-    if (!bookingState.startDate) return
+    // Validate start date
+    if (!bookingState.startDate) {
+      setDateError("Please select a travel date")
+      return
+    }
 
+    // Clear any previous error
+    setDateError(null)
     setIsLoading(true)
 
     // Build URL with booking state
@@ -300,6 +313,8 @@ export function TourCustomizer({ tour, children }: TourCustomizerProps) {
         handleBooking,
         isLoading,
         endDate,
+        dateError,
+        clearDateError,
       })}
     </>
   )

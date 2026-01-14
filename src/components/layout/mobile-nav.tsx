@@ -3,46 +3,63 @@
 import { useEffect, useState } from "react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
-import { Home, Compass, Calendar, MessageSquare, User } from "lucide-react"
+import { Home, Compass, Calendar, MessageSquare, User, Tag } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface MobileNavProps {
   isAuthenticated?: boolean
 }
 
-const navItems = [
+// Items for authenticated users
+const authNavItems = [
   {
     label: "Home",
     href: "/",
     icon: Home,
-    requiresAuth: false,
   },
   {
     label: "Tours",
     href: "/tours",
     icon: Compass,
-    requiresAuth: false,
   },
   {
     label: "Bookings",
     href: "/dashboard/bookings",
     icon: Calendar,
-    requiresAuth: true,
-    authFallback: "/login",
   },
   {
     label: "Messages",
     href: "/dashboard/messages",
     icon: MessageSquare,
-    requiresAuth: true,
-    authFallback: "/login",
   },
   {
     label: "Profile",
     href: "/dashboard",
     icon: User,
-    requiresAuth: true,
-    authFallback: "/login",
+  },
+]
+
+// Items for non-authenticated users
+const publicNavItems = [
+  {
+    label: "Home",
+    href: "/",
+    icon: Home,
+  },
+  {
+    label: "Tours",
+    href: "/tours",
+    icon: Compass,
+  },
+  {
+    label: "Deals",
+    href: "/deals",
+    icon: Tag,
+  },
+  {
+    label: "Sign In",
+    href: "/login",
+    icon: User,
   },
 ]
 
@@ -79,6 +96,9 @@ export function MobileNav({ isAuthenticated = false }: MobileNavProps) {
 
   if (!shouldShow) return null
 
+  // Select the appropriate nav items based on auth state
+  const navItems = isAuthenticated ? authNavItems : publicNavItems
+
   return (
     <nav
       className={cn(
@@ -88,11 +108,6 @@ export function MobileNav({ isAuthenticated = false }: MobileNavProps) {
     >
       <div className="flex items-center justify-around px-2 py-2 safe-area-pb">
         {navItems.map((item) => {
-          // Determine the actual href based on auth state
-          const href = item.requiresAuth && !isAuthenticated && item.authFallback
-            ? item.authFallback
-            : item.href
-
           // Check if this item is active
           const isActive = pathname === item.href ||
             (item.href !== "/" && pathname.startsWith(item.href))
@@ -102,12 +117,13 @@ export function MobileNav({ isAuthenticated = false }: MobileNavProps) {
           return (
             <Link
               key={item.label}
-              href={href}
+              href={item.href}
               className={cn(
                 "flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-colors min-w-[60px]",
                 isActive
                   ? "text-primary bg-primary/10"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted",
+                item.label === "Deals" && "text-orange-600 dark:text-orange-400"
               )}
             >
               <Icon className={cn("h-5 w-5", isActive && "stroke-[2.5]")} />

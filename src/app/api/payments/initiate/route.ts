@@ -22,6 +22,7 @@ const initiatePaymentSchema = z.object({
   paymentMethod: z.enum(["MPESA", "CARD", "BANK_TRANSFER", "PAYPAL"]).optional(),
   phoneNumber: z.string().optional(), // Required for M-Pesa
   gateway: z.enum(["pesapal", "flutterwave"]).optional(), // Allow explicit gateway selection
+  isBalancePayment: z.boolean().optional(), // True when paying remaining balance for deposit bookings
 })
 
 export async function POST(request: NextRequest) {
@@ -49,7 +50,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { bookingId, paymentMethod, phoneNumber, gateway: requestedGateway } = validation.data
+    const { bookingId, paymentMethod, phoneNumber, gateway: requestedGateway, isBalancePayment } = validation.data
 
     // Fetch booking with all related data
     const booking = await prisma.booking.findUnique({
@@ -84,7 +85,6 @@ export async function POST(request: NextRequest) {
           orderBy: {
             createdAt: "desc",
           },
-          take: 1,
         },
       },
     })
@@ -105,31 +105,80 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if payment already exists and is completed
-    if (booking.payments.length > 0 && booking.payments[0].status === "COMPLETED") {
-      return NextResponse.json(
-        { error: "Payment already completed for this booking" },
-        { status: 400 }
-      )
+    // Determine if this is a balance payment for a deposit booking
+    const completedPayments = booking.payments.filter(p => p.status === "COMPLETED")
+    const hasCompletedDeposit = completedPayments.length > 0 &&
+      booking.paymentType === "DEPOSIT" &&
+      !booking.balancePaidAt
+
+    // Handle balance payment logic
+    if (isBalancePayment) {
+      // Validate this is a deposit booking with unpaid balance
+      if (booking.paymentType !== "DEPOSIT") {
+        return NextResponse.json(
+          { error: "This booking was not a deposit payment. Balance payment not applicable." },
+          { status: 400 }
+        )
+      }
+
+      if (booking.balancePaidAt) {
+        return NextResponse.json(
+          { error: "Balance has already been paid for this booking." },
+          { status: 400 }
+        )
+      }
+
+      if (!hasCompletedDeposit) {
+        return NextResponse.json(
+          { error: "Deposit must be paid before paying the balance." },
+          { status: 400 }
+        )
+      }
+
+      if (!booking.balanceAmount || booking.balanceAmount <= 0) {
+        return NextResponse.json(
+          { error: "No balance amount due for this booking." },
+          { status: 400 }
+        )
+      }
+    } else {
+      // Regular payment - check if payment already exists and is completed
+      if (completedPayments.length > 0 && !hasCompletedDeposit) {
+        return NextResponse.json(
+          { error: "Payment already completed for this booking" },
+          { status: 400 }
+        )
+      }
+
+      // If deposit was paid, redirect to balance payment
+      if (hasCompletedDeposit) {
+        return NextResponse.json(
+          {
+            error: "Deposit already paid. Use isBalancePayment: true to pay the remaining balance.",
+            requiresBalancePayment: true,
+            balanceAmount: booking.balanceAmount,
+          },
+          { status: 400 }
+        )
+      }
     }
 
-    // Check if there's a pending/processing payment
-    if (
-      booking.payments.length > 0 &&
-      (booking.payments[0].status === "PENDING" || booking.payments[0].status === "PROCESSING")
-    ) {
-      const existingPayment = booking.payments[0]
+    // Check if there's a pending/processing payment for current payment type
+    const pendingPayment = booking.payments.find(
+      p => p.status === "PENDING" || p.status === "PROCESSING"
+    )
 
+    if (pendingPayment) {
       // If payment was created more than 30 minutes ago, allow retry
       const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000)
-      if (existingPayment.createdAt > thirtyMinutesAgo && (existingPayment.pesapalOrderId || existingPayment.flutterwaveRef)) {
+      if (pendingPayment.createdAt > thirtyMinutesAgo && (pendingPayment.pesapalOrderId || pendingPayment.flutterwaveRef)) {
         return NextResponse.json(
           {
             error: "A payment is already in progress for this booking",
             existingPayment: {
-              id: existingPayment.id,
-              status: existingPayment.status,
-              createdAt: existingPayment.createdAt,
+              id: pendingPayment.id,
+              status: pendingPayment.status,
+              createdAt: pendingPayment.createdAt,
             },
           },
           { status: 400 }
@@ -145,6 +194,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Calculate the amount to charge
+    let amountToCharge = booking.totalAmount
+    let paymentDescription = `Safari Booking: ${booking.tour.title} - ${booking.bookingReference}`
+
+    if (isBalancePayment && booking.balanceAmount) {
+      // Balance payment - charge only the remaining balance
+      amountToCharge = booking.balanceAmount
+      paymentDescription = `Balance Payment: ${booking.tour.title} - ${booking.bookingReference}`
+    } else if (booking.paymentType === "DEPOSIT" && booking.depositAmount) {
+      // Initial deposit payment - charge only the deposit
+      amountToCharge = booking.depositAmount
+      paymentDescription = `Deposit: ${booking.tour.title} - ${booking.bookingReference}`
+    }
+
     // Determine payment gateway
     const normalizedMethod = (paymentMethod?.toLowerCase() || "card") as PaymentMethod
     const selectedGateway = requestedGateway || selectPaymentGateway(normalizedMethod, booking.currency)
@@ -153,9 +216,9 @@ export async function POST(request: NextRequest) {
 
     // Route to appropriate gateway
     if (selectedGateway === "flutterwave") {
-      return await initiateFlutterwavePayment(booking, paymentMethod || "CARD", phoneNumber)
+      return await initiateFlutterwavePayment(booking, paymentMethod || "CARD", phoneNumber, amountToCharge, paymentDescription, isBalancePayment)
     } else {
-      return await initiatePesapalPayment(booking, paymentMethod || "CARD", phoneNumber)
+      return await initiatePesapalPayment(booking, paymentMethod || "CARD", phoneNumber, amountToCharge, paymentDescription, isBalancePayment)
     }
   } catch (error) {
     console.error("Error initiating payment:", error)
@@ -184,16 +247,24 @@ async function initiatePesapalPayment(
     user: { name: string | null }
   },
   paymentMethod: string,
-  phoneNumber?: string
+  phoneNumber?: string,
+  amountToCharge?: number,
+  paymentDescription?: string,
+  isBalancePayment?: boolean
 ) {
-  // Generate unique merchant reference
-  const merchantReference = generateMerchantReference(booking.bookingReference)
+  // Use provided amount or default to totalAmount
+  const amount = amountToCharge ?? booking.totalAmount
+  const description = paymentDescription ?? `Safari Booking: ${booking.tour.title} - ${booking.bookingReference}`
+
+  // Generate unique merchant reference (add BAL prefix for balance payments)
+  const referencePrefix = isBalancePayment ? "BAL" : "SP"
+  const merchantReference = `${referencePrefix}-${booking.bookingReference}-${Date.now()}`
 
   // Create payment record
   const payment = await prisma.payment.create({
     data: {
       bookingId: booking.id,
-      amount: booking.totalAmount,
+      amount: amount,
       currency: booking.currency,
       method: paymentMethod as "MPESA" | "CARD" | "BANK_TRANSFER" | "PAYPAL",
       pesapalMerchantRef: merchantReference,
@@ -210,7 +281,7 @@ async function initiatePesapalPayment(
   const isDevMode = process.env.PESAPAL_DEV_MODE === "true"
 
   // In dev mode, use 1 KES for testing; otherwise use actual amount
-  const pesapalAmount = isDevMode ? 1 : booking.totalAmount
+  const pesapalAmount = isDevMode ? 1 : amount
   const pesapalCurrency = isDevMode ? "KES" : booking.currency
 
   if (isDevMode) {
@@ -219,17 +290,26 @@ async function initiatePesapalPayment(
     })
   }
 
+  // Normalize phone number for Pesapal (format: 254XXXXXXXXX)
+  const rawPhone = phoneNumber || booking.contactPhone || ""
+  let normalizedPhone = rawPhone.replace(/\s+/g, "").replace(/[^\d+]/g, "")
+  if (normalizedPhone.startsWith("+")) {
+    normalizedPhone = normalizedPhone.substring(1) // Remove +
+  } else if (normalizedPhone.startsWith("0")) {
+    normalizedPhone = "254" + normalizedPhone.substring(1) // 07XX -> 2547XX
+  }
+
   // Prepare order data for Pesapal
   const orderData = {
     id: merchantReference,
     currency: pesapalCurrency,
     amount: pesapalAmount,
-    description: `Safari Booking: ${booking.tour.title} - ${booking.bookingReference}`,
+    description: description,
     callback_url: `${process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL}/booking/confirmation/${booking.id}`,
     notification_id: process.env.PESAPAL_IPN_ID || "",
     billing_address: {
       email_address: booking.contactEmail,
-      phone_number: phoneNumber || booking.contactPhone || undefined,
+      phone_number: normalizedPhone || undefined,
       first_name: booking.contactName?.split(" ")[0] || booking.user.name?.split(" ")[0] || "",
       last_name: booking.contactName?.split(" ").slice(1).join(" ") || booking.user.name?.split(" ").slice(1).join(" ") || "",
       country_code: "KE",
@@ -283,7 +363,8 @@ async function initiatePesapalPayment(
   log.info(`Pesapal payment initiated`, {
     paymentId: payment.id,
     bookingReference: booking.bookingReference,
-    amount: `${booking.currency} ${booking.totalAmount}`,
+    amount: `${booking.currency} ${amount}`,
+    isBalancePayment: isBalancePayment || false,
   })
 
   return NextResponse.json({
@@ -311,16 +392,26 @@ async function initiateFlutterwavePayment(
     user: { name: string | null }
   },
   paymentMethod: string,
-  phoneNumber?: string
+  phoneNumber?: string,
+  amountToCharge?: number,
+  paymentDescription?: string,
+  isBalancePayment?: boolean
 ) {
-  // Generate unique transaction reference
-  const txRef = generateFlutterwaveTxRef(booking.bookingReference)
+  // Use provided amount or default to totalAmount
+  const amount = amountToCharge ?? booking.totalAmount
+  const description = paymentDescription ?? `Safari Booking: ${booking.tour.title}`
+
+  // Generate unique transaction reference (add BAL prefix for balance payments)
+  const referencePrefix = isBalancePayment ? "FLW-BAL" : "FLW"
+  const timestamp = Date.now()
+  const random = require("crypto").randomBytes(4).toString("hex")
+  const txRef = `${referencePrefix}-${booking.bookingReference}-${timestamp}-${random}`
 
   // Create payment record
   const payment = await prisma.payment.create({
     data: {
       bookingId: booking.id,
-      amount: booking.totalAmount,
+      amount: amount,
       currency: booking.currency,
       method: paymentMethod as "MPESA" | "CARD" | "BANK_TRANSFER" | "PAYPAL",
       flutterwaveRef: txRef,
@@ -337,7 +428,7 @@ async function initiateFlutterwavePayment(
   const isDevMode = process.env.FLUTTERWAVE_DEV_MODE === "true"
 
   // In dev mode, use 10 USD for testing (Flutterwave minimum)
-  const flutterwaveAmount = isDevMode ? 10 : booking.totalAmount
+  const flutterwaveAmount = isDevMode ? 10 : amount
   const flutterwaveCurrency = isDevMode ? "USD" : booking.currency
 
   if (isDevMode) {
@@ -359,12 +450,13 @@ async function initiateFlutterwavePayment(
     },
     customizations: {
       title: "SafariPlus",
-      description: `Safari Booking: ${booking.tour.title}`,
+      description: description,
       logo: `${process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL}/icons/icon.svg`,
     },
     meta: {
       booking_id: booking.id,
       booking_reference: booking.bookingReference,
+      is_balance_payment: isBalancePayment ? "true" : "false",
     },
   }
 
@@ -413,7 +505,8 @@ async function initiateFlutterwavePayment(
   log.info(`Flutterwave payment initiated`, {
     paymentId: payment.id,
     bookingReference: booking.bookingReference,
-    amount: `${booking.currency} ${booking.totalAmount}`,
+    amount: `${booking.currency} ${amount}`,
+    isBalancePayment: isBalancePayment || false,
   })
 
   return NextResponse.json({

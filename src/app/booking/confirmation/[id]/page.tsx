@@ -20,7 +20,8 @@ import {
   Star,
   Loader2,
   AlertCircle,
-  CreditCard
+  CreditCard,
+  XCircle
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -39,6 +40,7 @@ interface BookingData {
   endDate: string
   adults: number
   children: number
+  infants: number
   contactName: string
   contactEmail: string
   contactPhone: string
@@ -70,10 +72,15 @@ interface BookingData {
     }
   }>
   activities: Array<{
+    quantity: number
     activityAddon: {
       name: string
     }
   }>
+  promoCode?: {
+    code: string
+    discountAmount: number
+  }
 }
 
 function ConfirmationContent() {
@@ -420,6 +427,7 @@ function ConfirmationContent() {
                       <p className="text-sm sm:text-base font-medium">
                         {booking.adults} adult{booking.adults > 1 ? "s" : ""}
                         {booking.children > 0 && `, ${booking.children} child${booking.children > 1 ? "ren" : ""}`}
+                        {booking.infants > 0 && `, ${booking.infants} infant${booking.infants > 1 ? "s" : ""}`}
                       </p>
                     </div>
                   </div>
@@ -465,15 +473,17 @@ function ConfirmationContent() {
                         <Star className="h-4 w-4 text-primary" />
                         Add-ons
                       </p>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="space-y-2">
                         {booking.activities.map((activity, idx) => (
-                          <Badge
+                          <div
                             key={idx}
-                            variant="outline"
-                            className="rounded-full px-3 py-1 bg-primary/5"
+                            className="flex justify-between items-center p-2 rounded-lg bg-muted/30"
                           >
-                            {activity.activityAddon.name}
-                          </Badge>
+                            <span className="text-sm">{activity.activityAddon.name}</span>
+                            <Badge variant="outline" className="text-xs">
+                              Qty: {activity.quantity}
+                            </Badge>
+                          </div>
                         ))}
                       </div>
                     </div>
@@ -484,6 +494,19 @@ function ConfirmationContent() {
 
                 {/* Payment Summary */}
                 <div className="space-y-3">
+                  {/* Promo Discount */}
+                  {booking.promoCode && booking.promoCode.discountAmount > 0 && (
+                    <div className="flex justify-between items-center text-sm p-2 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900">
+                      <span className="text-green-600 font-medium flex items-center gap-1">
+                        <CheckCircle className="h-3 w-3" />
+                        Promo Code ({booking.promoCode.code})
+                      </span>
+                      <span className="text-green-600 font-medium">
+                        -${booking.promoCode.discountAmount.toLocaleString()}
+                      </span>
+                    </div>
+                  )}
+
                   {/* Total Amount */}
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-muted-foreground">Total Amount</span>
@@ -685,6 +708,30 @@ function ConfirmationContent() {
               <Link href="/dashboard/bookings">View My Bookings</Link>
             </Button>
           </motion.div>
+
+          {/* Cancel Booking Option */}
+          {booking.status !== "CANCELLED" &&
+            booking.status !== "COMPLETED" &&
+            new Date(booking.startDate) > new Date() && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="text-center relative z-20"
+            >
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-destructive"
+                asChild
+              >
+                <Link href="/dashboard/bookings">
+                  <XCircle className="h-4 w-4 mr-2" />
+                  Need to cancel? Manage in your bookings
+                </Link>
+              </Button>
+            </motion.div>
+          )}
 
           {/* Help Text */}
           <motion.p

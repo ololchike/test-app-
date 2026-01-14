@@ -43,6 +43,8 @@ interface BookingWithRelations {
   status: string
   paymentStatus: string
   paymentType: string
+  agentEarnings: number
+  platformCommission: number
   tour: {
     id: string
     title: string
@@ -330,25 +332,48 @@ export async function POST(request: NextRequest) {
     if (newPaymentStatus === "COMPLETED") {
       log.info(`Processing successful payment for booking: ${payment.booking.bookingReference}`)
 
+      // Check if this is a balance payment (merchant reference starts with "BAL-")
+      const isBalancePayment = payment.pesapalMerchantRef?.startsWith("BAL-")
+
       // Use transaction to ensure all updates succeed or fail together
       await prisma.$transaction(async (tx) => {
+        // Prepare booking update data
+        const bookingUpdateData: {
+          status: "CONFIRMED"
+          paymentStatus: "COMPLETED"
+          balancePaidAt?: Date
+        } = {
+          status: "CONFIRMED",
+          paymentStatus: "COMPLETED",
+        }
+
+        // If this is a balance payment, set the balancePaidAt timestamp
+        if (isBalancePayment) {
+          bookingUpdateData.balancePaidAt = new Date()
+          log.info(`Balance payment completed for booking: ${payment.booking.bookingReference}`)
+        }
+
         // Update booking status
         await tx.booking.update({
           where: { id: payment.bookingId },
-          data: {
-            status: "CONFIRMED",
-            paymentStatus: "COMPLETED",
-          },
+          data: bookingUpdateData,
         })
 
         // Create agent earning record
+        // For balance payments, calculate earnings on the balance amount only
+        const earningsAmount = isBalancePayment
+          ? payment.amount * (1 - (payment.booking.platformCommission || 12) / 100)
+          : payment.booking.agentEarnings
+
         await tx.agentEarning.create({
           data: {
             agentId: payment.booking.agentId,
             bookingId: payment.booking.id,
-            amount: payment.booking.agentEarnings,
+            amount: earningsAmount,
             currency: payment.booking.currency,
-            description: `Earnings from booking ${payment.booking.bookingReference}`,
+            description: isBalancePayment
+              ? `Balance payment earnings from booking ${payment.booking.bookingReference}`
+              : `Earnings from booking ${payment.booking.bookingReference}`,
             type: EarningType.BOOKING,
           },
         })
@@ -357,7 +382,7 @@ export async function POST(request: NextRequest) {
         await tx.auditLog.create({
           data: {
             userId: payment.booking.userId,
-            action: "PAYMENT_COMPLETED",
+            action: isBalancePayment ? "BALANCE_PAYMENT_COMPLETED" : "PAYMENT_COMPLETED",
             resource: "Payment",
             resourceId: payment.id,
             metadata: {
@@ -368,19 +393,27 @@ export async function POST(request: NextRequest) {
               method: paymentMethod,
               pesapalTrackingId: transactionStatus.confirmation_code,
               paymentAccount: transactionStatus.payment_account,
+              isBalancePayment: isBalancePayment,
             },
           },
         })
       })
 
       // Send confirmation email with PDF itinerary (non-blocking)
-      sendConfirmationEmailWithPDF(payment.booking as BookingWithRelations)
-        .then(() => {
-          log.info(`Confirmation email sent for booking: ${payment.booking.bookingReference}`)
-        })
-        .catch((error) => {
-          log.error("Error sending confirmation email", error)
-        })
+      // Only send for initial payment, not balance payment (user already has itinerary)
+      if (!isBalancePayment) {
+        sendConfirmationEmailWithPDF(payment.booking as BookingWithRelations)
+          .then(() => {
+            log.info(`Confirmation email sent for booking: ${payment.booking.bookingReference}`)
+          })
+          .catch((error) => {
+            log.error("Error sending confirmation email", error)
+          })
+      } else {
+        // For balance payment, send a simple balance paid confirmation
+        log.info(`Balance paid for booking: ${payment.booking.bookingReference} - skipping full itinerary email`)
+        // TODO: Send balance payment confirmation email (simpler template)
+      }
     }
 
     // Handle payment failure

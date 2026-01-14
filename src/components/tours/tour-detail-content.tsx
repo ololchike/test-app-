@@ -32,7 +32,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { TourCustomizer, TourData } from "./tour-customizer"
 import { InteractiveItinerary } from "./interactive-itinerary"
 import { BookingCard } from "./booking-card"
-import { ReviewStats } from "@/components/reviews/review-stats"
+import { ReviewStatsLoader } from "@/components/reviews/review-stats-loader"
 import { ReviewList } from "@/components/reviews/review-list"
 import { TourReviewSection } from "@/components/reviews/tour-review-section"
 import { motion, AnimatePresence } from "framer-motion"
@@ -279,6 +279,8 @@ export function TourDetailContent({ tour }: TourDetailContentProps) {
         handleBooking,
         isLoading,
         endDate,
+        dateError,
+        clearDateError,
       }) => (
         <>
         <div className="container mx-auto px-4 lg:px-8 py-8">
@@ -656,18 +658,8 @@ export function TourDetailContent({ tour }: TourDetailContentProps) {
                       tourTitle={tour.title}
                     />
 
-                    {/* Review Stats */}
-                    <ReviewStats
-                      averageRating={tour.rating}
-                      totalReviews={tour.reviewCount}
-                      ratingBreakdown={{
-                        5: 0,
-                        4: 0,
-                        3: 0,
-                        2: 0,
-                        1: 0,
-                      }}
-                    />
+                    {/* Review Stats - will be loaded dynamically by ReviewStatsLoader */}
+                    <ReviewStatsLoader tourSlug={tour.slug} fallbackRating={tour.rating} fallbackCount={tour.reviewCount} />
 
                     {/* Reviews List */}
                     <div>
@@ -785,6 +777,7 @@ export function TourDetailContent({ tour }: TourDetailContentProps) {
                 transition={{ duration: 0.5, delay: 0.2 }}
               >
                 <BookingCard
+                  tourSlug={tour.slug}
                   basePrice={tour.basePrice}
                   durationNights={tour.durationNights}
                   maxGroupSize={tour.maxGroupSize}
@@ -799,6 +792,8 @@ export function TourDetailContent({ tour }: TourDetailContentProps) {
                   isLoading={isLoading}
                   endDate={endDate}
                   bookNowButtonRef={bookNowButtonRef}
+                  dateError={dateError}
+                  onClearDateError={clearDateError}
                 />
               </motion.div>
             </div>
@@ -819,7 +814,7 @@ export function TourDetailContent({ tour }: TourDetailContentProps) {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleBooking}
-                disabled={!bookingState.startDate || isLoading}
+                disabled={isLoading}
                 className="group flex items-center gap-3 bg-gradient-to-r from-primary to-orange-500 hover:from-primary/90 hover:to-orange-500/90 text-primary-foreground pl-5 pr-6 py-4 rounded-full shadow-2xl hover:shadow-glow transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 {/* Price Badge */}

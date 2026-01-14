@@ -4,12 +4,23 @@ import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
-import { Clock, ChevronLeft, AlertCircle, Shield, Lock } from "lucide-react"
+import { Clock, ChevronLeft, AlertCircle, Shield, Lock, Smartphone, CreditCard, Building2, Check, CalendarClock, Mail } from "lucide-react"
 import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { toast } from "sonner"
+import { cn } from "@/lib/utils"
+
+type PaymentMethodType = "MPESA" | "CARD" | "BANK_TRANSFER"
+
+interface PaymentMethodOption {
+  id: PaymentMethodType
+  name: string
+  description: string
+  icon: typeof Smartphone
+  gateway: "pesapal" | "flutterwave"
+}
 
 interface BookingData {
   id: string
@@ -43,11 +54,37 @@ interface BookingData {
   balancePaidAt: string | null
 }
 
+const paymentMethods: PaymentMethodOption[] = [
+  {
+    id: "MPESA",
+    name: "M-Pesa / Airtel Money",
+    description: "Pay with mobile money (Kenya, Tanzania, Uganda)",
+    icon: Smartphone,
+    gateway: "pesapal",
+  },
+  {
+    id: "CARD",
+    name: "Credit/Debit Card",
+    description: "Visa, Mastercard, American Express",
+    icon: CreditCard,
+    gateway: "pesapal",
+  },
+  {
+    id: "BANK_TRANSFER",
+    name: "Bank Transfer",
+    description: "Direct bank transfer",
+    icon: Building2,
+    gateway: "pesapal",
+  },
+]
+
 export default function PaymentPage() {
   const params = useParams()
   const [booking, setBooking] = useState<BookingData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [isReserving, setIsReserving] = useState(false)
+  const [selectedMethod, setSelectedMethod] = useState<PaymentMethodType>("MPESA")
 
   useEffect(() => {
     async function fetchBooking() {
@@ -74,12 +111,17 @@ export default function PaymentPage() {
 
     setIsProcessing(true)
 
+    const method = paymentMethods.find(m => m.id === selectedMethod)
+
     try {
       const response = await fetch("/api/payments/initiate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           bookingId: booking.id,
+          paymentMethod: selectedMethod,
+          gateway: method?.gateway || "pesapal",
+          // Phone number will be taken from booking.contactPhone in the API
         }),
       })
 
@@ -101,6 +143,37 @@ export default function PaymentPage() {
       })
     } finally {
       setIsProcessing(false)
+    }
+  }
+
+  const handleReserve = async () => {
+    if (!booking) return
+
+    setIsReserving(true)
+
+    try {
+      const response = await fetch(`/api/bookings/${booking.id}/reserve`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      })
+
+      if (response.ok) {
+        toast.success("Booking Reserved!", {
+          description: "We've sent a confirmation email with payment instructions.",
+        })
+        // Redirect to confirmation page
+        window.location.href = `/booking/confirmation/${booking.id}?reserved=true`
+      } else {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to reserve booking")
+      }
+    } catch (error) {
+      console.error("Reserve error:", error)
+      toast.error("Reservation Failed", {
+        description: error instanceof Error ? error.message : "Failed to reserve. Please try again.",
+      })
+    } finally {
+      setIsReserving(false)
     }
   }
 
@@ -242,6 +315,49 @@ export default function PaymentPage() {
             </CardContent>
           </Card>
 
+          {/* Payment Method Selection */}
+          <Card>
+            <CardHeader className="pb-3 sm:pb-6">
+              <CardTitle className="text-base sm:text-lg">Choose Payment Method</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {paymentMethods.map((method) => {
+                const Icon = method.icon
+                const isSelected = selectedMethod === method.id
+                return (
+                  <div key={method.id}>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedMethod(method.id)}
+                      className={cn(
+                        "w-full flex items-center gap-3 p-3 sm:p-4 rounded-lg border-2 transition-all text-left",
+                        isSelected
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:border-primary/50"
+                      )}
+                    >
+                      <div className={cn(
+                        "h-10 w-10 rounded-full flex items-center justify-center shrink-0",
+                        isSelected ? "bg-primary text-white" : "bg-muted"
+                      )}>
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm sm:text-base">{method.name}</p>
+                        <p className="text-xs text-muted-foreground">{method.description}</p>
+                      </div>
+                      {isSelected && (
+                        <div className="h-6 w-6 rounded-full bg-primary text-white flex items-center justify-center shrink-0">
+                          <Check className="h-4 w-4" />
+                        </div>
+                      )}
+                    </button>
+                  </div>
+                )
+              })}
+            </CardContent>
+          </Card>
+
           {/* Security Info */}
           <Card>
             <CardContent className="pt-6">
@@ -256,8 +372,7 @@ export default function PaymentPage() {
                 </div>
               </div>
               <p className="text-xs text-center text-muted-foreground mt-3">
-                You&apos;ll be redirected to Pesapal to complete your payment securely.
-                Choose your preferred payment method (M-Pesa, Card, Bank Transfer) on the next screen.
+                You&apos;ll be redirected to complete your payment securely via Pesapal.
               </p>
             </CardContent>
           </Card>
@@ -267,7 +382,7 @@ export default function PaymentPage() {
       {/* Floating Pay Button */}
       <div className="fixed bottom-0 left-0 right-0 bg-background border-t shadow-lg z-50">
         <div className="container mx-auto px-4 sm:px-6 py-4">
-          <div className="max-w-2xl mx-auto">
+          <div className="max-w-2xl mx-auto space-y-3">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="text-xs text-muted-foreground">Amount to Pay</p>
@@ -275,22 +390,47 @@ export default function PaymentPage() {
                   {booking.currency} {amountToPay.toLocaleString()}
                 </p>
               </div>
-              <Button
-                className="h-12 px-8 text-sm sm:text-base font-semibold min-w-[140px]"
-                size="lg"
-                onClick={handlePayment}
-                disabled={isProcessing}
-              >
-                {isProcessing ? (
-                  <>
-                    <Clock className="h-4 w-4 mr-2 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  "Confirm & Pay"
-                )}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="h-12 px-4 text-xs sm:text-sm font-medium"
+                  size="lg"
+                  onClick={handleReserve}
+                  disabled={isReserving || isProcessing}
+                >
+                  {isReserving ? (
+                    <>
+                      <Clock className="h-4 w-4 mr-2 animate-spin" />
+                      Reserving...
+                    </>
+                  ) : (
+                    <>
+                      <CalendarClock className="h-4 w-4 mr-2" />
+                      Pay Later
+                    </>
+                  )}
+                </Button>
+                <Button
+                  className="h-12 px-6 text-sm sm:text-base font-semibold"
+                  size="lg"
+                  onClick={handlePayment}
+                  disabled={isProcessing || isReserving}
+                >
+                  {isProcessing ? (
+                    <>
+                      <Clock className="h-4 w-4 mr-2 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    "Pay Now"
+                  )}
+                </Button>
+              </div>
             </div>
+            <p className="text-xs text-muted-foreground text-center">
+              <Mail className="h-3 w-3 inline mr-1" />
+              Choose &quot;Pay Later&quot; to reserve your spot. We&apos;ll send payment reminders via email.
+            </p>
           </div>
         </div>
       </div>

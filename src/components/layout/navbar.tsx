@@ -19,6 +19,11 @@ import {
   Compass,
   MapPin,
   Sparkles,
+  Tag,
+  HelpCircle,
+  BookOpen,
+  Layers,
+  MoreHorizontal,
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -37,6 +42,16 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 const navigation = [
   { name: "Tours", href: "/tours", icon: Compass },
   { name: "Destinations", href: "/destinations", icon: MapPin },
+  { name: "Deals", href: "/deals", icon: Tag, highlight: true },
+]
+
+const exploreItems = [
+  { name: "Collections", href: "/collections", icon: Layers, description: "Curated tour collections" },
+  { name: "Blog", href: "/blog", icon: BookOpen, description: "Travel stories & tips" },
+  { name: "FAQ", href: "/faq", icon: HelpCircle, description: "Common questions" },
+]
+
+const companyItems = [
   { name: "About", href: "/about", icon: null },
   { name: "Contact", href: "/contact", icon: null },
 ]
@@ -105,12 +120,14 @@ export function Navbar() {
               onMouseEnter={() => setHoveredItem(item.name)}
               onMouseLeave={() => setHoveredItem(null)}
               className={cn(
-                "relative px-4 py-2 text-sm font-medium transition-colors rounded-full",
+                "relative px-4 py-2 text-sm font-medium transition-colors rounded-full flex items-center gap-1.5",
                 pathname === item.href
                   ? "text-primary"
-                  : "text-muted-foreground hover:text-foreground"
+                  : "text-muted-foreground hover:text-foreground",
+                item.highlight && "text-orange-600 dark:text-orange-400"
               )}
             >
+              {item.highlight && <Tag className="h-3.5 w-3.5" />}
               {item.name}
               {/* Active indicator */}
               {pathname === item.href && (
@@ -121,6 +138,87 @@ export function Navbar() {
                 />
               )}
               {/* Hover indicator */}
+              <AnimatePresence>
+                {hoveredItem === item.name && pathname !== item.href && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    className="absolute inset-0 bg-muted rounded-full -z-10"
+                    transition={{ duration: 0.2 }}
+                  />
+                )}
+              </AnimatePresence>
+            </Link>
+          ))}
+
+          {/* Explore Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                onMouseEnter={() => setHoveredItem("Explore")}
+                onMouseLeave={() => setHoveredItem(null)}
+                className={cn(
+                  "relative px-4 py-2 text-sm font-medium transition-colors rounded-full flex items-center gap-1",
+                  exploreItems.some(item => pathname === item.href)
+                    ? "text-primary"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                Explore
+                <ChevronDown className="h-3.5 w-3.5" />
+                <AnimatePresence>
+                  {hoveredItem === "Explore" && !exploreItems.some(item => pathname === item.href) && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      className="absolute inset-0 bg-muted rounded-full -z-10"
+                      transition={{ duration: 0.2 }}
+                    />
+                  )}
+                </AnimatePresence>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="center" className="w-56 p-2 rounded-2xl border-border/50 shadow-premium-lg">
+              {exploreItems.map((item) => (
+                <DropdownMenuItem key={item.name} asChild className="rounded-lg cursor-pointer p-0">
+                  <Link href={item.href} className="flex items-start gap-3 p-3">
+                    <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                      <item.icon className="h-4 w-4 text-primary" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="font-medium">{item.name}</span>
+                      <span className="text-xs text-muted-foreground">{item.description}</span>
+                    </div>
+                  </Link>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Company Links */}
+          {companyItems.map((item) => (
+            <Link
+              key={item.name}
+              href={item.href}
+              onMouseEnter={() => setHoveredItem(item.name)}
+              onMouseLeave={() => setHoveredItem(null)}
+              className={cn(
+                "relative px-4 py-2 text-sm font-medium transition-colors rounded-full",
+                pathname === item.href
+                  ? "text-primary"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {item.name}
+              {pathname === item.href && (
+                <motion.div
+                  layoutId="navbar-active-company"
+                  className="absolute inset-0 bg-primary/10 rounded-full -z-10"
+                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                />
+              )}
               <AnimatePresence>
                 {hoveredItem === item.name && pathname !== item.href && (
                   <motion.div
@@ -287,13 +385,13 @@ export function Navbar() {
               </div>
 
               {/* Mobile Navigation Links */}
-              <nav className="flex flex-col gap-1 p-4">
+              <nav className="flex flex-col gap-1 p-4 overflow-y-auto flex-1">
                 {navigation.map((item, index) => (
                   <motion.div
                     key={item.name}
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
+                    transition={{ delay: index * 0.05 }}
                   >
                     <Link
                       href={item.href}
@@ -302,14 +400,77 @@ export function Navbar() {
                         "flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all",
                         pathname === item.href
                           ? "text-primary bg-primary/10"
-                          : "text-foreground hover:bg-muted"
+                          : "text-foreground hover:bg-muted",
+                        item.highlight && "text-orange-600 dark:text-orange-400"
                       )}
                     >
                       {item.icon && <item.icon className="h-5 w-5" />}
                       {item.name}
+                      {item.highlight && (
+                        <span className="ml-auto text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 px-2 py-0.5 rounded-full">
+                          Hot
+                        </span>
+                      )}
                     </Link>
                   </motion.div>
                 ))}
+
+                {/* Explore Section */}
+                <div className="mt-4 pt-4 border-t border-border/50">
+                  <p className="px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                    Explore
+                  </p>
+                  {exploreItems.map((item, index) => (
+                    <motion.div
+                      key={item.name}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: (navigation.length + index) * 0.05 }}
+                    >
+                      <Link
+                        href={item.href}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={cn(
+                          "flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all",
+                          pathname === item.href
+                            ? "text-primary bg-primary/10"
+                            : "text-foreground hover:bg-muted"
+                        )}
+                      >
+                        <item.icon className="h-5 w-5" />
+                        {item.name}
+                      </Link>
+                    </motion.div>
+                  ))}
+                </div>
+
+                {/* Company Section */}
+                <div className="mt-4 pt-4 border-t border-border/50">
+                  <p className="px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                    Company
+                  </p>
+                  {companyItems.map((item, index) => (
+                    <motion.div
+                      key={item.name}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: (navigation.length + exploreItems.length + index) * 0.05 }}
+                    >
+                      <Link
+                        href={item.href}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={cn(
+                          "flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all",
+                          pathname === item.href
+                            ? "text-primary bg-primary/10"
+                            : "text-foreground hover:bg-muted"
+                        )}
+                      >
+                        {item.name}
+                      </Link>
+                    </motion.div>
+                  ))}
+                </div>
               </nav>
 
               <div className="mt-auto border-t border-border/50 p-4 bg-muted/30">

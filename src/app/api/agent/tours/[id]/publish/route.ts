@@ -42,9 +42,16 @@ export async function POST(
       )
     }
 
-    // Fetch tour
+    // Fetch tour with itinerary count
     const tour = await prisma.tour.findUnique({
       where: { id },
+      include: {
+        _count: {
+          select: {
+            itinerary: true,
+          },
+        },
+      },
     })
 
     if (!tour) {
@@ -95,9 +102,15 @@ export async function POST(
       errors.push("At least one tour type is required")
     }
 
-    // Check cover image (recommended but not required)
-    if (!tour.coverImage) {
-      errors.push("Cover image is recommended for better visibility")
+    // Check for at least 1 itinerary day (required per documentation)
+    if (tour._count.itinerary === 0) {
+      errors.push("At least one itinerary day is required")
+    }
+
+    // Check for at least 1 image (cover image or gallery images required)
+    const images = JSON.parse(tour.images || "[]")
+    if (!tour.coverImage && images.length === 0) {
+      errors.push("At least one image is required (cover image or gallery)")
     }
 
     if (errors.length > 0) {

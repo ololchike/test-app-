@@ -25,6 +25,7 @@ import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { WithdrawalMethod, WithdrawalMethodLabels } from "@/lib/constants"
+import { SectionError } from "@/components/error"
 
 // Force dynamic rendering for this page
 export const dynamic = "force-dynamic"
@@ -465,6 +466,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Platform Stats */}
+      <SectionError name="Platform Stats">
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {statsConfig.map((statConfig, index) => {
           const stat = stats[statConfig.key as keyof typeof stats]
@@ -510,9 +512,11 @@ export default async function AdminDashboardPage() {
           )
         })}
       </div>
+      </SectionError>
 
       <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
         {/* Pending Agent Approvals */}
+        <SectionError name="Pending Approvals">
         <Card className="border-border/50 hover:shadow-premium transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
@@ -572,8 +576,10 @@ export default async function AdminDashboardPage() {
             )}
           </CardContent>
         </Card>
+        </SectionError>
 
         {/* Pending Withdrawals */}
+        <SectionError name="Pending Withdrawals">
         <Card className="border-border/50 hover:shadow-premium transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
@@ -641,10 +647,12 @@ export default async function AdminDashboardPage() {
             )}
           </CardContent>
         </Card>
+        </SectionError>
       </div>
 
       <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
         {/* Recent Activity */}
+        <SectionError name="Recent Activity">
         <Card className="lg:col-span-1 border-border/50 hover:shadow-premium transition-all duration-300">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -688,8 +696,10 @@ export default async function AdminDashboardPage() {
             )}
           </CardContent>
         </Card>
+        </SectionError>
 
         {/* Top Performing Agents */}
+        <SectionError name="Top Performers" className="lg:col-span-2">
         <Card className="lg:col-span-2 border-border/50 hover:shadow-premium transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
@@ -759,6 +769,7 @@ export default async function AdminDashboardPage() {
             </div>
           </CardContent>
         </Card>
+        </SectionError>
       </div>
     </div>
   )

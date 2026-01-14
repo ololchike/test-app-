@@ -1,8 +1,9 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { BookingStatus } from "@prisma/client"
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const session = await auth()
 
@@ -20,11 +21,49 @@ export async function GET() {
       return NextResponse.json({ error: "Agent not found" }, { status: 404 })
     }
 
+    // Parse query params for filtering
+    const { searchParams } = new URL(request.url)
+    const status = searchParams.get("status")
+    const search = searchParams.get("search")
+    const startDate = searchParams.get("startDate")
+    const endDate = searchParams.get("endDate")
+
+    // Build where clause
+    const whereClause: Record<string, unknown> = {
+      agentId: agent.id,
+    }
+
+    // Status filter
+    if (status && status !== "all") {
+      whereClause.status = status as BookingStatus
+    }
+
+    // Search filter (booking reference or contact name)
+    if (search) {
+      whereClause.OR = [
+        { bookingReference: { contains: search, mode: "insensitive" } },
+        { contactName: { contains: search, mode: "insensitive" } },
+        { contactEmail: { contains: search, mode: "insensitive" } },
+      ]
+    }
+
+    // Date range filter
+    if (startDate) {
+      whereClause.startDate = {
+        ...(whereClause.startDate as object || {}),
+        gte: new Date(startDate),
+      }
+    }
+    if (endDate) {
+      whereClause.endDate = {
+        ...(whereClause.endDate as object || {}),
+        lte: new Date(endDate),
+      }
+    }
+
     // Get all bookings for the agent's tours
     const bookings = await prisma.booking.findMany({
-      where: {
-        agentId: agent.id,
-      },
+      where: whereClause,
       include: {
         tour: {
           select: {
@@ -37,13 +76,29 @@ export async function GET() {
             durationNights: true,
           },
         },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
       },
       orderBy: {
         createdAt: "desc",
       },
     })
 
-    return NextResponse.json({ bookings })
+    // Calculate summary stats
+    const stats = {
+      total: bookings.length,
+      pending: bookings.filter((b) => b.status === "PENDING").length,
+      confirmed: bookings.filter((b) => b.status === "CONFIRMED").length,
+      completed: bookings.filter((b) => b.status === "COMPLETED").length,
+      cancelled: bookings.filter((b) => b.status === "CANCELLED").length,
+    }
+
+    return NextResponse.json({ bookings, stats })
   } catch (error) {
     console.error("Error fetching agent bookings:", error)
     return NextResponse.json(

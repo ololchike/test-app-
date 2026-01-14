@@ -66,7 +66,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Check booking status - only COMPLETED bookings can be reviewed
-    if (booking.status !== "COMPLETED") {
+    // Also allow CONFIRMED bookings where the tour has ended (endDate in the past)
+    const now = new Date()
+    const isCompleted = booking.status === "COMPLETED"
+    const isConfirmedAndEnded = booking.status === "CONFIRMED" && booking.endDate && booking.endDate < now
+
+    if (!isCompleted && !isConfirmedAndEnded) {
       return NextResponse.json(
         { error: "Only completed bookings can be reviewed" },
         { status: 400 }

@@ -160,6 +160,13 @@ export const authConfig: NextAuthConfig = {
         // SECURITY: Clear failed attempts on successful login
         clearFailedAttempts(normalizedEmail)
 
+        // SECURITY: Check if email is verified
+        if (!user.emailVerified) {
+          throw new Error(
+            "Please verify your email address before logging in. Check your inbox for the verification link."
+          )
+        }
+
         // Check if user account is active
         if (user.status !== "ACTIVE") {
           throw new Error("Account is not active. Please contact support.")

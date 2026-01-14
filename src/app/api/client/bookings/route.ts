@@ -1,8 +1,9 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { BookingStatus } from "@prisma/client"
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const session = await auth()
 
@@ -10,10 +11,29 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    // Parse query params for filtering
+    const { searchParams } = new URL(request.url)
+    const status = searchParams.get("status")
+    const upcoming = searchParams.get("upcoming")
+
+    // Build where clause - SECURITY: Always filter by authenticated user
+    const whereClause: Record<string, unknown> = {
+      userId: session.user.id,
+    }
+
+    // Status filter
+    if (status && status !== "all") {
+      whereClause.status = status as BookingStatus
+    }
+
+    // Upcoming trips filter (trips starting in the future)
+    if (upcoming === "true") {
+      whereClause.startDate = { gte: new Date() }
+      whereClause.status = { notIn: ["CANCELLED", "REFUNDED"] }
+    }
+
     const bookings = await prisma.booking.findMany({
-      where: {
-        userId: session.user.id,
-      },
+      where: whereClause,
       include: {
         tour: {
           select: {

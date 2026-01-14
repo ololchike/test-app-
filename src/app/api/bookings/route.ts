@@ -15,14 +15,19 @@ function generateBookingReference(): string {
 
 // SECURITY: Comprehensive input validation schema
 const bookingSchema = z.object({
-  tourId: z.string().uuid("Invalid tour ID"),
+  tourId: z.string().min(1, "Tour ID is required"), // Prisma uses CUID, not UUID
   startDate: z.string().datetime("Invalid start date"),
   endDate: z.string().datetime("Invalid end date"),
   adults: z.number().int().min(1).max(20, "Too many adults"),
   children: z.number().int().min(0).max(20, "Too many children").optional(),
+  infants: z.number().int().min(0).max(10, "Too many infants").optional(),
   accommodations: z.record(z.string(), z.string()).optional(),
-  addons: z.array(z.string().uuid()).optional(),
+  addons: z.array(z.object({
+    id: z.string().min(1),
+    quantity: z.number().int().min(1).max(20).optional(),
+  })).optional(),
   travelers: z.array(z.object({
+    type: z.string().optional(),
     firstName: z.string().min(1).max(100),
     lastName: z.string().min(1).max(100),
     email: z.string().email().optional(),
@@ -44,10 +49,12 @@ const bookingSchema = z.object({
     addonsTotal: z.number().min(0),
     serviceFee: z.number().min(0),
     total: z.number().min(1, "Total must be greater than 0"),
+    discount: z.number().min(0).optional(),
   }),
   paymentType: z.enum(["FULL", "DEPOSIT"]).optional(),
-  depositAmount: z.number().min(0).optional(),
-  balanceAmount: z.number().min(0).optional(),
+  depositAmount: z.number().min(0).nullable().optional(),
+  balanceAmount: z.number().min(0).nullable().optional(),
+  promoCodeId: z.string().nullable().optional(),
 })
 
 export async function POST(request: NextRequest) {
@@ -91,6 +98,7 @@ export async function POST(request: NextRequest) {
       endDate,
       adults,
       children,
+      infants,
       accommodations,
       addons,
       travelers: _travelers, // Reserved for future traveler details feature
@@ -114,7 +122,11 @@ export async function POST(request: NextRequest) {
     const endDateTime = new Date(endDate)
     const now = new Date()
 
-    if (startDateTime < now) {
+    // Allow same-day bookings by comparing dates only (not time)
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    const bookingDate = new Date(startDateTime.getFullYear(), startDateTime.getMonth(), startDateTime.getDate())
+
+    if (bookingDate < todayStart) {
       return NextResponse.json(
         { error: "Start date cannot be in the past" },
         { status: 400 }
@@ -148,6 +160,54 @@ export async function POST(request: NextRequest) {
     if (tour.status !== "ACTIVE") {
       return NextResponse.json(
         { error: "Tour is not available for booking" },
+        { status: 400 }
+      )
+    }
+
+    // SECURITY: Validate tour availability for selected dates
+    const totalGuests = adults + (children || 0)
+
+    // Check for blocked dates
+    const blockedDates = await prisma.tourAvailability.findMany({
+      where: {
+        tourId,
+        date: {
+          gte: startDateTime,
+          lte: endDateTime,
+        },
+        type: "BLOCKED",
+      },
+    })
+
+    if (blockedDates.length > 0) {
+      return NextResponse.json(
+        { error: "Some of the selected dates are not available for booking" },
+        { status: 400 }
+      )
+    }
+
+    // Check capacity against existing bookings
+    const existingBookings = await prisma.booking.findMany({
+      where: {
+        tourId,
+        status: { notIn: ["CANCELLED", "REFUNDED"] },
+        startDate: { lte: endDateTime },
+        endDate: { gte: startDateTime },
+      },
+      select: {
+        adults: true,
+        children: true,
+      },
+    })
+
+    const totalBookedGuests = existingBookings.reduce(
+      (sum, b) => sum + b.adults + b.children,
+      0
+    )
+
+    if (totalBookedGuests + totalGuests > tour.maxGroupSize) {
+      return NextResponse.json(
+        { error: `Insufficient capacity. Only ${tour.maxGroupSize - totalBookedGuests} spots available.` },
         { status: 400 }
       )
     }
@@ -197,11 +257,12 @@ export async function POST(request: NextRequest) {
         endDate: new Date(endDate),
         adults,
         children: children || 0,
-        infants: 0,
+        infants: infants || 0,
         baseAmount: pricing.baseTotal + pricing.childTotal,
         accommodationAmount: pricing.accommodationTotal,
         activitiesAmount: pricing.addonsTotal,
         taxAmount: pricing.serviceFee,
+        discountAmount: pricing.discount || 0,
         totalAmount: pricing.total,
         platformCommission,
         agentEarnings,
@@ -227,13 +288,18 @@ export async function POST(request: NextRequest) {
             }
           }),
         },
-        // Create booking activities
+        // Create booking activities with quantity validation
         activities: {
-          create: (addons || []).map((addonId: string) => {
-            const addon = tour.activityAddons.find((a) => a.id === addonId)
-            const quantity = adults + (children || 0)
+          create: (addons || []).map((addonItem) => {
+            const addon = tour.activityAddons.find((a) => a.id === addonItem.id)
+            // Use provided quantity or default to total guests
+            const requestedQty = addonItem.quantity || (adults + (children || 0))
+            // Respect max capacity if set
+            const quantity = addon?.maxCapacity
+              ? Math.min(requestedQty, addon.maxCapacity)
+              : requestedQty
             return {
-              activityAddonId: addonId,
+              activityAddonId: addonItem.id,
               quantity,
               price: (addon?.price || 0) * quantity,
             }
