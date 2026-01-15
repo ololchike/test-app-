@@ -396,6 +396,18 @@ const styles = StyleSheet.create({
     padding: 14,
     borderLeftWidth: 3,
     borderLeftColor: colors.forest,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+  },
+  accommodationImage: {
+    width: 60,
+    height: 45,
+    borderRadius: 6,
+    objectFit: "cover",
+  },
+  accommodationInfo: {
+    flex: 1,
   },
   accommodationLabel: {
     fontSize: 8,
@@ -418,6 +430,60 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
 
+  // Day-specific add-ons
+  dayAddonsBadge: {
+    marginTop: 14,
+    backgroundColor: colors.goldPale,
+    borderRadius: 8,
+    padding: 14,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.gold,
+  },
+  dayAddonsLabel: {
+    fontSize: 8,
+    color: colors.slate,
+    letterSpacing: 1,
+    textTransform: "uppercase",
+    marginBottom: 8,
+  },
+  dayAddonsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 6,
+  },
+  dayAddonTag: {
+    backgroundColor: colors.white,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: colors.goldMuted,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  dayAddonImage: {
+    width: 36,
+    height: 28,
+    borderRadius: 4,
+    objectFit: "cover",
+  },
+  dayAddonInfo: {
+    flex: 1,
+  },
+  dayAddonText: {
+    fontSize: 9,
+    color: colors.charcoal,
+    fontWeight: "bold",
+  },
+  dayAddonPriceType: {
+    fontSize: 7,
+    color: colors.slate,
+    marginTop: 2,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+
   // ===== ADD-ONS =====
   addonsContainer: {
     flexDirection: "row",
@@ -427,10 +493,13 @@ const styles = StyleSheet.create({
   addonItem: {
     backgroundColor: colors.goldPale,
     paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 6,
+    paddingVertical: 10,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: colors.goldMuted,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
   },
   addonText: {
     fontSize: 10,
@@ -929,12 +998,18 @@ interface ItineraryPDFProps {
       accommodationOption: {
         name: string
         tier: string
+        images?: string[]
       }
     }>
     activities: Array<{
       price: number
+      quantity: number
+      dayNumber?: number | null // Day this add-on is assigned to
       activityAddon: {
         name: string
+        priceType: "PER_PERSON" | "PER_GROUP" | "FLAT_RATE"
+        maxCapacity?: number | null
+        images?: string[]
       }
     }>
   }
@@ -965,13 +1040,59 @@ export function ItineraryPDF({ booking, itinerary, pricing }: ItineraryPDFProps)
   const endDate = new Date(booking.endDate)
 
   // Create accommodation map by day
-  const accommodationByDay: Record<number, { name: string; tier: string }> = {}
+  const accommodationByDay: Record<number, { name: string; tier: string; image?: string }> = {}
   booking.accommodations.forEach((acc) => {
     accommodationByDay[acc.dayNumber] = {
       name: acc.accommodationOption.name,
       tier: acc.accommodationOption.tier,
+      image: acc.accommodationOption.images?.[0],
     }
   })
+
+  // Create add-ons map by day
+  interface AddonInfo {
+    name: string
+    price: number
+    quantity: number
+    priceType: "PER_PERSON" | "PER_GROUP" | "FLAT_RATE"
+    maxCapacity?: number | null
+    image?: string
+  }
+  const addonsByDay: Record<number, AddonInfo[]> = {}
+  const generalAddons: AddonInfo[] = [] // Add-ons without a specific day
+
+  booking.activities.forEach((activity) => {
+    const addonInfo: AddonInfo = {
+      name: activity.activityAddon.name,
+      price: activity.price,
+      quantity: activity.quantity,
+      priceType: activity.activityAddon.priceType,
+      maxCapacity: activity.activityAddon.maxCapacity,
+      image: activity.activityAddon.images?.[0],
+    }
+    if (activity.dayNumber) {
+      if (!addonsByDay[activity.dayNumber]) {
+        addonsByDay[activity.dayNumber] = []
+      }
+      addonsByDay[activity.dayNumber].push(addonInfo)
+    } else {
+      // Add-ons without a day assignment go to general list
+      generalAddons.push(addonInfo)
+    }
+  })
+
+  // Helper to format pricing type label
+  const formatPriceType = (priceType: "PER_PERSON" | "PER_GROUP" | "FLAT_RATE", maxCapacity?: number | null) => {
+    switch (priceType) {
+      case "PER_PERSON":
+        return "per person"
+      case "PER_GROUP":
+        return maxCapacity ? `per group (up to ${maxCapacity})` : "per group"
+      case "FLAT_RATE":
+      default:
+        return "flat rate"
+    }
+  }
 
   const formatCurrency = (amount: number) => {
     return `$${amount.toLocaleString()}`
@@ -1118,13 +1239,46 @@ export function ItineraryPDF({ booking, itinerary, pricing }: ItineraryPDFProps)
 
                       {accommodationByDay[day.dayNumber] && (
                         <View style={styles.accommodationBadge}>
-                          <Text style={styles.accommodationLabel}>Overnight Stay</Text>
-                          <Text style={styles.accommodationName}>
-                            {accommodationByDay[day.dayNumber].name}
-                          </Text>
-                          <Text style={styles.accommodationTier}>
-                            {accommodationByDay[day.dayNumber].tier} Accommodation
-                          </Text>
+                          {accommodationByDay[day.dayNumber].image && (
+                            <Image
+                              src={accommodationByDay[day.dayNumber].image}
+                              style={styles.accommodationImage}
+                            />
+                          )}
+                          <View style={styles.accommodationInfo}>
+                            <Text style={styles.accommodationLabel}>Overnight Stay</Text>
+                            <Text style={styles.accommodationName}>
+                              {accommodationByDay[day.dayNumber].name}
+                            </Text>
+                            <Text style={styles.accommodationTier}>
+                              {accommodationByDay[day.dayNumber].tier} Accommodation
+                            </Text>
+                          </View>
+                        </View>
+                      )}
+
+                      {/* Day-specific add-ons */}
+                      {addonsByDay[day.dayNumber] && addonsByDay[day.dayNumber].length > 0 && (
+                        <View style={styles.dayAddonsBadge}>
+                          <Text style={styles.dayAddonsLabel}>Premium Experiences</Text>
+                          <View style={styles.dayAddonsGrid}>
+                            {addonsByDay[day.dayNumber].map((addon, idx) => (
+                              <View key={idx} style={styles.dayAddonTag}>
+                                {addon.image && (
+                                  <Image
+                                    src={addon.image}
+                                    style={styles.dayAddonImage}
+                                  />
+                                )}
+                                <View style={styles.dayAddonInfo}>
+                                  <Text style={styles.dayAddonText}>{addon.name}</Text>
+                                  <Text style={styles.dayAddonPriceType}>
+                                    {formatCurrency(addon.price)} {formatPriceType(addon.priceType, addon.maxCapacity)}
+                                  </Text>
+                                </View>
+                              </View>
+                            ))}
+                          </View>
                         </View>
                       )}
                     </View>
@@ -1134,22 +1288,33 @@ export function ItineraryPDF({ booking, itinerary, pricing }: ItineraryPDFProps)
             </View>
           </View>
 
-          {/* Add-ons Section */}
-          {booking.activities.length > 0 && (
+          {/* General Add-ons Section (only for add-ons not assigned to specific days) */}
+          {generalAddons.length > 0 && (
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
                 <View style={[styles.sectionIcon, styles.sectionIconAlt]}>
                   <SparkleIcon color={colors.white} />
                 </View>
                 <View>
-                  <Text style={styles.sectionTitle}>Premium Experiences</Text>
-                  <Text style={styles.sectionSubtitle}>Your selected add-ons and activities</Text>
+                  <Text style={styles.sectionTitle}>Additional Experiences</Text>
+                  <Text style={styles.sectionSubtitle}>Trip-wide add-ons and activities</Text>
                 </View>
               </View>
               <View style={styles.addonsContainer}>
-                {booking.activities.map((activity, idx) => (
+                {generalAddons.map((addon, idx) => (
                   <View key={idx} style={styles.addonItem}>
-                    <Text style={styles.addonText}>{activity.activityAddon.name}</Text>
+                    {addon.image && (
+                      <Image
+                        src={addon.image}
+                        style={styles.dayAddonImage}
+                      />
+                    )}
+                    <View>
+                      <Text style={styles.addonText}>{addon.name}</Text>
+                      <Text style={styles.dayAddonPriceType}>
+                        {formatCurrency(addon.price)} {formatPriceType(addon.priceType, addon.maxCapacity)}
+                      </Text>
+                    </View>
                   </View>
                 ))}
               </View>

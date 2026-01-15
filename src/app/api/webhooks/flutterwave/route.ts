@@ -104,6 +104,7 @@ export async function POST(request: NextRequest) {
                   select: {
                     name: true,
                     tier: true,
+                    images: true,
                   },
                 },
               },
@@ -113,6 +114,9 @@ export async function POST(request: NextRequest) {
                 activityAddon: {
                   select: {
                     name: true,
+                    priceType: true,
+                    maxCapacity: true,
+                    images: true,
                   },
                 },
               },
@@ -373,12 +377,18 @@ interface BookingWithRelations {
     accommodationOption: {
       name: string
       tier: string
+      images: string
     }
   }>
   activities: Array<{
     price: number
+    quantity: number
+    dayNumber: number | null
     activityAddon: {
       name: string
+      priceType: string
+      maxCapacity: number | null
+      images: string
     }
   }>
 }
@@ -445,8 +455,26 @@ async function sendConfirmationEmailWithPDF(booking: BookingWithRelations) {
           durationNights: booking.tour.durationNights,
         },
         agent: booking.agent,
-        accommodations: booking.accommodations,
-        activities: booking.activities,
+        accommodations: booking.accommodations.map((acc) => ({
+          dayNumber: acc.dayNumber,
+          price: acc.price,
+          accommodationOption: {
+            name: acc.accommodationOption.name,
+            tier: acc.accommodationOption.tier,
+            images: JSON.parse(acc.accommodationOption.images || "[]") as string[],
+          },
+        })),
+        activities: booking.activities.map((act) => ({
+          price: act.price,
+          quantity: act.quantity,
+          dayNumber: act.dayNumber,
+          activityAddon: {
+            name: act.activityAddon.name,
+            priceType: act.activityAddon.priceType as "PER_PERSON" | "PER_GROUP" | "FLAT_RATE",
+            maxCapacity: act.activityAddon.maxCapacity,
+            images: JSON.parse(act.activityAddon.images || "[]") as string[],
+          },
+        })),
       },
       itinerary,
       pricing: {

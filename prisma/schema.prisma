@@ -165,6 +165,11 @@ model Agent {
   assignedMessages   ContactMessage[]
   promoCodes         PromoCode[]
 
+  // Global Catalogs (reusable across tours)
+  addonCatalog         AddonCatalog[]
+  vehicleCatalog       VehicleCatalog[]
+  accommodationCatalog AccommodationCatalog[]
+
   @@index([userId])
   @@index([status])
   @@index([isVerified])
@@ -185,6 +190,173 @@ model BankDetails {
   updatedAt       DateTime         @updatedAt
 
   agent           Agent            @relation(fields: [agentId], references: [id], onDelete: Cascade)
+}
+
+// ============================================================================
+// GLOBAL CATALOGS (Agent-Level Reusable Items)
+// ============================================================================
+
+// Global Add-on Catalog (per agent) - reusable across tours
+model AddonCatalog {
+  id          String        @id @default(cuid())
+  agentId     String
+  name        String        // e.g., "Hot Air Balloon Ride"
+  description String?
+  basePrice   Float         // Default price: $200
+  duration    String?       // e.g., "2 hours", "Half day"
+  images      String        @default("[]") // JSON array
+  type        AddonType     @default(ACTIVITY)
+  category    AddonCategory @default(ADVENTURE)
+  priceType   String        @default("PER_PERSON") // "PER_PERSON" | "PER_GROUP" | "FLAT"
+  childPrice  Float?        // Optional child-specific price
+  maxCapacity Int?          // Max people for PER_GROUP pricing (e.g., 4 people per group)
+  isActive    Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  agent       Agent         @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  tourAddons  TourAddon[]   // Tours using this addon
+
+  @@index([agentId])
+  @@index([type])
+  @@index([category])
+  @@index([isActive])
+}
+
+// Global Vehicle Catalog (per agent) - reusable across tours
+model VehicleCatalog {
+  id              String      @id @default(cuid())
+  agentId         String
+  type            VehicleType
+  name            String      // e.g., "Toyota Land Cruiser 4x4"
+  description     String?
+  maxPassengers   Int         // Capacity: 6 passengers
+  basePricePerDay Float       // Default: $150/day
+  currency        String      @default("USD")
+  features        String      @default("[]") // JSON array
+  images          String      @default("[]") // JSON array
+  isActive        Boolean     @default(true)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  agent           Agent       @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  tourVehicles    TourVehicle[]
+
+  @@index([agentId])
+  @@index([type])
+  @@index([isActive])
+}
+
+// Global Accommodation Catalog (per agent) - reusable across tours
+model AccommodationCatalog {
+  id                String            @id @default(cuid())
+  agentId           String
+  name              String            // e.g., "Serena Safari Lodge"
+  description       String?
+  tier              AccommodationTier
+  basePricePerNight Float             // Default: $350/night
+  currency          String            @default("USD")
+  images            String            @default("[]") // JSON array
+  amenities         String            @default("[]") // JSON array
+  location          String?
+  rating            Float?
+  roomType          String?           // e.g., "DOUBLE", "SUITE", "AIRBNB"
+  numberOfRooms     Int?              // Number of rooms (for AIRBNB type)
+  numberOfBeds      Int?              // Number of beds per room
+  isActive          Boolean           @default(true)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  agent               Agent              @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  tourAccommodations  TourAccommodation[]
+
+  @@index([agentId])
+  @@index([tier])
+  @@index([isActive])
+}
+
+// ============================================================================
+// TOUR-SPECIFIC ASSIGNMENTS (with price overrides)
+// ============================================================================
+
+// Tour-specific add-on assignment with price override
+model TourAddon {
+  id                 String        @id @default(cuid())
+  tourId             String
+  addonCatalogId     String
+
+  // Price override (null = use catalog price)
+  priceOverride      Float?        // e.g., $150 (instead of catalog $200)
+  childPriceOverride Float?
+
+  // Tour-specific settings
+  dayNumbers         String        @default("[]") // JSON: Days when available [1, 3, 5]
+  isRecommended      Boolean       @default(false)
+  sortOrder          Int           @default(0)
+  isActive           Boolean       @default(true)
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  tour               Tour          @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  addonCatalog       AddonCatalog  @relation(fields: [addonCatalogId], references: [id], onDelete: Cascade)
+  bookingAddons      BookingAddon[]
+
+  @@unique([tourId, addonCatalogId])
+  @@index([tourId])
+  @@index([addonCatalogId])
+}
+
+// Tour-specific vehicle assignment with price override
+model TourVehicle {
+  id                   String          @id @default(cuid())
+  tourId               String
+  vehicleCatalogId     String
+
+  // Price override
+  pricePerDayOverride  Float?          // Override catalog price
+
+  // Tour-specific settings
+  isDefault            Boolean         @default(false)
+  isIncludedInBase     Boolean         @default(false) // Included in base price
+  sortOrder            Int             @default(0)
+  isActive             Boolean         @default(true)
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+
+  tour                 Tour            @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  vehicleCatalog       VehicleCatalog  @relation(fields: [vehicleCatalogId], references: [id], onDelete: Cascade)
+  bookingVehicles      BookingVehicleNew[]
+
+  @@unique([tourId, vehicleCatalogId])
+  @@index([tourId])
+  @@index([vehicleCatalogId])
+}
+
+// Tour-specific accommodation assignment with price override
+model TourAccommodation {
+  id                     String               @id @default(cuid())
+  tourId                 String
+  accommodationCatalogId String
+
+  // Price override
+  pricePerNightOverride  Float?
+
+  // Tour-specific settings
+  availableDays          String               @default("[]") // JSON: Days available [1, 2, 3, 4]
+  tierOverride           AccommodationTier?   // Override tier for this tour
+  isDefault              Boolean              @default(false)
+  sortOrder              Int                  @default(0)
+  isActive               Boolean              @default(true)
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
+
+  tour                   Tour                 @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  accommodationCatalog   AccommodationCatalog @relation(fields: [accommodationCatalogId], references: [id], onDelete: Cascade)
+  bookingAccommodations  BookingAccommodationNew[]
+
+  @@unique([tourId, accommodationCatalogId])
+  @@index([tourId])
+  @@index([accommodationCatalogId])
 }
 
 // ============================================================================
@@ -339,9 +511,9 @@ model Tour {
   // Relations
   agent            Agent       @relation(fields: [agentId], references: [id], onDelete: Cascade)
   itinerary        Itinerary[]
-  vehicles         Vehicle[]
-  accommodationOptions AccommodationOption[]
-  activityAddons   ActivityAddon[]
+  vehicles         Vehicle[]   // Legacy - keep for backwards compatibility
+  accommodationOptions AccommodationOption[] // Legacy
+  activityAddons   ActivityAddon[] // Legacy
   bookings         Booking[]
   reviews          Review[]
   wishlist         Wishlist[]
@@ -349,6 +521,11 @@ model Tour {
   availability     TourAvailability[]
   pricing          TourPricing?
   availabilityHolds AvailabilityHold[]
+
+  // New catalog-based relations (with price overrides)
+  tourAddons         TourAddon[]
+  tourVehicles       TourVehicle[]
+  tourAccommodations TourAccommodation[]
 
   @@index([agentId])
   @@index([status])
@@ -702,10 +879,15 @@ model Booking {
   tour              Tour          @relation(fields: [tourId], references: [id])
   agent             Agent         @relation(fields: [agentId], references: [id])
   payments          Payment[]
-  accommodations    BookingAccommodation[]
-  activities        BookingActivity[]
-  vehicles          BookingVehicle[]
+  accommodations    BookingAccommodation[]  // Legacy
+  activities        BookingActivity[]        // Legacy
+  vehicles          BookingVehicle[]         // Legacy
   review            Review?
+
+  // New catalog-based booking items
+  bookingAddons           BookingAddon[]
+  bookingVehiclesNew      BookingVehicleNew[]
+  bookingAccommodationsNew BookingAccommodationNew[]
 
   @@index([userId])
   @@index([tourId])
@@ -734,6 +916,7 @@ model BookingActivity {
   activityAddonId String
   quantity        Int           @default(1)
   price           Float
+  dayNumber       Int?          // Which day this add-on is assigned to (optional for non-day-specific add-ons)
 
   booking         Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
   activityAddon   ActivityAddon @relation(fields: [activityAddonId], references: [id])
@@ -755,6 +938,59 @@ model BookingVehicle {
 
   @@index([bookingId])
   @@index([vehicleId])
+}
+
+// ============================================================================
+// NEW BOOKING ITEMS (Catalog-Based with Tour-Specific Pricing)
+// ============================================================================
+
+// Booking add-on (links to TourAddon which has price override)
+model BookingAddon {
+  id              String      @id @default(cuid())
+  bookingId       String
+  tourAddonId     String
+  dayNumber       Int         // Day this addon is for
+  quantity        Int         @default(1)
+  priceAtBooking  Float       // Price at time of booking (from tour override or catalog)
+  totalPrice      Float       // quantity * priceAtBooking
+
+  booking         Booking     @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  tourAddon       TourAddon   @relation(fields: [tourAddonId], references: [id])
+
+  @@index([bookingId])
+  @@index([tourAddonId])
+}
+
+// Booking vehicle (links to TourVehicle which has price override)
+model BookingVehicleNew {
+  id              String       @id @default(cuid())
+  bookingId       String
+  tourVehicleId   String
+  quantity        Int          @default(1)  // Number of vehicles
+  pricePerDay     Float        // Price per day at booking (from tour override or catalog)
+  totalDays       Int
+  totalPrice      Float
+
+  booking         Booking      @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  tourVehicle     TourVehicle  @relation(fields: [tourVehicleId], references: [id])
+
+  @@index([bookingId])
+  @@index([tourVehicleId])
+}
+
+// Booking accommodation (links to TourAccommodation which has price override)
+model BookingAccommodationNew {
+  id                   String             @id @default(cuid())
+  bookingId            String
+  tourAccommodationId  String
+  dayNumber            Int
+  priceAtBooking       Float              // Price at time of booking
+
+  booking              Booking            @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  tourAccommodation    TourAccommodation  @relation(fields: [tourAccommodationId], references: [id])
+
+  @@index([bookingId])
+  @@index([tourAccommodationId])
 }
 
 // ============================================================================

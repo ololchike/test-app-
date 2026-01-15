@@ -25,6 +25,7 @@ const bookingSchema = z.object({
   addons: z.array(z.object({
     id: z.string().min(1),
     quantity: z.number().int().min(1).max(20).optional(),
+    dayNumber: z.number().int().min(1).max(30).optional(), // Day this add-on is assigned to
   })).optional(),
   travelers: z.array(z.object({
     type: z.string().optional(),
@@ -302,6 +303,7 @@ export async function POST(request: NextRequest) {
               activityAddonId: addonItem.id,
               quantity,
               price: (addon?.price || 0) * quantity,
+              dayNumber: addonItem.dayNumber || null, // Day-specific add-on assignment
             }
           }),
         },

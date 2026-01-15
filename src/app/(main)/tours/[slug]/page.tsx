@@ -37,6 +37,43 @@ async function getTour(slug: string) {
         orderBy: { pricePerNight: "asc" },
       },
       activityAddons: true,
+      // Include catalog-based relations for images
+      tourVehicles: {
+        where: { isActive: true },
+        include: {
+          vehicleCatalog: {
+            select: {
+              id: true,
+              name: true,
+              images: true,
+            },
+          },
+        },
+      },
+      tourAccommodations: {
+        where: { isActive: true },
+        include: {
+          accommodationCatalog: {
+            select: {
+              id: true,
+              name: true,
+              images: true,
+            },
+          },
+        },
+      },
+      tourAddons: {
+        where: { isActive: true },
+        include: {
+          addonCatalog: {
+            select: {
+              id: true,
+              name: true,
+              images: true,
+            },
+          },
+        },
+      },
       reviews: {
         where: { isApproved: true },
         orderBy: { createdAt: "desc" },
@@ -67,13 +104,52 @@ async function getTour(slug: string) {
     ? tour.reviews.reduce((sum, r) => sum + r.rating, 0) / tour.reviews.length
     : 0
 
+  // Parse tour images
+  const tourImages: string[] = JSON.parse(tour.images || "[]")
+
+  // Collect catalog item images
+  const catalogImages: string[] = []
+
+  // Add accommodation catalog images
+  tour.tourAccommodations?.forEach((ta) => {
+    const accImages: string[] = JSON.parse(ta.accommodationCatalog.images || "[]")
+    catalogImages.push(...accImages)
+  })
+
+  // Add vehicle catalog images
+  tour.tourVehicles?.forEach((tv) => {
+    const vehImages: string[] = JSON.parse(tv.vehicleCatalog.images || "[]")
+    catalogImages.push(...vehImages)
+  })
+
+  // Add addon catalog images
+  tour.tourAddons?.forEach((ta) => {
+    const addonImages: string[] = JSON.parse(ta.addonCatalog.images || "[]")
+    catalogImages.push(...addonImages)
+  })
+
+  // Also collect from legacy relations if available
+  tour.accommodationOptions?.forEach((acc) => {
+    const accImages: string[] = JSON.parse(acc.images || "[]")
+    catalogImages.push(...accImages)
+  })
+
+  tour.activityAddons?.forEach((addon) => {
+    const addonImages: string[] = JSON.parse(addon.images || "[]")
+    catalogImages.push(...addonImages)
+  })
+
+  // Combine tour images with unique catalog images (tour images first)
+  const uniqueCatalogImages = catalogImages.filter(img => !tourImages.includes(img))
+  const allImages = [...tourImages, ...uniqueCatalogImages]
+
   // Transform JSON strings to arrays
   return {
     ...tour,
     highlights: JSON.parse(tour.highlights || "[]"),
     included: JSON.parse(tour.included || "[]"),
     excluded: JSON.parse(tour.excluded || "[]"),
-    images: JSON.parse(tour.images || "[]"),
+    images: allImages,
     tourType: JSON.parse(tour.tourType || "[]"),
     bestSeason: JSON.parse(tour.bestSeason || "[]"),
     itinerary: tour.itinerary.map((day) => ({

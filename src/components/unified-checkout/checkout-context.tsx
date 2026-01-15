@@ -17,6 +17,8 @@ import {
   PricingConfig,
   PaymentType,
   PaymentMethod,
+  VehicleSelection,
+  calculateVehicleSuggestion,
 } from "./types"
 
 const CheckoutContext = createContext<CheckoutContextValue | null>(null)
@@ -73,11 +75,27 @@ export function CheckoutProvider({ children }: CheckoutProviderProps) {
       // Infant pricing - use configurable or 0
       const infantTotal = (pricingConfig.infantPrice || tour.infantPrice || 0) * infants
 
-      // Vehicle pricing (difference from default)
+      // Vehicle pricing (supports multiple vehicles with quantities)
       let vehicleTotal = 0
-      if (selections.vehicleId) {
+      const defaultVehicle = vehicles.find(v => v.isDefault)
+
+      // Use new vehicles array if available, fall back to single vehicleId
+      if (selections.vehicles && selections.vehicles.length > 0) {
+        selections.vehicles.forEach(({ vehicleId, quantity }) => {
+          const vehicle = vehicles.find(v => v.id === vehicleId)
+          if (vehicle) {
+            if (defaultVehicle) {
+              // Calculate upgrade cost (difference from default)
+              const priceDiff = vehicle.pricePerDay - defaultVehicle.pricePerDay
+              vehicleTotal += priceDiff * tour.durationDays * quantity
+            } else {
+              vehicleTotal += vehicle.pricePerDay * tour.durationDays * quantity
+            }
+          }
+        })
+      } else if (selections.vehicleId) {
+        // Legacy single vehicle support
         const selectedVehicle = vehicles.find(v => v.id === selections.vehicleId)
-        const defaultVehicle = vehicles.find(v => v.isDefault)
         if (selectedVehicle && defaultVehicle) {
           const priceDiff = selectedVehicle.pricePerDay - defaultVehicle.pricePerDay
           vehicleTotal = priceDiff * tour.durationDays
@@ -241,7 +259,13 @@ export function CheckoutProvider({ children }: CheckoutProviderProps) {
         })),
       ]
 
-      // Set default vehicle if available
+      // Calculate total group size for vehicle capacity
+      const totalGroupSize = params.adults + params.children
+
+      // Calculate suggested vehicles based on group size
+      const suggestedVehicles = calculateVehicleSuggestion(vehicles, totalGroupSize)
+
+      // Set default vehicle if available (for legacy support)
       const defaultVehicle = vehicles.find((v: { isDefault: boolean }) => v.isDefault)
 
       // Set default accommodations per day
@@ -252,9 +276,10 @@ export function CheckoutProvider({ children }: CheckoutProviderProps) {
         }
       })
 
-      // Apply preselections
+      // Apply preselections with capacity-based vehicle suggestion
       const initialSelections = {
         vehicleId: params.preselectedVehicle || defaultVehicle?.id || null,
+        vehicles: suggestedVehicles.length > 0 ? suggestedVehicles : (defaultVehicle ? [{ vehicleId: defaultVehicle.id, quantity: 1 }] : []),
         accommodations: params.preselectedAccommodations || defaultAccommodations,
         addons: params.preselectedAddons?.map(id => ({ id, quantity: params.adults + params.children })) || [],
       }
@@ -386,6 +411,7 @@ export function CheckoutProvider({ children }: CheckoutProviderProps) {
         pricingConfig: DEFAULT_PRICING_CONFIG,
         selections: {
           vehicleId: null,
+          vehicles: [],
           accommodations: {},
           addons: [],
         },
@@ -426,6 +452,22 @@ export function CheckoutProvider({ children }: CheckoutProviderProps) {
       selections: {
         ...prev.selections,
         vehicleId,
+        // Clear vehicles array when using legacy single vehicle
+        vehicles: vehicleId ? [{ vehicleId, quantity: 1 }] : [],
+      },
+    }))
+    setTimeout(recalculatePricing, 0)
+  }, [recalculatePricing])
+
+  // Set multiple vehicles with quantities (for capacity-based selection)
+  const setVehicles = useCallback((vehicles: VehicleSelection[]) => {
+    setState(prev => ({
+      ...prev,
+      selections: {
+        ...prev.selections,
+        vehicles,
+        // Keep vehicleId in sync for legacy support
+        vehicleId: vehicles.length > 0 ? vehicles[0].vehicleId : null,
       },
     }))
     setTimeout(recalculatePricing, 0)
@@ -675,6 +717,7 @@ export function CheckoutProvider({ children }: CheckoutProviderProps) {
     initializeCheckout,
     loadExistingBooking,
     setVehicle,
+    setVehicles,
     setAccommodation,
     toggleAddon,
     setContact,

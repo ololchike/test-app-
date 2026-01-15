@@ -79,6 +79,22 @@ export async function GET(
       },
     })
 
+    // Get active holds for the period (from other users currently in checkout)
+    const activeHolds = await prisma.availabilityHold.findMany({
+      where: {
+        tourId: tour.id,
+        status: "ACTIVE",
+        expiresAt: { gt: new Date() },
+        startDate: { lte: endDate },
+        endDate: { gte: startDate },
+      },
+      select: {
+        startDate: true,
+        endDate: true,
+        spotsHeld: true,
+      },
+    })
+
     // Create a map of dates with their availability status
     const availabilityMap = new Map<
       string,
@@ -149,6 +165,33 @@ export async function GET(
               remainingSpots < guests
                 ? `Only ${Math.max(0, remainingSpots)} spots remaining`
                 : undefined,
+          })
+        }
+      })
+    })
+
+    // Account for active holds (other users currently in checkout)
+    activeHolds.forEach((hold) => {
+      const holdDates = eachDayOfInterval({
+        start: hold.startDate,
+        end: hold.endDate,
+      })
+
+      holdDates.forEach((date) => {
+        const dateKey = format(date, "yyyy-MM-dd")
+        const existing = availabilityMap.get(dateKey)
+        if (existing) {
+          const newBookedSpots = existing.bookedSpots + hold.spotsHeld
+          const remainingSpots = existing.spotsAvailable - newBookedSpots
+
+          availabilityMap.set(dateKey, {
+            ...existing,
+            available: remainingSpots >= guests,
+            bookedSpots: newBookedSpots,
+            reason:
+              remainingSpots < guests
+                ? `Only ${Math.max(0, remainingSpots)} spots remaining`
+                : existing.reason,
           })
         }
       })
@@ -306,6 +349,22 @@ export async function POST(
       },
     })
 
+    // Get active holds that overlap (from other users in checkout)
+    const activeHolds = await prisma.availabilityHold.findMany({
+      where: {
+        tourId: tour.id,
+        status: "ACTIVE",
+        expiresAt: { gt: new Date() },
+        startDate: { lte: end },
+        endDate: { gte: start },
+      },
+      select: {
+        startDate: true,
+        endDate: true,
+        spotsHeld: true,
+      },
+    })
+
     // Calculate booked spots for each day
     const tripDates = eachDayOfInterval({ start, end })
     let insufficientCapacityDate: string | null = null
@@ -319,11 +378,18 @@ export async function POST(
       )
       const maxSpots = limitedEntry?.spotsAvailable || tour.maxGroupSize
 
-      // Calculate booked spots
+      // Calculate booked spots from confirmed bookings
       let bookedSpots = 0
       existingBookings.forEach((booking) => {
         if (date >= booking.startDate && date <= booking.endDate) {
           bookedSpots += booking.adults + booking.children
+        }
+      })
+
+      // Add spots from active holds
+      activeHolds.forEach((hold) => {
+        if (date >= hold.startDate && date <= hold.endDate) {
+          bookedSpots += hold.spotsHeld
         }
       })
 

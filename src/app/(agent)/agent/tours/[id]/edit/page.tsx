@@ -81,6 +81,12 @@ import {
   MealTypeLabels,
   getEnumValues,
 } from "@/lib/constants"
+import {
+  AddonSelector,
+  VehicleSelector,
+  AccommodationSelector,
+} from "@/components/agent/catalog-item-selector"
+import { Car } from "lucide-react"
 
 const COUNTRIES = ["Kenya", "Tanzania", "Uganda", "Rwanda"]
 const TOUR_TYPES = getEnumValues(TourType).map((value) => ({
@@ -171,6 +177,82 @@ interface ItineraryDay {
   availableAddonIds: string[]
 }
 
+// Catalog item types for the new catalog-based selection system
+interface CatalogAddon {
+  id: string
+  name: string
+  description?: string | null
+  basePrice: number
+  duration?: string | null
+  type: string
+  category: string
+  priceType: string
+  childPrice?: number | null
+  images: string[]
+}
+
+interface CatalogVehicle {
+  id: string
+  name: string
+  description?: string | null
+  type: string
+  maxPassengers: number
+  basePricePerDay: number
+  features: string[]
+  images: string[]
+}
+
+interface CatalogAccommodation {
+  id: string
+  name: string
+  description?: string | null
+  tier: string
+  basePricePerNight: number
+  location?: string | null
+  rating?: number | null
+  roomType?: string | null
+  amenities: string[]
+  images: string[]
+}
+
+interface TourAddon {
+  id: string
+  catalog: CatalogAddon
+  priceOverride?: number | null
+  childPriceOverride?: number | null
+  effectivePrice: number
+  dayNumbers: number[]
+  isRecommended: boolean
+  isActive: boolean
+}
+
+interface TourVehicle {
+  id: string
+  catalog: CatalogVehicle
+  pricePerDayOverride?: number | null
+  effectivePricePerDay: number
+  isDefault: boolean
+  isIncludedInBase: boolean
+  isActive: boolean
+}
+
+interface TourAccommodation {
+  id: string
+  catalog: CatalogAccommodation
+  pricePerNightOverride?: number | null
+  effectivePricePerNight: number
+  availableDays: number[]
+  tierOverride?: string | null
+  isDefault: boolean
+  isActive: boolean
+}
+
+interface CatalogItems {
+  addons: TourAddon[]
+  vehicles: TourVehicle[]
+  accommodations: TourAccommodation[]
+}
+
 interface EditTourPageProps {
   params: Promise<{ id: string }>
 }
@@ -196,6 +278,13 @@ export default function EditTourPage({ params }: EditTourPageProps) {
   const [excludedInput, setExcludedInput] = useState("")
   const [imageInput, setImageInput] = useState("")
   const [customTourTypeInput, setCustomTourTypeInput] = useState("")
+
+  // Catalog items state (new catalog-based system)
+  const [catalogItems, setCatalogItems] = useState<CatalogItems>({
+    addons: [],
+    vehicles: [],
+    accommodations: [],
+  })
 
   useEffect(() => {
     async function fetchTour() {
@@ -237,6 +326,29 @@ export default function EditTourPage({ params }: EditTourPageProps) {
 
     if (id) {
       fetchItinerary()
+    }
+  }, [id])
+
+  // Fetch catalog items assigned to this tour
+  const fetchCatalogItems = async () => {
+    try {
+      const res = await fetch(`/api/agent/tours/${id}/catalog-items`)
+      if (res.ok) {
+        const data = await res.json()
+        setCatalogItems({
+          addons: data.addons || [],
+          vehicles: data.vehicles || [],
+          accommodations: data.accommodations || [],
+        })
+      }
+    } catch (error) {
+      console.error("Error fetching catalog items:", error)
+    }
+  }
+
+  useEffect(() => {
+    if (id) {
+      fetchCatalogItems()
     }
   }, [id])
 
@@ -661,10 +773,11 @@ export default function EditTourPage({ params }: EditTourPageProps) {
 
       {/* Edit Form */}
       <Tabs defaultValue="details" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 sm:grid-cols-7 text-xs sm:text-sm">
+        <TabsList className="grid w-full grid-cols-4 sm:grid-cols-8 text-xs sm:text-sm">
           <TabsTrigger value="details">Details</TabsTrigger>
           <TabsTrigger value="features">Features</TabsTrigger>
           <TabsTrigger value="accommodations">Stays</TabsTrigger>
+          <TabsTrigger value="vehicles">Vehicles</TabsTrigger>
           <TabsTrigger value="addons">Add-ons</TabsTrigger>
           <TabsTrigger value="itinerary">Itinerary</TabsTrigger>
           <TabsTrigger value="images">Images</TabsTrigger>
@@ -1293,22 +1406,31 @@ export default function EditTourPage({ params }: EditTourPageProps) {
         </TabsContent>
 
         <TabsContent value="accommodations" className="space-y-6">
+          {/* New Catalog-based Accommodation Selector */}
+          <AccommodationSelector
+            tourId={id}
+            tourDays={tour.durationDays}
+            assignedAccommodations={catalogItems.accommodations}
+            onUpdate={fetchCatalogItems}
+          />
+
+          {/* Legacy: Tour-specific accommodations (for backward compatibility) */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0">
               <div>
                 <CardTitle className="flex items-center gap-2">
                   <Hotel className="h-5 w-5" />
-                  Accommodation Options
+                  Tour-Specific Accommodations
                 </CardTitle>
                 <CardDescription>
-                  Add different accommodation tiers for travelers to choose from
+                  Create new accommodations specific to this tour only
                 </CardDescription>
               </div>
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button>
+                  <Button variant="outline">
                     <Plus className="h-4 w-4 mr-2" />
-                    Add Accommodation
+                    Create New
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-lg">
@@ -1332,10 +1454,8 @@ export default function EditTourPage({ params }: EditTourPageProps) {
             </CardHeader>
             <CardContent>
               {tour.accommodationOptions.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Hotel className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                  <p>No accommodation options added yet</p>
-                  <p className="text-sm">Add accommodation tiers like Budget, Mid-range, or Luxury</p>
+                <div className="text-center py-4 text-muted-foreground">
+                  <p className="text-sm">No tour-specific accommodations</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -1416,23 +1536,42 @@ export default function EditTourPage({ params }: EditTourPageProps) {
           </Card>
         </TabsContent>
 
+        {/* Vehicles Tab */}
+        <TabsContent value="vehicles" className="space-y-6">
+          <VehicleSelector
+            tourId={id}
+            tourDays={tour.durationDays}
+            assignedVehicles={catalogItems.vehicles}
+            onUpdate={fetchCatalogItems}
+          />
+        </TabsContent>
+
         <TabsContent value="addons" className="space-y-6">
+          {/* New Catalog-based Add-on Selector */}
+          <AddonSelector
+            tourId={id}
+            tourDays={tour.durationDays}
+            assignedAddons={catalogItems.addons}
+            onUpdate={fetchCatalogItems}
+          />
+
+          {/* Legacy: Tour-specific add-ons (for backward compatibility) */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0">
               <div>
                 <CardTitle className="flex items-center gap-2">
                   <Sparkles className="h-5 w-5" />
-                  Activity Add-ons
+                  Tour-Specific Add-ons
                 </CardTitle>
                 <CardDescription>
-                  Optional activities travelers can add to their booking
+                  Create new add-ons specific to this tour only
                 </CardDescription>
               </div>
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button>
+                  <Button variant="outline">
                     <Plus className="h-4 w-4 mr-2" />
-                    Add Activity
+                    Create New
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-lg">
@@ -1457,10 +1596,8 @@ export default function EditTourPage({ params }: EditTourPageProps) {
             </CardHeader>
             <CardContent>
               {tour.activityAddons.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Sparkles className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                  <p>No activity add-ons yet</p>
-                  <p className="text-sm">Add optional experiences like hot air balloon rides or cultural visits</p>
+                <div className="text-center py-4 text-muted-foreground">
+                  <p className="text-sm">No tour-specific add-ons</p>
                 </div>
               ) : (
                 <div className="space-y-4">

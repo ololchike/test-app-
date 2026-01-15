@@ -30,6 +30,7 @@ async function getBookingPdfData(bookingId: string) {
             select: {
               name: true,
               tier: true,
+              images: true,
             },
           },
         },
@@ -39,6 +40,9 @@ async function getBookingPdfData(bookingId: string) {
           activityAddon: {
             select: {
               name: true,
+              priceType: true,
+              maxCapacity: true,
+              images: true,
             },
           },
         },
@@ -100,8 +104,26 @@ async function getBookingPdfData(bookingId: string) {
           images: JSON.parse(booking.tour.images || "[]"),
         },
         agent: booking.agent,
-        accommodations: booking.accommodations,
-        activities: booking.activities,
+        accommodations: booking.accommodations.map((acc) => ({
+          dayNumber: acc.dayNumber,
+          price: acc.price,
+          accommodationOption: {
+            name: acc.accommodationOption.name,
+            tier: acc.accommodationOption.tier,
+            images: JSON.parse(acc.accommodationOption.images || "[]"),
+          },
+        })),
+        activities: booking.activities.map((act) => ({
+          price: act.price,
+          quantity: act.quantity,
+          dayNumber: act.dayNumber,
+          activityAddon: {
+            name: act.activityAddon.name,
+            priceType: act.activityAddon.priceType as "PER_PERSON" | "PER_GROUP" | "FLAT_RATE",
+            maxCapacity: act.activityAddon.maxCapacity,
+            images: JSON.parse(act.activityAddon.images || "[]") as string[],
+          },
+        })),
       },
       itinerary,
       pricing: {

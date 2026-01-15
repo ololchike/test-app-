@@ -204,6 +204,7 @@ export async function POST(request: NextRequest) {
       rating: a.rating,
       amenities: JSON.parse(a.amenities || "[]"),
       roomType: a.roomType,
+      images: JSON.parse(a.images || "[]"),
     }))
 
     // Format addons
@@ -220,6 +221,7 @@ export async function POST(request: NextRequest) {
       priceType: a.priceType,
       isPopular: a.isPopular,
       dayAvailable: a.dayAvailable ? JSON.parse(a.dayAvailable) : null,
+      images: JSON.parse(a.images || "[]"),
     }))
 
     // Format itinerary with available options

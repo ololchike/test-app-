@@ -108,6 +108,7 @@ export interface AccommodationOption {
   rating: number | null
   amenities: string[]
   roomType: string | null
+  images: string[]
 }
 
 export interface AddonOption {
@@ -123,6 +124,7 @@ export interface AddonOption {
   priceType: "PER_PERSON" | "PER_GROUP" | "FLAT_RATE"
   isPopular: boolean
   dayAvailable: number[] | null
+  images: string[]
 }
 
 export interface ItineraryDay {
@@ -213,9 +215,17 @@ export interface PricingBreakdown {
   balanceAmount: number     // Remaining balance after deposit
 }
 
+export interface VehicleSelection {
+  vehicleId: string
+  quantity: number
+}
+
 export interface CheckoutSelections {
-  // Selected vehicle (optional upgrade from default)
+  // Selected vehicle (legacy - single vehicle)
   vehicleId: string | null
+
+  // Selected vehicles with quantities (new - supports multiple vehicles)
+  vehicles: VehicleSelection[]
 
   // Selected accommodations per day
   accommodations: Record<number, string> // dayNumber -> accommodationId
@@ -226,6 +236,47 @@ export interface CheckoutSelections {
     quantity: number
     dayNumber?: number // For day-specific add-ons
   }>
+}
+
+// Helper function to calculate optimal vehicle combination for group size
+export function calculateVehicleSuggestion(
+  vehicles: VehicleOption[],
+  groupSize: number
+): VehicleSelection[] {
+  if (groupSize === 0 || vehicles.length === 0) return []
+
+  // Sort vehicles by capacity (largest first) for efficiency
+  const sortedVehicles = [...vehicles]
+    .filter(v => v.maxPassengers > 0)
+    .sort((a, b) => b.maxPassengers - a.maxPassengers)
+
+  // Find the best combination using a greedy approach
+  const result: VehicleSelection[] = []
+  let remainingPassengers = groupSize
+
+  // First, check if a single vehicle can fit everyone
+  const singleVehicle = sortedVehicles.find(v => v.maxPassengers >= groupSize)
+  if (singleVehicle) {
+    return [{ vehicleId: singleVehicle.id, quantity: 1 }]
+  }
+
+  // Otherwise, find combination of vehicles
+  for (const vehicle of sortedVehicles) {
+    if (remainingPassengers <= 0) break
+
+    const vehiclesNeeded = Math.ceil(remainingPassengers / vehicle.maxPassengers)
+    const passengersInThese = Math.min(
+      remainingPassengers,
+      vehiclesNeeded * vehicle.maxPassengers
+    )
+
+    if (vehiclesNeeded > 0) {
+      result.push({ vehicleId: vehicle.id, quantity: vehiclesNeeded })
+      remainingPassengers -= passengersInThese
+    }
+  }
+
+  return result
 }
 
 export interface CheckoutState {
@@ -281,6 +332,7 @@ export interface CheckoutContextValue {
 
   // Selection updates
   setVehicle: (vehicleId: string | null) => void
+  setVehicles: (vehicles: VehicleSelection[]) => void
   setAccommodation: (dayNumber: number, accommodationId: string) => void
   toggleAddon: (addonId: string, quantity?: number, dayNumber?: number) => void
 
@@ -374,6 +426,7 @@ export const DEFAULT_CHECKOUT_STATE: CheckoutState = {
   pricingConfig: DEFAULT_PRICING_CONFIG,
   selections: {
     vehicleId: null,
+    vehicles: [],
     accommodations: {},
     addons: [],
   },
