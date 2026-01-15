@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/form"
 import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
+import { SectionError } from "@/components/error"
 
 // Password strength indicator
 function PasswordStrength({ password }: { password: string }) {
@@ -158,11 +159,12 @@ export default function SignupPage() {
   // Show success message after registration
   if (registrationSuccess) {
     return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="space-y-6"
-      >
+      <SectionError name="Signup Success">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="space-y-6"
+        >
         <div className="space-y-4 text-center">
           <motion.div
             initial={{ scale: 0 }}
@@ -209,16 +211,18 @@ export default function SignupPage() {
           </Link>
         </div>
       </motion.div>
+      </SectionError>
     )
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="space-y-6"
-    >
+    <SectionError name="Signup Form">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="space-y-6"
+      >
       <div className="space-y-2">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
@@ -488,5 +492,6 @@ export default function SignupPage() {
         </p>
       </motion.div>
     </motion.div>
+    </SectionError>
   )
 }

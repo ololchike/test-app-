@@ -43,6 +43,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
 import { format } from "date-fns"
+import { SectionError } from "@/components/error"
 
 interface BlogPost {
   id: string
@@ -161,7 +162,8 @@ export default function DashboardBlogPage() {
         </CardContent>
       </Card>
 
-      {posts.length === 0 ? (
+      <SectionError name="Blog Posts">
+        {posts.length === 0 ? (
         <Card>
           <CardContent className="py-12">
             <div className="text-center">
@@ -256,6 +258,7 @@ export default function DashboardBlogPage() {
           ))}
         </div>
       )}
+      </SectionError>
 
       {/* Delete Confirmation */}
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>

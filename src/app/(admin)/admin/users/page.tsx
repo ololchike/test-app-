@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { SectionError } from "@/components/error"
 import {
   Select,
   SelectContent,
@@ -156,61 +157,64 @@ export default function AdminUsersPage() {
         <p className="text-muted-foreground mt-2">Manage all platform users</p>
       </div>
 
-      <div className="grid gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4">
-        <Card
-          className={`cursor-pointer transition-all hover:shadow-lg ${
-            roleFilter === "all" ? "ring-2 ring-primary" : ""
-          }`}
-          onClick={() => {
-            setRoleFilter("all")
-            setPage(1)
-          }}
-        >
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">All Users</p>
-                <p className="text-2xl font-bold mt-1">
-                  {Object.values(roleCounts).reduce((a, b) => a + b, 0)}
-                </p>
-              </div>
-              <Users className="h-8 w-8 text-blue-500" />
-            </div>
-          </CardContent>
-        </Card>
-
-        {Object.entries(roleConfig).map(([role, config]) => {
-          const Icon = config.icon
-          const count = roleCounts[role] || 0
-
-          return (
-            <Card
-              key={role}
-              className={`cursor-pointer transition-all hover:shadow-lg ${
-                roleFilter === role ? "ring-2 ring-primary" : ""
-              }`}
-              onClick={() => {
-                setRoleFilter(role)
-                setPage(1)
-              }}
-            >
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">
-                      {config.label}s
-                    </p>
-                    <p className="text-2xl font-bold mt-1">{count}</p>
-                  </div>
-                  <Icon className="h-8 w-8" />
+      <SectionError name="User Stats">
+        <div className="grid gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4">
+          <Card
+            className={`cursor-pointer transition-all hover:shadow-lg ${
+              roleFilter === "all" ? "ring-2 ring-primary" : ""
+            }`}
+            onClick={() => {
+              setRoleFilter("all")
+              setPage(1)
+            }}
+          >
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">All Users</p>
+                  <p className="text-2xl font-bold mt-1">
+                    {Object.values(roleCounts).reduce((a, b) => a + b, 0)}
+                  </p>
                 </div>
-              </CardContent>
-            </Card>
-          )
-        })}
-      </div>
+                <Users className="h-8 w-8 text-blue-500" />
+              </div>
+            </CardContent>
+          </Card>
 
-      <Card>
+          {Object.entries(roleConfig).map(([role, config]) => {
+            const Icon = config.icon
+            const count = roleCounts[role] || 0
+
+            return (
+              <Card
+                key={role}
+                className={`cursor-pointer transition-all hover:shadow-lg ${
+                  roleFilter === role ? "ring-2 ring-primary" : ""
+                }`}
+                onClick={() => {
+                  setRoleFilter(role)
+                  setPage(1)
+                }}
+              >
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">
+                        {config.label}s
+                      </p>
+                      <p className="text-2xl font-bold mt-1">{count}</p>
+                    </div>
+                    <Icon className="h-8 w-8" />
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          })}
+        </div>
+      </SectionError>
+
+      <SectionError name="Users Table">
+        <Card>
         <CardHeader>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <CardTitle>Users</CardTitle>
@@ -379,6 +383,7 @@ export default function AdminUsersPage() {
           )}
         </CardContent>
       </Card>
+      </SectionError>
 
       <ConfirmationDialog
         isOpen={changeDialogOpen}

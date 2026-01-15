@@ -1,0 +1,8 @@
+export { DetailsStep } from "./details-step"
+export { FeaturesStep } from "./features-step"
+export { VehiclesStep } from "./vehicles-step"
+export { AccommodationsStep } from "./accommodations-step"
+export { AddonsStep } from "./addons-step"
+export { ItineraryStep } from "./itinerary-step"
+export { ImagesStep } from "./images-step"
+export { ReviewStep } from "./review-step"

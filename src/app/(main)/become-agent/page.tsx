@@ -33,6 +33,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
+import { SectionError } from "@/components/error"
 
 // East African countries
 const countries = [
@@ -250,6 +251,7 @@ export default function BecomeAgentPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       {/* Hero Section */}
+      <SectionError name="Become Agent Hero">
       <section className="relative py-16 px-4 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5" />
         <div className="container max-w-4xl mx-auto text-center relative">
@@ -271,8 +273,10 @@ export default function BecomeAgentPage() {
           </motion.div>
         </div>
       </section>
+      </SectionError>
 
       {/* Benefits Section */}
+      <SectionError name="Agent Benefits">
       <section className="py-8 px-4">
         <div className="container max-w-4xl mx-auto">
           <div className="grid md:grid-cols-3 gap-6">
@@ -308,8 +312,10 @@ export default function BecomeAgentPage() {
           </div>
         </div>
       </section>
+      </SectionError>
 
       {/* Registration Form */}
+      <SectionError name="Become Agent Form">
       <section className="py-8 px-4 pb-16">
         <div className="container max-w-2xl mx-auto">
           <motion.div
@@ -820,6 +826,7 @@ export default function BecomeAgentPage() {
           </motion.div>
         </div>
       </section>
+      </SectionError>
     </div>
   )
 }

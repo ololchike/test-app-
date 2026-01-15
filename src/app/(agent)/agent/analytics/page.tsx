@@ -24,6 +24,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
+import { SectionError } from "@/components/error"
 import {
   BarChart,
   Bar,
@@ -219,39 +220,41 @@ export default function AgentAnalyticsPage() {
       </motion.div>
 
       {/* Overview Stats */}
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-        {statsConfig.map((stat, index) => {
-          const Icon = stat.icon
-          const value = overview[stat.key as keyof typeof overview]
-          return (
-            <motion.div
-              key={stat.key}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <Card className="border-border/50 hover:border-primary/30 hover:shadow-premium transition-all duration-300">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    {stat.title}
-                  </CardTitle>
-                  <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center bg-gradient-to-br", stat.color)}>
-                    <Icon className="h-5 w-5 text-white" />
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {stat.format(value)}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {stat.description}
-                  </p>
-                </CardContent>
-              </Card>
-            </motion.div>
-          )
-        })}
-      </div>
+      <SectionError name="Analytics Overview">
+        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+          {statsConfig.map((stat, index) => {
+            const Icon = stat.icon
+            const value = overview[stat.key as keyof typeof overview]
+            return (
+              <motion.div
+                key={stat.key}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Card className="border-border/50 hover:border-primary/30 hover:shadow-premium transition-all duration-300">
+                  <CardHeader className="flex flex-row items-center justify-between pb-2">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      {stat.title}
+                    </CardTitle>
+                    <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center bg-gradient-to-br", stat.color)}>
+                      <Icon className="h-5 w-5 text-white" />
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      {stat.format(value)}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {stat.description}
+                    </p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )
+          })}
+        </div>
+      </SectionError>
 
       {/* Secondary Stats */}
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
@@ -335,20 +338,21 @@ export default function AgentAnalyticsPage() {
       </div>
 
       {/* Revenue & Bookings Trend */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.7 }}
-      >
-        <Card className="border-border/50 hover:shadow-premium transition-all duration-300">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-primary" />
-              Revenue & Bookings Trend
-            </CardTitle>
-            <CardDescription>Your earnings and bookings over the last 6 months</CardDescription>
-          </CardHeader>
-          <CardContent>
+      <SectionError name="Revenue Trend">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
+        >
+          <Card className="border-border/50 hover:shadow-premium transition-all duration-300">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-primary" />
+                Revenue & Bookings Trend
+              </CardTitle>
+              <CardDescription>Your earnings and bookings over the last 6 months</CardDescription>
+            </CardHeader>
+            <CardContent>
             {monthlyEarnings.some((m) => m.earnings > 0 || m.bookings > 0) ? (
               <ResponsiveContainer width="100%" height={300}>
                 <AreaChart data={monthlyEarnings}>
@@ -408,9 +412,11 @@ export default function AgentAnalyticsPage() {
           </CardContent>
         </Card>
       </motion.div>
+      </SectionError>
 
       {/* Charts Row */}
-      <div className="grid gap-4 md:grid-cols-2">
+      <SectionError name="Analytics Charts">
+        <div className="grid gap-4 md:grid-cols-2">
         {/* Monthly Earnings Chart */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
@@ -522,9 +528,11 @@ export default function AgentAnalyticsPage() {
           </Card>
         </motion.div>
       </div>
+      </SectionError>
 
       {/* Top Tours */}
-      <motion.div
+      <SectionError name="Top Tours">
+        <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 1 }}
@@ -613,6 +621,7 @@ export default function AgentAnalyticsPage() {
           </CardContent>
         </Card>
       </motion.div>
+      </SectionError>
     </div>
   )
 }

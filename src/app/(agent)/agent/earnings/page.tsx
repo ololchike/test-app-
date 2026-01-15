@@ -8,6 +8,7 @@ import { WithdrawalHistory } from "@/components/agent/withdrawal-history"
 import { Skeleton } from "@/components/ui/skeleton"
 import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
+import { SectionError } from "@/components/error"
 
 interface BalanceData {
   totalEarnings: number
@@ -144,146 +145,152 @@ export default function AgentEarningsPage() {
       </motion.div>
 
       {/* Stats Grid */}
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-        {statsConfig.map((stat, index) => {
-          const Icon = stat.icon
-          return (
-            <motion.div
-              key={stat.key}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <Card className="border-border/50 hover:border-primary/30 hover:shadow-premium transition-all duration-300 overflow-hidden">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    {stat.title}
-                  </CardTitle>
-                  <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center bg-gradient-to-br", stat.color)}>
-                    <Icon className="h-5 w-5 text-white" />
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {loading ? (
-                    <Skeleton className="h-8 w-32" />
-                  ) : (
-                    <>
-                      <div className="text-2xl font-bold">
-                        ${balanceData?.[stat.key as keyof BalanceData]?.toLocaleString() || 0}
-                      </div>
-                      {stat.key === "monthlyEarnings" && balanceData && (
-                        <div className="flex items-center gap-1 mt-1">
-                          <TrendingUp className="h-3 w-3 text-emerald-600" />
-                          <span className="text-xs text-emerald-600">Current month</span>
+      <SectionError name="Earnings Stats">
+        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+          {statsConfig.map((stat, index) => {
+            const Icon = stat.icon
+            return (
+              <motion.div
+                key={stat.key}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Card className="border-border/50 hover:border-primary/30 hover:shadow-premium transition-all duration-300 overflow-hidden">
+                  <CardHeader className="flex flex-row items-center justify-between pb-2">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      {stat.title}
+                    </CardTitle>
+                    <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center bg-gradient-to-br", stat.color)}>
+                      <Icon className="h-5 w-5 text-white" />
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    {loading ? (
+                      <Skeleton className="h-8 w-32" />
+                    ) : (
+                      <>
+                        <div className="text-2xl font-bold">
+                          ${balanceData?.[stat.key as keyof BalanceData]?.toLocaleString() || 0}
                         </div>
-                      )}
-                      {stat.key !== "monthlyEarnings" && balanceData && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {stat.description(balanceData)}
-                        </p>
-                      )}
-                      {stat.key === "availableBalance" && !loading && (
-                        <div className="mt-3">
-                          <WithdrawalForm
-                            availableBalance={balanceData?.availableBalance || 0}
-                            currency={balanceData?.currency || "USD"}
-                            onSuccess={handleWithdrawalSuccess}
-                          />
-                        </div>
-                      )}
-                    </>
-                  )}
-                </CardContent>
-              </Card>
-            </motion.div>
-          )
-        })}
-      </div>
+                        {stat.key === "monthlyEarnings" && balanceData && (
+                          <div className="flex items-center gap-1 mt-1">
+                            <TrendingUp className="h-3 w-3 text-emerald-600" />
+                            <span className="text-xs text-emerald-600">Current month</span>
+                          </div>
+                        )}
+                        {stat.key !== "monthlyEarnings" && balanceData && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {stat.description(balanceData)}
+                          </p>
+                        )}
+                        {stat.key === "availableBalance" && !loading && (
+                          <div className="mt-3">
+                            <WithdrawalForm
+                              availableBalance={balanceData?.availableBalance || 0}
+                              currency={balanceData?.currency || "USD"}
+                              onSuccess={handleWithdrawalSuccess}
+                            />
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )
+          })}
+        </div>
+      </SectionError>
 
       {/* Withdrawal History */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-      >
-        <Card className="border-border/50 hover:shadow-premium transition-all duration-300">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-primary" />
-              Withdrawal History
-            </CardTitle>
-            <CardDescription>
-              View and track your withdrawal requests
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <WithdrawalHistory refreshTrigger={refreshTrigger} />
-          </CardContent>
-        </Card>
-      </motion.div>
+      <SectionError name="Withdrawal History">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+        >
+          <Card className="border-border/50 hover:shadow-premium transition-all duration-300">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+                Withdrawal History
+              </CardTitle>
+              <CardDescription>
+                View and track your withdrawal requests
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <WithdrawalHistory refreshTrigger={refreshTrigger} />
+            </CardContent>
+          </Card>
+        </motion.div>
+      </SectionError>
 
       {/* Additional Stats */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.5 }}
-        >
-          <Card className="border-border/50 hover:border-primary/30 hover:shadow-premium transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Total Withdrawn</CardTitle>
-              <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                <ArrowUpRight className="h-4 w-4 text-emerald-600" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <Skeleton className="h-8 w-32" />
-              ) : (
-                <>
-                  <div className="text-2xl font-bold">
-                    ${balanceData?.totalWithdrawn.toLocaleString() || 0}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {balanceData?.stats.completedWithdrawalsCount || 0} completed
-                    withdrawal
-                    {balanceData?.stats.completedWithdrawalsCount !== 1 ? "s" : ""}
-                  </p>
-                </>
-              )}
-            </CardContent>
-          </Card>
-        </motion.div>
+      <SectionError name="Additional Stats">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <Card className="border-border/50 hover:border-primary/30 hover:shadow-premium transition-all duration-300">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Total Withdrawn</CardTitle>
+                <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                  <ArrowUpRight className="h-4 w-4 text-emerald-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <Skeleton className="h-8 w-32" />
+                ) : (
+                  <>
+                    <div className="text-2xl font-bold">
+                      ${balanceData?.totalWithdrawn.toLocaleString() || 0}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {balanceData?.stats.completedWithdrawalsCount || 0} completed
+                      withdrawal
+                      {balanceData?.stats.completedWithdrawalsCount !== 1 ? "s" : ""}
+                    </p>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.6 }}
-        >
-          <Card className="border-border/50 hover:border-primary/30 hover:shadow-premium transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Pending Earnings</CardTitle>
-              <div className="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                <Clock className="h-4 w-4 text-amber-600" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <Skeleton className="h-8 w-32" />
-              ) : (
-                <>
-                  <div className="text-2xl font-bold">
-                    ${balanceData?.pendingEarnings.toLocaleString() || 0}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    From bookings in progress
-                  </p>
-                </>
-              )}
-            </CardContent>
-          </Card>
-        </motion.div>
-      </div>
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.6 }}
+          >
+            <Card className="border-border/50 hover:border-primary/30 hover:shadow-premium transition-all duration-300">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Pending Earnings</CardTitle>
+                <div className="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                  <Clock className="h-4 w-4 text-amber-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <Skeleton className="h-8 w-32" />
+                ) : (
+                  <>
+                    <div className="text-2xl font-bold">
+                      ${balanceData?.pendingEarnings.toLocaleString() || 0}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      From bookings in progress
+                    </p>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+      </SectionError>
     </div>
   )
 }

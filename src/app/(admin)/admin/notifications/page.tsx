@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog"
+import { SectionError } from "@/components/error"
 import { cn } from "@/lib/utils"
 
 interface Notification {
@@ -187,8 +188,9 @@ export default function AdminNotificationsPage() {
         )}
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+      <SectionError name="Notifications List">
+        {/* Stats Cards */}
+        <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
         <Card
           className={`cursor-pointer transition-all hover:shadow-lg ${
             typeFilter === "all" ? "ring-2 ring-primary" : ""
@@ -406,6 +408,7 @@ export default function AdminNotificationsPage() {
           )}
         </CardContent>
       </Card>
+      </SectionError>
 
       {/* Delete Confirmation Dialog */}
       <ConfirmationDialog

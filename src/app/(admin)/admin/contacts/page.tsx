@@ -51,6 +51,7 @@ import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ForwardToAgentDialog } from "@/components/admin/forward-to-agent-dialog"
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog"
+import { SectionError } from "@/components/error"
 
 interface ContactMessage {
   id: string
@@ -334,8 +335,9 @@ export default function AdminContactsPage() {
         </p>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+      <SectionError name="Contact Messages Table">
+        {/* Stats Cards */}
+        <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
         {Object.entries(statusConfig).map(([status, config]) => {
           const Icon = config.icon
           const count = statusCounts[status as keyof StatusCounts] || 0
@@ -496,6 +498,7 @@ export default function AdminContactsPage() {
           )}
         </CardContent>
       </Card>
+      </SectionError>
 
       {/* Message Detail Modal */}
       <Dialog open={isDetailModalOpen} onOpenChange={setIsDetailModalOpen}>

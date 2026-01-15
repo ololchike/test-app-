@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import Link from "next/link"
 import Image from "next/image"
+import { SectionError } from "@/components/error"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -134,6 +135,7 @@ export default async function OperatorProfilePage({ params }: Props) {
   return (
     <div className="min-h-screen bg-linear-to-b from-background to-muted/20">
       {/* Hero Section */}
+      <SectionError name="Operator Profile Header">
       <div className="relative bg-linear-to-r from-secondary/10 via-primary/5 to-secondary/10 border-b">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
           <div className="flex flex-col lg:flex-row gap-6 sm:gap-8 items-start">
@@ -217,8 +219,10 @@ export default async function OperatorProfilePage({ params }: Props) {
           </div>
         </div>
       </div>
+      </SectionError>
 
       {/* Content */}
+      <SectionError name="Operator Profile Content">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <div className="grid lg:grid-cols-3 gap-6 sm:gap-8">
           {/* Left Column - About & Details */}
@@ -341,6 +345,7 @@ export default async function OperatorProfilePage({ params }: Props) {
           </div>
         </div>
       </div>
+      </SectionError>
     </div>
   )
 }

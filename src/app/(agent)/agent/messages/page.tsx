@@ -13,6 +13,7 @@ import {
 import { ChatContainer } from "@/components/messages/chat-container"
 import { useUnreadCount, useConversations } from "@/hooks/use-messages"
 import { toast } from "sonner"
+import { SectionError } from "@/components/error"
 
 function AgentMessagesContent() {
   const { unreadCount } = useUnreadCount()
@@ -127,13 +128,14 @@ function AgentMessagesContent() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Messages</h1>
-        <p className="text-muted-foreground mt-1">
-          Communicate with your customers
-        </p>
-      </div>
+    <SectionError name="Messages Chat">
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Messages</h1>
+          <p className="text-muted-foreground mt-1">
+            Communicate with your customers
+          </p>
+        </div>
 
       {/* Stats Cards */}
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
@@ -192,7 +194,8 @@ function AgentMessagesContent() {
       ) : (
         <ChatContainer initialConversationId={initialConversationId} />
       )}
-    </div>
+      </div>
+    </SectionError>
   )
 }
 

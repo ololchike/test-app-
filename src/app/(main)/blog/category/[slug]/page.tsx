@@ -8,6 +8,7 @@ import { Clock, Eye, ChevronRight, ArrowLeft } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { SectionError } from "@/components/error"
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -133,167 +134,175 @@ export default async function BlogCategoryPage({ params, searchParams }: PagePro
     <div className="pt-20 pb-16">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Back Link */}
-        <div className="mb-6">
-          <Button variant="ghost" asChild className="pl-0">
-            <Link href="/blog">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              All Posts
-            </Link>
-          </Button>
-        </div>
-
-        {/* Header */}
-        <div className="text-center mb-12">
-          <Badge
-            className="mb-4 text-lg px-4 py-1"
-            style={{
-              backgroundColor: category.color || undefined,
-              color: category.color ? "#fff" : undefined,
-            }}
-          >
-            {category.name}
-          </Badge>
-          <h1 className="text-4xl font-bold mb-4">{category.name}</h1>
-          {category.description && (
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              {category.description}
-            </p>
-          )}
-          <p className="text-sm text-muted-foreground mt-2">
-            {total} {total === 1 ? "article" : "articles"}
-          </p>
-        </div>
-
-        {/* Categories */}
-        {categories.length > 0 && (
-          <div className="flex flex-wrap justify-center gap-2 mb-12">
-            <Button variant="outline" asChild>
-              <Link href="/blog">All Posts</Link>
-            </Button>
-            {categories.map((cat) => (
-              <Button
-                key={cat.slug}
-                variant={cat.slug === slug ? "default" : "outline"}
-                asChild
-                style={{
-                  borderColor: cat.color || undefined,
-                  backgroundColor: cat.slug === slug ? cat.color || undefined : undefined,
-                }}
-              >
-                <Link href={`/blog/category/${cat.slug}`}>
-                  {cat.name}
-                  <Badge variant="secondary" className="ml-2">
-                    {cat._count.posts}
-                  </Badge>
-                </Link>
-              </Button>
-            ))}
-          </div>
-        )}
-
-        {/* Posts Grid */}
-        {posts.length > 0 ? (
-          <>
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {posts.map((post) => (
-                <Link key={post.id} href={`/blog/${post.slug}`}>
-                  <Card className="overflow-hidden h-full hover:shadow-lg transition-shadow">
-                    <div className="relative h-48">
-                      {post.coverImage ? (
-                        <Image
-                          src={post.coverImage}
-                          alt={post.title}
-                          fill
-                          className="object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-muted flex items-center justify-center">
-                          <span className="text-muted-foreground">No image</span>
-                        </div>
-                      )}
-                      {post.isFeatured && (
-                        <Badge className="absolute top-3 left-3 bg-primary">
-                          Featured
-                        </Badge>
-                      )}
-                    </div>
-                    <CardContent className="p-5">
-                      <h3 className="font-semibold text-lg mb-2 line-clamp-2">
-                        {post.title}
-                      </h3>
-                      {post.excerpt && (
-                        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                          {post.excerpt}
-                        </p>
-                      )}
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                        {post.publishedAt && (
-                          <span>
-                            {format(new Date(post.publishedAt), "MMM d, yyyy")}
-                          </span>
-                        )}
-                        {post.readingTime && (
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {post.readingTime} min
-                          </span>
-                        )}
-                        <span className="flex items-center gap-1">
-                          <Eye className="h-3 w-3" />
-                          {post.viewCount.toLocaleString()}
-                        </span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
-            </div>
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex justify-center gap-2 mt-12">
-                {page > 1 && (
-                  <Button variant="outline" asChild>
-                    <Link href={`/blog/category/${slug}?page=${page - 1}`}>
-                      Previous
-                    </Link>
-                  </Button>
-                )}
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                    <Button
-                      key={p}
-                      variant={p === page ? "default" : "outline"}
-                      size="sm"
-                      asChild
-                    >
-                      <Link href={`/blog/category/${slug}?page=${p}`}>{p}</Link>
-                    </Button>
-                  ))}
-                </div>
-                {page < totalPages && (
-                  <Button variant="outline" asChild>
-                    <Link href={`/blog/category/${slug}?page=${page + 1}`}>
-                      Next
-                    </Link>
-                  </Button>
-                )}
-              </div>
-            )}
-          </>
-        ) : (
-          <div className="text-center py-16">
-            <p className="text-muted-foreground mb-4">
-              No articles in this category yet.
-            </p>
-            <Button asChild>
+        <SectionError name="Navigation">
+          <div className="mb-6">
+            <Button variant="ghost" asChild className="pl-0">
               <Link href="/blog">
-                View All Posts
-                <ChevronRight className="h-4 w-4 ml-2" />
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                All Posts
               </Link>
             </Button>
           </div>
-        )}
+        </SectionError>
+
+        {/* Header */}
+        <SectionError name="Category Header">
+          <div className="text-center mb-12">
+            <Badge
+              className="mb-4 text-lg px-4 py-1"
+              style={{
+                backgroundColor: category.color || undefined,
+                color: category.color ? "#fff" : undefined,
+              }}
+            >
+              {category.name}
+            </Badge>
+            <h1 className="text-4xl font-bold mb-4">{category.name}</h1>
+            {category.description && (
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                {category.description}
+              </p>
+            )}
+            <p className="text-sm text-muted-foreground mt-2">
+              {total} {total === 1 ? "article" : "articles"}
+            </p>
+          </div>
+        </SectionError>
+
+        {/* Categories */}
+        <SectionError name="Categories">
+          {categories.length > 0 && (
+            <div className="flex flex-wrap justify-center gap-2 mb-12">
+              <Button variant="outline" asChild>
+                <Link href="/blog">All Posts</Link>
+              </Button>
+              {categories.map((cat) => (
+                <Button
+                  key={cat.slug}
+                  variant={cat.slug === slug ? "default" : "outline"}
+                  asChild
+                  style={{
+                    borderColor: cat.color || undefined,
+                    backgroundColor: cat.slug === slug ? cat.color || undefined : undefined,
+                  }}
+                >
+                  <Link href={`/blog/category/${cat.slug}`}>
+                    {cat.name}
+                    <Badge variant="secondary" className="ml-2">
+                      {cat._count.posts}
+                    </Badge>
+                  </Link>
+                </Button>
+              ))}
+            </div>
+          )}
+        </SectionError>
+
+        {/* Posts Grid */}
+        <SectionError name="Category Posts">
+          {posts.length > 0 ? (
+            <>
+              <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                {posts.map((post) => (
+                  <Link key={post.id} href={`/blog/${post.slug}`}>
+                    <Card className="overflow-hidden h-full hover:shadow-lg transition-shadow">
+                      <div className="relative h-48">
+                        {post.coverImage ? (
+                          <Image
+                            src={post.coverImage}
+                            alt={post.title}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-muted flex items-center justify-center">
+                            <span className="text-muted-foreground">No image</span>
+                          </div>
+                        )}
+                        {post.isFeatured && (
+                          <Badge className="absolute top-3 left-3 bg-primary">
+                            Featured
+                          </Badge>
+                        )}
+                      </div>
+                      <CardContent className="p-5">
+                        <h3 className="font-semibold text-lg mb-2 line-clamp-2">
+                          {post.title}
+                        </h3>
+                        {post.excerpt && (
+                          <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                            {post.excerpt}
+                          </p>
+                        )}
+                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                          {post.publishedAt && (
+                            <span>
+                              {format(new Date(post.publishedAt), "MMM d, yyyy")}
+                            </span>
+                          )}
+                          {post.readingTime && (
+                            <span className="flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              {post.readingTime} min
+                            </span>
+                          )}
+                          <span className="flex items-center gap-1">
+                            <Eye className="h-3 w-3" />
+                            {post.viewCount.toLocaleString()}
+                          </span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex justify-center gap-2 mt-12">
+                  {page > 1 && (
+                    <Button variant="outline" asChild>
+                      <Link href={`/blog/category/${slug}?page=${page - 1}`}>
+                        Previous
+                      </Link>
+                    </Button>
+                  )}
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                      <Button
+                        key={p}
+                        variant={p === page ? "default" : "outline"}
+                        size="sm"
+                        asChild
+                      >
+                        <Link href={`/blog/category/${slug}?page=${p}`}>{p}</Link>
+                      </Button>
+                    ))}
+                  </div>
+                  {page < totalPages && (
+                    <Button variant="outline" asChild>
+                      <Link href={`/blog/category/${slug}?page=${page + 1}`}>
+                        Next
+                      </Link>
+                    </Button>
+                  )}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="text-center py-16">
+              <p className="text-muted-foreground mb-4">
+                No articles in this category yet.
+              </p>
+              <Button asChild>
+                <Link href="/blog">
+                  View All Posts
+                  <ChevronRight className="h-4 w-4 ml-2" />
+                </Link>
+              </Button>
+            </div>
+          )}
+        </SectionError>
       </div>
     </div>
   )

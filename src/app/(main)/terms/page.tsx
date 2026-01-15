@@ -3,6 +3,7 @@ import { FileText } from "lucide-react"
 import { format } from "date-fns"
 import { prisma } from "@/lib/prisma"
 import { RichTextViewer } from "@/components/ui/rich-text-viewer"
+import { SectionError } from "@/components/error"
 
 async function getTermsContent() {
   try {
@@ -24,6 +25,7 @@ export default async function TermsOfServicePage() {
   return (
     <>
       {/* Header */}
+      <SectionError name="Terms of Service Header">
       <section className="bg-secondary py-12 sm:py-16 lg:py-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center">
@@ -37,8 +39,10 @@ export default async function TermsOfServicePage() {
           </div>
         </div>
       </section>
+      </SectionError>
 
       {/* Content */}
+      <SectionError name="Terms of Service Content">
       <section className="py-12 sm:py-16 lg:py-24">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-4xl">
@@ -57,6 +61,7 @@ export default async function TermsOfServicePage() {
           </div>
         </div>
       </section>
+      </SectionError>
     </>
   )
 }

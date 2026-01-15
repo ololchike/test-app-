@@ -3,9 +3,11 @@
 import Link from "next/link"
 import { WifiOff, RefreshCw, Home } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { SectionError } from "@/components/error"
 
 export default function OfflinePage() {
   return (
+    <SectionError name="Offline Content">
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
       <div className="text-center max-w-md">
         {/* Offline Icon */}
@@ -44,5 +46,6 @@ export default function OfflinePage() {
         </p>
       </div>
     </div>
+    </SectionError>
   )
 }

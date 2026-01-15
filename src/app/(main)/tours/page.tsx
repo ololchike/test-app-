@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { SocialProofBanner } from "@/components/trust/social-proof-banner"
+import { SectionError } from "@/components/error"
 
 interface Tour {
   id: string
@@ -204,6 +205,7 @@ function ToursContent() {
   return (
     <div className="pt-20">
       {/* Premium Hero Header */}
+      <SectionError name="Hero">
       <div className="relative bg-gradient-to-br from-secondary via-secondary/95 to-primary/30 py-12 sm:py-16 lg:py-24 overflow-hidden">
         {/* Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -296,11 +298,15 @@ function ToursContent() {
           </motion.div>
         </div>
       </div>
+      </SectionError>
 
       {/* Social Proof Banner */}
-      <SocialProofBanner variant="compact" />
+      <SectionError name="Social Proof">
+        <SocialProofBanner variant="compact" />
+      </SectionError>
 
       {/* Filters and Results */}
+      <SectionError name="Tours">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -543,9 +549,11 @@ function ToursContent() {
           </div>
         </div>
       </div>
+      </SectionError>
 
       {/* Bottom CTA */}
       {!isLoading && tours.length > 0 && (
+        <SectionError name="CTA">
         <motion.section
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
@@ -573,6 +581,7 @@ function ToursContent() {
             </Button>
           </div>
         </motion.section>
+        </SectionError>
       )}
     </div>
   )

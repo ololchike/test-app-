@@ -31,6 +31,7 @@ import {
 import { Download, Calendar, TrendingUp, DollarSign, Users, Package } from "lucide-react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { Skeleton } from "@/components/ui/skeleton"
+import { SectionError } from "@/components/error"
 
 // Color palette
 const COLORS = {
@@ -317,18 +318,19 @@ export default function AdminReportsPage() {
         </div>
       )}
 
-      {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
-          <TabsTrigger value="revenue">Revenue</TabsTrigger>
-          <TabsTrigger value="bookings">Bookings</TabsTrigger>
-          <TabsTrigger value="users">Users</TabsTrigger>
-          <TabsTrigger value="agents">Agents</TabsTrigger>
-          <TabsTrigger value="tours">Tours</TabsTrigger>
-        </TabsList>
+      <SectionError name="Reports Analytics">
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+            <TabsTrigger value="revenue">Revenue</TabsTrigger>
+            <TabsTrigger value="bookings">Bookings</TabsTrigger>
+            <TabsTrigger value="users">Users</TabsTrigger>
+            <TabsTrigger value="agents">Agents</TabsTrigger>
+            <TabsTrigger value="tours">Tours</TabsTrigger>
+          </TabsList>
 
-        {/* Revenue Tab */}
-        <TabsContent value="revenue" className="space-y-4">
+          {/* Revenue Tab */}
+          <TabsContent value="revenue" className="space-y-4">
           {loading ? (
             <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
               {[...Array(4)].map((_, i) => (
@@ -1103,7 +1105,8 @@ export default function AdminReportsPage() {
             </>
           )}
         </TabsContent>
-      </Tabs>
+        </Tabs>
+      </SectionError>
     </div>
   )
 }

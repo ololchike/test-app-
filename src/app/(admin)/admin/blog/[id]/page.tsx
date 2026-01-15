@@ -51,6 +51,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
+import { SectionError } from "@/components/error"
 import { toast } from "sonner"
 
 interface Category {
@@ -616,10 +617,11 @@ export default function AdminEditBlogPage() {
         </Card>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Main Content - Same as new page */}
-        <div className="lg:col-span-2 space-y-6">
-          <Card>
+      <SectionError name="Blog Post Editor">
+        <div className="grid gap-6 lg:grid-cols-3">
+          {/* Main Content - Same as new page */}
+          <div className="lg:col-span-2 space-y-6">
+            <Card>
             <CardHeader>
               <CardTitle>Post Details</CardTitle>
               <CardDescription>Basic information about the blog post</CardDescription>
@@ -970,7 +972,8 @@ export default function AdminEditBlogPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
+        </div>
+      </SectionError>
     </div>
   )
 }

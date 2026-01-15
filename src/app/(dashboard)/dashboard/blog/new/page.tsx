@@ -33,6 +33,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { toast } from "sonner"
+import { SectionError } from "@/components/error"
 
 interface Category {
   id: string
@@ -203,6 +204,7 @@ export default function ClientNewBlogPage() {
   }
 
   return (
+    <SectionError name="New Blog Post Form">
     <div className="p-4 md:p-6 space-y-6 max-w-4xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
@@ -397,5 +399,6 @@ export default function ClientNewBlogPage() {
         </div>
       </div>
     </div>
+    </SectionError>
   )
 }

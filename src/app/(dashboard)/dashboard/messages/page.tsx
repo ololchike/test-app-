@@ -13,6 +13,7 @@ import {
 import { ChatContainer } from "@/components/messages/chat-container"
 import { useUnreadCount, useConversations } from "@/hooks/use-messages"
 import { toast } from "sonner"
+import { SectionError } from "@/components/error"
 
 function ClientMessagesContent() {
   const { unreadCount } = useUnreadCount()
@@ -127,8 +128,9 @@ function ClientMessagesContent() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 grid-cols-2 sm:grid-cols-3">
-        <Card>
+      <SectionError name="Message Stats">
+        <div className="grid gap-4 grid-cols-2 sm:grid-cols-3">
+          <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
               Unread Messages
@@ -172,19 +174,22 @@ function ClientMessagesContent() {
             </p>
           </CardContent>
         </Card>
-      </div>
+        </div>
+      </SectionError>
 
       {/* Chat Container */}
-      {isCreatingConversation ? (
-        <Card className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
-            <p className="mt-2 text-muted-foreground">Starting conversation...</p>
-          </div>
-        </Card>
-      ) : (
-        <ChatContainer initialConversationId={initialConversationId} />
-      )}
+      <SectionError name="Messages">
+        {isCreatingConversation ? (
+          <Card className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+              <p className="mt-2 text-muted-foreground">Starting conversation...</p>
+            </div>
+          </Card>
+        ) : (
+          <ChatContainer initialConversationId={initialConversationId} />
+        )}
+      </SectionError>
     </div>
   )
 }

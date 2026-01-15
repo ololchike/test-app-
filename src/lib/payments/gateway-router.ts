@@ -5,11 +5,13 @@
 
 export type PaymentGateway = "pesapal" | "flutterwave"
 
-export type PaymentMethod = "mpesa" | "card" | "bank_transfer"
+export type PaymentMethod = "mpesa" | "airtel_money" | "card" | "bank_transfer"
 
 interface GatewayRoutingConfig {
   // M-Pesa is always routed to Pesapal (best rates for East Africa)
   mpesa: PaymentGateway
+  // Airtel Money is also routed to Pesapal
+  airtel_money: PaymentGateway
   // Cards can be routed based on currency/region
   card: {
     default: PaymentGateway
@@ -23,6 +25,9 @@ interface GatewayRoutingConfig {
 const ROUTING_CONFIG: GatewayRoutingConfig = {
   // M-Pesa: Pesapal has better M-Pesa integration for East Africa
   mpesa: "pesapal",
+
+  // Airtel Money: Also routed through Pesapal for East Africa
+  airtel_money: "pesapal",
 
   // Cards: Flutterwave for international cards, Pesapal for local
   card: {
@@ -65,6 +70,9 @@ export function selectPaymentGateway(
     case "mpesa":
       return ROUTING_CONFIG.mpesa
 
+    case "airtel_money":
+      return ROUTING_CONFIG.airtel_money
+
     case "card":
       // Check for currency-specific routing
       const currencyGateway = ROUTING_CONFIG.card.currencies?.[normalizedCurrency]
@@ -99,7 +107,7 @@ export function getGatewayDisplayName(gateway: PaymentGateway): string {
 export function getGatewayPaymentMethods(gateway: PaymentGateway): PaymentMethod[] {
   switch (gateway) {
     case "pesapal":
-      return ["mpesa", "card", "bank_transfer"]
+      return ["mpesa", "airtel_money", "card", "bank_transfer"]
     case "flutterwave":
       return ["card", "bank_transfer"]
     default:
@@ -172,6 +180,17 @@ export function getAvailablePaymentMethods(currency: string): {
       gateway: "pesapal",
       label: "M-Pesa",
       description: "Pay with M-Pesa mobile money",
+    })
+  }
+
+  // Airtel Money is available for East African currencies
+  const airtelMoneyCurrencies = ["KES", "TZS", "UGX", "RWF"]
+  if (airtelMoneyCurrencies.includes(normalizedCurrency)) {
+    methods.push({
+      method: "airtel_money",
+      gateway: "pesapal",
+      label: "Airtel Money",
+      description: "Pay with Airtel Money mobile wallet",
     })
   }
 

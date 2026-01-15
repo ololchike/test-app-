@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { AvailabilityCalendar } from "@/components/agent/availability-calendar"
+import { SectionError } from "@/components/error"
 
 interface Tour {
   id: string
@@ -51,16 +52,17 @@ export default function AgentAvailabilityPage() {
   const selectedTour = tours.find((t) => t.id === selectedTourId)
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-          Availability Management
-        </h1>
-        <p className="text-muted-foreground mt-1 text-sm sm:text-base">
-          Manage tour dates, block unavailable periods, and set limited
-          availability
-        </p>
-      </div>
+    <SectionError name="Availability Calendar">
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+            Availability Management
+          </h1>
+          <p className="text-muted-foreground mt-1 text-sm sm:text-base">
+            Manage tour dates, block unavailable periods, and set limited
+            availability
+          </p>
+        </div>
 
       <div className="grid gap-6 grid-cols-1 lg:grid-cols-4">
         {/* Tour Selection Sidebar */}
@@ -180,6 +182,7 @@ export default function AgentAvailabilityPage() {
           )}
         </div>
       </div>
-    </div>
+      </div>
+    </SectionError>
   )
 }

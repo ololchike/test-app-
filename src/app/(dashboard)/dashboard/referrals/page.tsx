@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Gift, Loader2 } from "lucide-react"
 import { ReferralShareCard, ReferralStatsCard } from "@/components/referral"
 import { REFERRAL_CONFIG, formatCredit } from "@/lib/referral"
+import { SectionError } from "@/components/error"
 
 interface ReferralData {
   referralCode: string
@@ -83,7 +84,8 @@ export default function ReferralsPage() {
       </div>
 
       {/* How it works banner */}
-      <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent rounded-xl p-6">
+      <SectionError name="Referral Program">
+        <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent rounded-xl p-6">
         <h2 className="font-semibold mb-3">How It Works</h2>
         <div className="grid sm:grid-cols-3 gap-4">
           <div className="flex items-start gap-3">
@@ -135,7 +137,8 @@ export default function ReferralsPage() {
             recentReferrals={data.recentReferrals}
           />
         </div>
-      </div>
+        </div>
+      </SectionError>
 
       {/* Terms */}
       <div className="text-xs text-muted-foreground bg-muted/50 rounded-lg p-4">

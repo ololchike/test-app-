@@ -9,6 +9,7 @@ import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
+import { SectionError } from "@/components/error"
 
 function VerifyEmailSkeleton() {
   return (
@@ -118,7 +119,8 @@ function VerifyEmailForm() {
   // Loading state while verifying
   if (isVerifying) {
     return (
-      <div className="space-y-6">
+      <SectionError name="Email Verification">
+        <div className="space-y-6">
         <div className="space-y-2">
           <div className="flex justify-center mb-4">
             <div className="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-blue-100">
@@ -133,13 +135,15 @@ function VerifyEmailForm() {
           </p>
         </div>
       </div>
+      </SectionError>
     )
   }
 
   // Success state
   if (isSuccess) {
     return (
-      <div className="space-y-6">
+      <SectionError name="Email Verification Success">
+        <div className="space-y-6">
         <div className="space-y-2">
           <div className="flex justify-center mb-4">
             <div className="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-green-100">
@@ -168,13 +172,15 @@ function VerifyEmailForm() {
           </Link>
         </div>
       </div>
+      </SectionError>
     )
   }
 
   // Error state
   if (isError) {
     return (
-      <div className="space-y-6">
+      <SectionError name="Email Verification Error">
+        <div className="space-y-6">
         <div className="space-y-2">
           <div className="flex justify-center mb-4">
             <div className="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-red-100">
@@ -230,12 +236,14 @@ function VerifyEmailForm() {
           </Link>
         </div>
       </div>
+      </SectionError>
     )
   }
 
   // Default state - no token
   return (
-    <div className="space-y-6">
+    <SectionError name="Email Verification Instructions">
+      <div className="space-y-6">
       <div className="space-y-2">
         <div className="flex justify-center mb-4">
           <div className="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-blue-100">
@@ -300,5 +308,6 @@ function VerifyEmailForm() {
         </Link>
       </div>
     </div>
+    </SectionError>
   )
 }

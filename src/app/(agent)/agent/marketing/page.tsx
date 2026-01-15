@@ -10,6 +10,7 @@ import {
 } from "@/components/agent/marketing-tools"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Tag, Share2, QrCode, Code2 } from "lucide-react"
+import { SectionError } from "@/components/error"
 
 export const metadata: Metadata = {
   title: "Marketing Tools | SafariPlus Agent",
@@ -49,13 +50,14 @@ export default async function MarketingPage() {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://safariplus.com"
 
   return (
-    <div className="container py-6 space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Marketing Tools</h1>
-        <p className="text-muted-foreground">
-          Boost your bookings with promo codes, QR codes, and shareable links
-        </p>
-      </div>
+    <SectionError name="Marketing Tools">
+      <div className="container py-6 space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Marketing Tools</h1>
+          <p className="text-muted-foreground">
+            Boost your bookings with promo codes, QR codes, and shareable links
+          </p>
+        </div>
 
       <Tabs defaultValue="promo-codes" className="space-y-6">
         <TabsList>
@@ -93,6 +95,7 @@ export default async function MarketingPage() {
           <EmbedWidgetSection agentId={agent.id} baseUrl={baseUrl} />
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </SectionError>
   )
 }

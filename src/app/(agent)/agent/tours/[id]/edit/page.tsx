@@ -30,6 +30,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
+import { SectionError } from "@/components/error"
 
 // Dynamic import for RichTextEditor to avoid SSR issues
 const RichTextEditor = dynamic(
@@ -587,16 +588,17 @@ export default function EditTourPage({ params }: EditTourPageProps) {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild>
-            <Link href="/agent/tours">
-              <ArrowLeft className="h-5 w-5" />
-            </Link>
-          </Button>
-          <div>
+    <SectionError name="Tour Editor">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" asChild>
+              <Link href="/agent/tours">
+                <ArrowLeft className="h-5 w-5" />
+              </Link>
+            </Button>
+            <div>
             <div className="flex items-center gap-2">
               <h1 className="text-2xl font-bold tracking-tight">Edit Tour</h1>
               <Badge
@@ -1864,7 +1866,8 @@ export default function EditTourPage({ params }: EditTourPageProps) {
           </CardContent>
         </Card>
       </div>
-    </div>
+      </div>
+    </SectionError>
   )
 }
 

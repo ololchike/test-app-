@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { Badge } from "@/components/ui/badge"
+import { SectionError } from "@/components/error"
 import { format } from "date-fns"
 
 interface SiteContent {
@@ -180,7 +181,8 @@ export default function AdminSiteContentPage() {
           </div>
         </div>
 
-        <Card>
+        <SectionError name="Content Editor">
+          <Card>
           <CardContent className="pt-6 space-y-6">
             <div className="space-y-2">
               <Label htmlFor="title">Page Title</Label>
@@ -203,6 +205,7 @@ export default function AdminSiteContentPage() {
             </div>
           </CardContent>
         </Card>
+        </SectionError>
       </div>
     )
   }
@@ -217,7 +220,8 @@ export default function AdminSiteContentPage() {
         </p>
       </div>
 
-      <div className="grid gap-4">
+      <SectionError name="Site Content Pages">
+        <div className="grid gap-4">
         {PAGE_TEMPLATES.map((template) => {
           const existing = getExistingContent(template.key)
           const hasContent = !!existing
@@ -267,7 +271,8 @@ export default function AdminSiteContentPage() {
             </Card>
           )
         })}
-      </div>
+        </div>
+      </SectionError>
     </div>
   )
 }

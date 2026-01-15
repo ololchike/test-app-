@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma"
 import { defaultCollections, CollectionData } from "@/lib/data/collections"
 import { TourCard } from "@/components/tours/tour-card"
 import { Button } from "@/components/ui/button"
+import { SectionError } from "@/components/error"
 
 interface CollectionDetailPageProps {
   params: Promise<{ slug: string }>
@@ -138,85 +139,91 @@ export default async function CollectionDetailPage({ params }: CollectionDetailP
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 pt-16">
       {/* Breadcrumb */}
-      <div className="bg-muted/30 py-3 border-b border-border/30">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex items-center gap-2 text-sm">
-            <Link href="/" className="text-muted-foreground hover:text-primary transition-colors">
-              Home
-            </Link>
-            <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
-            <Link href="/collections" className="text-muted-foreground hover:text-primary transition-colors">
-              Collections
-            </Link>
-            <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
-            <span className="text-foreground font-medium">{collection.title}</span>
-          </nav>
+      <SectionError name="Collection Breadcrumb">
+        <div className="bg-muted/30 py-3 border-b border-border/30">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <nav className="flex items-center gap-2 text-sm">
+              <Link href="/" className="text-muted-foreground hover:text-primary transition-colors">
+                Home
+              </Link>
+              <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
+              <Link href="/collections" className="text-muted-foreground hover:text-primary transition-colors">
+                Collections
+              </Link>
+              <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
+              <span className="text-foreground font-medium">{collection.title}</span>
+            </nav>
+          </div>
         </div>
-      </div>
+      </SectionError>
 
       {/* Hero */}
-      <section className="relative h-64 sm:h-80 overflow-hidden">
-        <Image
-          src={collection.coverImage || "https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=1200"}
-          alt={collection.title}
-          fill
-          className="object-cover"
-          priority
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/20" />
-        <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
-          <div className="container mx-auto">
-            <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
-              {collection.title}
-            </h1>
-            {collection.description && (
-              <p className="text-white/90 max-w-2xl">
-                {collection.description}
+      <SectionError name="Collection Hero">
+        <section className="relative h-64 sm:h-80 overflow-hidden">
+          <Image
+            src={collection.coverImage || "https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=1200"}
+            alt={collection.title}
+            fill
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/20" />
+          <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
+            <div className="container mx-auto">
+              <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
+                {collection.title}
+              </h1>
+              {collection.description && (
+                <p className="text-white/90 max-w-2xl">
+                  {collection.description}
+                </p>
+              )}
+              <p className="text-white/80 mt-2">
+                {tours.length} tour{tours.length !== 1 ? "s" : ""} available
               </p>
-            )}
-            <p className="text-white/80 mt-2">
-              {tours.length} tour{tours.length !== 1 ? "s" : ""} available
-            </p>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </SectionError>
 
       {/* Tours Grid */}
-      <section className="py-8 sm:py-12">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Filters Bar (placeholder for future enhancement) */}
-          <div className="flex items-center justify-between mb-6">
-            <p className="text-muted-foreground">
-              Showing {tours.length} tour{tours.length !== 1 ? "s" : ""}
-            </p>
-            <Button variant="outline" size="sm" disabled>
-              <SlidersHorizontal className="h-4 w-4 mr-2" />
-              Filters
-            </Button>
-          </div>
-
-          {tours.length > 0 ? (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {tours.map((tour, index) => (
-                <TourCard key={tour.id} tour={tour} index={index} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-16">
-              <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-muted mb-4">
-                <Filter className="h-8 w-8 text-muted-foreground" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">No tours found</h3>
-              <p className="text-muted-foreground mb-6">
-                We don't have any tours matching this collection criteria yet.
+      <SectionError name="Collection Tours Grid">
+        <section className="py-8 sm:py-12">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Filters Bar (placeholder for future enhancement) */}
+            <div className="flex items-center justify-between mb-6">
+              <p className="text-muted-foreground">
+                Showing {tours.length} tour{tours.length !== 1 ? "s" : ""}
               </p>
-              <Button asChild>
-                <Link href="/tours">Browse All Tours</Link>
+              <Button variant="outline" size="sm" disabled>
+                <SlidersHorizontal className="h-4 w-4 mr-2" />
+                Filters
               </Button>
             </div>
-          )}
-        </div>
-      </section>
+
+            {tours.length > 0 ? (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {tours.map((tour, index) => (
+                  <TourCard key={tour.id} tour={tour} index={index} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16">
+                <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-muted mb-4">
+                  <Filter className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">No tours found</h3>
+                <p className="text-muted-foreground mb-6">
+                  We don't have any tours matching this collection criteria yet.
+                </p>
+                <Button asChild>
+                  <Link href="/tours">Browse All Tours</Link>
+                </Button>
+              </div>
+            )}
+          </div>
+        </section>
+      </SectionError>
     </div>
   )
 }

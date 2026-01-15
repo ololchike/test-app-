@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/dialog"
 import { toast } from "sonner"
 import { Skeleton } from "@/components/ui/skeleton"
+import { SectionError } from "@/components/error"
 
 interface Review {
   id: string
@@ -189,77 +190,80 @@ export default function AgentReviewsPage() {
       </div>
 
       {/* Stats Cards */}
-      {loading ? (
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
-          {[1, 2, 3].map((i) => (
-            <Card key={i}>
-              <CardHeader className="pb-2">
-                <Skeleton className="h-4 w-24" />
+      <SectionError name="Reviews Stats">
+        {loading ? (
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
+            {[1, 2, 3].map((i) => (
+              <Card key={i}>
+                <CardHeader className="pb-2">
+                  <Skeleton className="h-4 w-24" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-8 w-16" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Average Rating
+                </CardTitle>
+                <Star className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <Skeleton className="h-8 w-16" />
+                <div className="text-2xl font-bold">{stats?.averageRating.toFixed(1) || "0.0"}</div>
+                <div className="flex items-center gap-1 mt-1">
+                  <span className="text-xs text-muted-foreground">
+                    Based on {stats?.totalReviews || 0} reviews
+                  </span>
+                </div>
               </CardContent>
             </Card>
-          ))}
-        </div>
-      ) : (
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Average Rating
-              </CardTitle>
-              <Star className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats?.averageRating.toFixed(1) || "0.0"}</div>
-              <div className="flex items-center gap-1 mt-1">
-                <span className="text-xs text-muted-foreground">
-                  Based on {stats?.totalReviews || 0} reviews
-                </span>
-              </div>
-            </CardContent>
-          </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Total Reviews
-              </CardTitle>
-              <Star className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats?.totalReviews || 0}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {stats?.pendingResponseCount || 0} pending response
-              </p>
-            </CardContent>
-          </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Total Reviews
+                </CardTitle>
+                <Star className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats?.totalReviews || 0}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {stats?.pendingResponseCount || 0} pending response
+                </p>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Response Rate
-              </CardTitle>
-              <MessageSquare className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{responseRate}%</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {stats?.respondedCount || 0} of {stats?.totalReviews || 0} responded
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Response Rate
+                </CardTitle>
+                <MessageSquare className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{responseRate}%</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {stats?.respondedCount || 0} of {stats?.totalReviews || 0} responded
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+      </SectionError>
 
       {/* Filters and Search */}
-      <Card>
-        <CardHeader>
-          <CardTitle>All Reviews</CardTitle>
-          <CardDescription>View and respond to customer reviews</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <SectionError name="Reviews List">
+        <Card>
+          <CardHeader>
+            <CardTitle>All Reviews</CardTitle>
+            <CardDescription>View and respond to customer reviews</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -410,6 +414,7 @@ export default function AgentReviewsPage() {
           )}
         </CardContent>
       </Card>
+      </SectionError>
 
       {/* Response Dialog */}
       <Dialog open={!!selectedReview} onOpenChange={() => setSelectedReview(null)}>

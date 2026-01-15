@@ -18,6 +18,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
+import { SectionError } from "@/components/error"
 
 export default function ForgotPasswordPage() {
   const [isLoading, setIsLoading] = React.useState(false)
@@ -59,7 +60,8 @@ export default function ForgotPasswordPage() {
 
   if (isSuccess) {
     return (
-      <div className="space-y-6">
+      <SectionError name="Password Reset Success">
+        <div className="space-y-6">
         <div className="space-y-2">
           <div className="flex justify-center mb-4">
             <div className="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-green-100">
@@ -99,11 +101,13 @@ export default function ForgotPasswordPage() {
           </Link>
         </div>
       </div>
+      </SectionError>
     )
   }
 
   return (
-    <div className="space-y-6">
+    <SectionError name="Password Reset Form">
+      <div className="space-y-6">
       <div className="space-y-2">
         <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Forgot password?</h1>
         <p className="text-sm sm:text-base text-muted-foreground">
@@ -161,5 +165,6 @@ export default function ForgotPasswordPage() {
         </Link>
       </div>
     </div>
+    </SectionError>
   )
 }

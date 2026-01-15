@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { SectionError } from "@/components/error"
 import {
   Table,
   TableBody,
@@ -214,56 +215,59 @@ export default function AdminAgentsPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-5">
-        <Card
-          className={`cursor-pointer transition-all hover:shadow-lg ${
-            statusFilter === "all" ? "ring-2 ring-primary" : ""
-          }`}
-          onClick={() => {
-            setStatusFilter("all")
-            setPage(1)
-          }}
-        >
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">All Agents</p>
-                <p className="text-2xl font-bold mt-1">{agents.length}</p>
-              </div>
-              <Shield className="h-8 w-8 text-blue-500" />
-            </div>
-          </CardContent>
-        </Card>
-
-        {Object.entries(statusConfig).map(([status, config]) => {
-          const count = statusCounts[status] || 0
-
-          return (
-            <Card
-              key={status}
-              className={`cursor-pointer transition-all hover:shadow-lg ${
-                statusFilter === status ? "ring-2 ring-primary" : ""
-              }`}
-              onClick={() => {
-                setStatusFilter(status)
-                setPage(1)
-              }}
-            >
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">{config.label}</p>
-                    <p className="text-2xl font-bold mt-1">{count}</p>
-                  </div>
-                  <div className={`h-3 w-3 rounded-full ${config.color}`}></div>
+      <SectionError name="Agent Stats">
+        <div className="grid gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-5">
+          <Card
+            className={`cursor-pointer transition-all hover:shadow-lg ${
+              statusFilter === "all" ? "ring-2 ring-primary" : ""
+            }`}
+            onClick={() => {
+              setStatusFilter("all")
+              setPage(1)
+            }}
+          >
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">All Agents</p>
+                  <p className="text-2xl font-bold mt-1">{agents.length}</p>
                 </div>
-              </CardContent>
-            </Card>
-          )
-        })}
-      </div>
+                <Shield className="h-8 w-8 text-blue-500" />
+              </div>
+            </CardContent>
+          </Card>
 
-      <Card>
+          {Object.entries(statusConfig).map(([status, config]) => {
+            const count = statusCounts[status] || 0
+
+            return (
+              <Card
+                key={status}
+                className={`cursor-pointer transition-all hover:shadow-lg ${
+                  statusFilter === status ? "ring-2 ring-primary" : ""
+                }`}
+                onClick={() => {
+                  setStatusFilter(status)
+                  setPage(1)
+                }}
+              >
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">{config.label}</p>
+                      <p className="text-2xl font-bold mt-1">{count}</p>
+                    </div>
+                    <div className={`h-3 w-3 rounded-full ${config.color}`}></div>
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          })}
+        </div>
+      </SectionError>
+
+      <SectionError name="Agents Table">
+        <Card>
         <CardHeader>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <CardTitle>Agents</CardTitle>
@@ -486,6 +490,7 @@ export default function AdminAgentsPage() {
           )}
         </CardContent>
       </Card>
+      </SectionError>
 
       <ConfirmationDialog
         isOpen={dialogOpen}

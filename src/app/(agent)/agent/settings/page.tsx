@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { Separator } from "@/components/ui/separator"
 import { toast } from "sonner"
+import { SectionError } from "@/components/error"
 
 interface ProfileData {
   user: {
@@ -287,14 +288,15 @@ export default function AgentSettingsPage() {
         </TabsList>
 
         <TabsContent value="profile">
-          <Card>
-            <CardHeader>
-              <CardTitle>Profile Settings</CardTitle>
-              <CardDescription>
-                Manage your personal information
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
+          <SectionError name="Profile Settings">
+            <Card>
+              <CardHeader>
+                <CardTitle>Profile Settings</CardTitle>
+                <CardDescription>
+                  Manage your personal information
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="firstName">First Name</Label>
@@ -353,10 +355,12 @@ export default function AgentSettingsPage() {
               </div>
             </CardContent>
           </Card>
+          </SectionError>
         </TabsContent>
 
         <TabsContent value="business">
-          <div className="space-y-6">
+          <SectionError name="Business Settings">
+            <div className="space-y-6">
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -546,10 +550,12 @@ export default function AgentSettingsPage() {
               </CardContent>
             </Card>
           </div>
+          </SectionError>
         </TabsContent>
 
         <TabsContent value="notifications">
-          <Card>
+          <SectionError name="Notification Settings">
+            <Card>
             <CardHeader>
               <CardTitle>Email Notifications</CardTitle>
               <CardDescription>
@@ -695,10 +701,12 @@ export default function AgentSettingsPage() {
               </div>
             </CardContent>
           </Card>
+          </SectionError>
         </TabsContent>
 
         <TabsContent value="security">
-          <Card>
+          <SectionError name="Security Settings">
+            <Card>
             <CardHeader>
               <CardTitle>Change Password</CardTitle>
               <CardDescription>
@@ -842,6 +850,7 @@ export default function AgentSettingsPage() {
               </div>
             </CardContent>
           </Card>
+          </SectionError>
         </TabsContent>
       </Tabs>
     </div>

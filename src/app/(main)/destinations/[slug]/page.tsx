@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
+import { SectionError } from "@/components/error"
 
 interface Tour {
   id: string
@@ -92,6 +93,7 @@ export default function DestinationPage() {
   return (
     <div className="pt-20">
       {/* Hero Section */}
+      <SectionError name="Destination Hero">
       <div className="relative h-[250px] sm:h-[300px] md:h-[400px] bg-muted">
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/30" />
         <div className="absolute inset-0 flex items-center">
@@ -111,8 +113,10 @@ export default function DestinationPage() {
           </div>
         </div>
       </div>
+      </SectionError>
 
       {/* Tours Section */}
+      <SectionError name="Destination Tours">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <div className="flex items-center justify-between mb-8">
           <div>
@@ -235,6 +239,7 @@ export default function DestinationPage() {
           </div>
         )}
       </div>
+      </SectionError>
     </div>
   )
 }

@@ -297,7 +297,7 @@ export function TourCustomizer({ tour, children }: TourCustomizerProps) {
       addons: bookingState.selectedAddons.join(","),
     })
 
-    router.push(`/booking/checkout?${params.toString()}`)
+    router.push(`/checkout?${params.toString()}`)
   }, [bookingState, tour.id, router])
 
   return (

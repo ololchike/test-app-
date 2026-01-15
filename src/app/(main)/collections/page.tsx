@@ -3,6 +3,7 @@ import { Compass } from "lucide-react"
 import { prisma } from "@/lib/prisma"
 import { defaultCollections, CollectionData } from "@/lib/data/collections"
 import { CollectionCard } from "@/components/collections"
+import { SectionError } from "@/components/error"
 
 export const metadata: Metadata = {
   title: "Safari Collections | SafariPlus",
@@ -72,62 +73,68 @@ export default async function CollectionsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
       {/* Hero Section */}
-      <section className="pt-24 pb-12 sm:pt-32 sm:pb-16 bg-gradient-to-br from-primary/10 via-background to-background">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl">
-            <div className="flex items-center gap-2 text-primary mb-4">
-              <Compass className="h-6 w-6" />
-              <span className="font-semibold uppercase tracking-wider">
-                Curated Collections
-              </span>
-            </div>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
-              Find Your Perfect Safari Adventure
-            </h1>
-            <p className="text-lg text-muted-foreground">
-              Browse our hand-picked collections of tours designed for every type of traveler.
-              From luxury escapes to budget-friendly options, we have the perfect safari waiting for you.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Collections */}
-      {featuredCollections.length > 0 && (
-        <section className="py-12 sm:py-16">
+      <SectionError name="Collections Hero">
+        <section className="pt-24 pb-12 sm:pt-32 sm:pb-16 bg-gradient-to-br from-primary/10 via-background to-background">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-2xl font-bold mb-8">Featured Collections</h2>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {featuredCollections.map((collection, index) => (
-                <CollectionCard
-                  key={collection.id}
-                  collection={collection}
-                  index={index}
-                  variant="featured"
-                />
-              ))}
+            <div className="max-w-3xl">
+              <div className="flex items-center gap-2 text-primary mb-4">
+                <Compass className="h-6 w-6" />
+                <span className="font-semibold uppercase tracking-wider">
+                  Curated Collections
+                </span>
+              </div>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
+                Find Your Perfect Safari Adventure
+              </h1>
+              <p className="text-lg text-muted-foreground">
+                Browse our hand-picked collections of tours designed for every type of traveler.
+                From luxury escapes to budget-friendly options, we have the perfect safari waiting for you.
+              </p>
             </div>
           </div>
         </section>
+      </SectionError>
+
+      {/* Featured Collections */}
+      {featuredCollections.length > 0 && (
+        <SectionError name="Featured Collections">
+          <section className="py-12 sm:py-16">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+              <h2 className="text-2xl font-bold mb-8">Featured Collections</h2>
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {featuredCollections.map((collection, index) => (
+                  <CollectionCard
+                    key={collection.id}
+                    collection={collection}
+                    index={index}
+                    variant="featured"
+                  />
+                ))}
+              </div>
+            </div>
+          </section>
+        </SectionError>
       )}
 
       {/* All Collections */}
       {otherCollections.length > 0 && (
-        <section className="py-12 sm:py-16 bg-muted/30">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-2xl font-bold mb-8">More Collections</h2>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {otherCollections.map((collection, index) => (
-                <CollectionCard
-                  key={collection.id}
-                  collection={collection}
-                  index={index}
-                  variant="default"
-                />
-              ))}
+        <SectionError name="More Collections">
+          <section className="py-12 sm:py-16 bg-muted/30">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+              <h2 className="text-2xl font-bold mb-8">More Collections</h2>
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {otherCollections.map((collection, index) => (
+                  <CollectionCard
+                    key={collection.id}
+                    collection={collection}
+                    index={index}
+                    variant="default"
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        </SectionError>
       )}
     </div>
   )

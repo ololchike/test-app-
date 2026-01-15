@@ -37,6 +37,7 @@ import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
+import { SectionError } from "@/components/error"
 import { toast } from "sonner"
 
 interface Category {
@@ -397,11 +398,12 @@ export default function AdminNewBlogPage() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:gap-6 lg:grid-cols-3">
-        {/* Main Content */}
-        <div className="lg:col-span-2 space-y-4 md:space-y-6">
-          {/* Basic Info */}
-          <Card>
+      <SectionError name="Blog Post Form">
+        <div className="grid gap-4 md:gap-6 lg:grid-cols-3">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-4 md:space-y-6">
+            {/* Basic Info */}
+            <Card>
             <CardHeader className="p-4 md:p-6">
               <CardTitle className="text-lg md:text-xl">Post Details</CardTitle>
               <CardDescription className="text-sm">Basic information about the blog post</CardDescription>
@@ -785,7 +787,8 @@ export default function AdminNewBlogPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
+        </div>
+      </SectionError>
     </div>
   )
 }

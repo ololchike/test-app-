@@ -52,6 +52,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { toast } from "sonner"
 import { format } from "date-fns"
+import { SectionError } from "@/components/error"
 
 interface BlogPost {
   id: string
@@ -184,44 +185,46 @@ export default function AgentBlogPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-3 md:gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Posts</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{posts.length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Published</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{publishedCount}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Pending</CardTitle>
-            <Clock className="h-4 w-4 text-amber-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{pendingCount}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Rejected</CardTitle>
-            <XCircle className="h-4 w-4 text-destructive" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{rejectedCount}</div>
-          </CardContent>
-        </Card>
-      </div>
+      <SectionError name="Blog Stats">
+        <div className="grid grid-cols-2 gap-3 md:gap-4 md:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Total Posts</CardTitle>
+              <FileText className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{posts.length}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Published</CardTitle>
+              <CheckCircle className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{publishedCount}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Pending</CardTitle>
+              <Clock className="h-4 w-4 text-amber-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{pendingCount}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Rejected</CardTitle>
+              <XCircle className="h-4 w-4 text-destructive" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{rejectedCount}</div>
+            </CardContent>
+          </Card>
+        </div>
+      </SectionError>
 
       {/* Info Banner */}
       <Card className="border-blue-500/50 bg-blue-50 dark:bg-blue-950/20">
@@ -271,28 +274,29 @@ export default function AgentBlogPage() {
       </Card>
 
       {/* Table */}
-      <Card>
-        <CardContent className="pt-6">
-          {isLoading ? (
-            <div className="text-center py-8 text-muted-foreground">
-              Loading posts...
-            </div>
-          ) : posts.length === 0 ? (
-            <div className="text-center py-8">
-              <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="font-semibold mb-2">No blog posts yet</h3>
-              <p className="text-muted-foreground mb-4">
-                Share your expertise and travel stories with our community
-              </p>
-              <Button asChild>
-                <Link href="/agent/blog/new">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Write Your First Post
-                </Link>
-              </Button>
-            </div>
-          ) : (
-            <Table>
+      <SectionError name="Blog Posts Table">
+        <Card>
+          <CardContent className="pt-6">
+            {isLoading ? (
+              <div className="text-center py-8 text-muted-foreground">
+                Loading posts...
+              </div>
+            ) : posts.length === 0 ? (
+              <div className="text-center py-8">
+                <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="font-semibold mb-2">No blog posts yet</h3>
+                <p className="text-muted-foreground mb-4">
+                  Share your expertise and travel stories with our community
+                </p>
+                <Button asChild>
+                  <Link href="/agent/blog/new">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Write Your First Post
+                  </Link>
+                </Button>
+              </div>
+            ) : (
+              <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Post</TableHead>
@@ -396,6 +400,7 @@ export default function AgentBlogPage() {
           )}
         </CardContent>
       </Card>
+      </SectionError>
 
       {/* Delete Confirmation */}
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>

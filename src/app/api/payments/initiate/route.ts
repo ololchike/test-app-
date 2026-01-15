@@ -19,8 +19,9 @@ const log = createLogger("Payment Initiate")
 // Validation schema
 const initiatePaymentSchema = z.object({
   bookingId: z.string().cuid("Invalid booking ID format"),
-  paymentMethod: z.enum(["MPESA", "CARD", "BANK_TRANSFER", "PAYPAL"]).optional(),
-  phoneNumber: z.string().optional(), // Required for M-Pesa
+  paymentMethod: z.enum(["MPESA", "AIRTEL_MONEY", "CARD", "BANK_TRANSFER", "PAYPAL"]).optional(),
+  paymentType: z.enum(["FULL", "DEPOSIT", "PAY_LATER"]).optional(), // Payment type from checkout
+  phoneNumber: z.string().optional(), // Required for M-Pesa and Airtel Money
   gateway: z.enum(["pesapal", "flutterwave"]).optional(), // Allow explicit gateway selection
   isBalancePayment: z.boolean().optional(), // True when paying remaining balance for deposit bookings
 })
@@ -266,7 +267,7 @@ async function initiatePesapalPayment(
       bookingId: booking.id,
       amount: amount,
       currency: booking.currency,
-      method: paymentMethod as "MPESA" | "CARD" | "BANK_TRANSFER" | "PAYPAL",
+      method: paymentMethod as "MPESA" | "AIRTEL_MONEY" | "CARD" | "BANK_TRANSFER" | "PAYPAL",
       pesapalMerchantRef: merchantReference,
       gateway: "PESAPAL",
       status: "PENDING",
@@ -413,7 +414,7 @@ async function initiateFlutterwavePayment(
       bookingId: booking.id,
       amount: amount,
       currency: booking.currency,
-      method: paymentMethod as "MPESA" | "CARD" | "BANK_TRANSFER" | "PAYPAL",
+      method: paymentMethod as "MPESA" | "AIRTEL_MONEY" | "CARD" | "BANK_TRANSFER" | "PAYPAL",
       flutterwaveRef: txRef,
       gateway: "FLUTTERWAVE",
       status: "PENDING",

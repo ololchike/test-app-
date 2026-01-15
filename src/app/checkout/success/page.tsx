@@ -21,6 +21,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import Confetti from "react-confetti"
 import { useWindowSize } from "usehooks-ts"
+import { SectionError } from "@/components/error"
 
 type PaymentStatus = "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED"
 
@@ -236,6 +237,7 @@ function PaymentSuccessContent() {
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
         </div>
 
+        <SectionError name="Payment Success">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -393,6 +395,7 @@ function PaymentSuccessContent() {
             </CardContent>
           </Card>
         </motion.div>
+        </SectionError>
       </div>
     )
   }

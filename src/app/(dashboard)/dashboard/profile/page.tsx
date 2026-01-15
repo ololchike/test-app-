@@ -29,6 +29,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
 import { format } from "date-fns"
+import { SectionError } from "@/components/error"
 
 interface ProfileData {
   id: string
@@ -263,10 +264,11 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Profile Card */}
-        <div className="lg:col-span-1 space-y-6">
-          <Card>
+      <SectionError name="Profile Information">
+        <div className="grid gap-6 lg:grid-cols-3">
+          {/* Profile Card */}
+          <div className="lg:col-span-1 space-y-6">
+            <Card>
             <CardContent className="pt-6 flex flex-col items-center">
               <div className="relative">
                 <Avatar className="h-24 w-24">
@@ -543,7 +545,8 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
         </div>
-      </div>
+        </div>
+      </SectionError>
     </div>
   )
 }

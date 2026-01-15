@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
+import { SectionError } from "@/components/error"
 
 interface UserPreferences {
   currency: string
@@ -138,8 +139,9 @@ export default function SettingsPage() {
       </div>
 
       {/* Appearance */}
-      <Card>
-        <CardHeader>
+      <SectionError name="Appearance Settings">
+        <Card>
+          <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
             <Sun className="h-5 w-5" />
             Appearance
@@ -186,9 +188,11 @@ export default function SettingsPage() {
           </div>
         </CardContent>
       </Card>
+      </SectionError>
 
       {/* Regional Settings */}
-      <Card>
+      <SectionError name="Regional Settings">
+        <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
             <Globe className="h-5 w-5" />
@@ -252,9 +256,11 @@ export default function SettingsPage() {
           </div>
         </CardContent>
       </Card>
+      </SectionError>
 
       {/* Notification Settings */}
-      <Card>
+      <SectionError name="Notification Settings">
+        <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
             <Bell className="h-5 w-5" />
@@ -336,9 +342,11 @@ export default function SettingsPage() {
           </div>
         </CardContent>
       </Card>
+      </SectionError>
 
       {/* Privacy & Security */}
-      <Card>
+      <SectionError name="Privacy & Security">
+        <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
             <Shield className="h-5 w-5" />
@@ -390,6 +398,7 @@ export default function SettingsPage() {
           </div>
         </CardContent>
       </Card>
+      </SectionError>
 
       {/* Save Button */}
       <div className="flex justify-end">

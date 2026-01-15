@@ -14,6 +14,7 @@ import {
   Plus,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { SectionError } from "@/components/error"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -324,29 +325,30 @@ export default function AgentNewBlogPage() {
   }
 
   return (
-    <div className="p-4 md:p-6 space-y-4 md:space-y-6 max-w-5xl mx-auto">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" asChild className="shrink-0">
-            <Link href="/agent/blog">
-              <ArrowLeft className="h-5 w-5" />
-            </Link>
-          </Button>
-          <div className="min-w-0">
-            <h1 className="text-xl md:text-2xl font-bold">Write a Blog Post</h1>
-            <p className="text-sm text-muted-foreground hidden sm:block">Share your travel expertise</p>
+    <SectionError name="Blog Post Editor">
+      <div className="p-4 md:p-6 space-y-4 md:space-y-6 max-w-5xl mx-auto">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" asChild className="shrink-0">
+              <Link href="/agent/blog">
+                <ArrowLeft className="h-5 w-5" />
+              </Link>
+            </Button>
+            <div className="min-w-0">
+              <h1 className="text-xl md:text-2xl font-bold">Write a Blog Post</h1>
+              <p className="text-sm text-muted-foreground hidden sm:block">Share your travel expertise</p>
+            </div>
           </div>
+          <Button onClick={handleSubmit} disabled={isSubmitting} className="w-full sm:w-auto">
+            {isSubmitting ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Send className="h-4 w-4 mr-2" />
+            )}
+            Submit for Approval
+          </Button>
         </div>
-        <Button onClick={handleSubmit} disabled={isSubmitting} className="w-full sm:w-auto">
-          {isSubmitting ? (
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          ) : (
-            <Send className="h-4 w-4 mr-2" />
-          )}
-          Submit for Approval
-        </Button>
-      </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Main Content */}
@@ -653,6 +655,7 @@ export default function AgentNewBlogPage() {
           </Card>
         </div>
       </div>
-    </div>
+      </div>
+    </SectionError>
   )
 }

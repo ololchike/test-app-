@@ -53,6 +53,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
+import { SectionError } from "@/components/error"
 
 interface Booking {
   id: string
@@ -274,57 +275,60 @@ export default function AgentBookingsPage() {
       </motion.div>
 
       {/* Stats Summary */}
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-        {statsConfig.map((stat, index) => {
-          const Icon = stat.icon
-          const value = stat.key === "totalRevenue"
-            ? `$${stats[stat.key as keyof typeof stats].toLocaleString()}`
-            : stats[stat.key as keyof typeof stats]
-          return (
-            <motion.div
-              key={stat.key}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <Card className="border-border/50 hover:border-primary/30 hover:shadow-premium transition-all duration-300">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    {stat.title}
-                  </CardTitle>
-                  <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center bg-gradient-to-br", stat.color)}>
-                    <Icon className="h-5 w-5 text-white" />
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className={cn(
-                    "text-2xl font-bold",
-                    stat.key === "pendingPayments" && stats.pendingPayments > 0 && "text-yellow-600"
-                  )}>
-                    {value}
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          )
-        })}
-      </div>
+      <SectionError name="Bookings Stats">
+        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+          {statsConfig.map((stat, index) => {
+            const Icon = stat.icon
+            const value = stat.key === "totalRevenue"
+              ? `$${stats[stat.key as keyof typeof stats].toLocaleString()}`
+              : stats[stat.key as keyof typeof stats]
+            return (
+              <motion.div
+                key={stat.key}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Card className="border-border/50 hover:border-primary/30 hover:shadow-premium transition-all duration-300">
+                  <CardHeader className="flex flex-row items-center justify-between pb-2">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      {stat.title}
+                    </CardTitle>
+                    <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center bg-gradient-to-br", stat.color)}>
+                      <Icon className="h-5 w-5 text-white" />
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className={cn(
+                      "text-2xl font-bold",
+                      stat.key === "pendingPayments" && stats.pendingPayments > 0 && "text-yellow-600"
+                    )}>
+                      {value}
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )
+          })}
+        </div>
+      </SectionError>
 
       {/* Bookings Table */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-      >
-        <Card className="border-border/50 hover:shadow-premium transition-all duration-300">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-primary" />
-              All Bookings
-            </CardTitle>
-            <CardDescription>Manage and track your tour bookings</CardDescription>
-          </CardHeader>
-          <CardContent>
+      <SectionError name="Bookings Table">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+        >
+          <Card className="border-border/50 hover:shadow-premium transition-all duration-300">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+                All Bookings
+              </CardTitle>
+              <CardDescription>Manage and track your tour bookings</CardDescription>
+            </CardHeader>
+            <CardContent>
             <div className="flex flex-col gap-4 mb-6">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -497,6 +501,7 @@ export default function AgentBookingsPage() {
           </CardContent>
         </Card>
       </motion.div>
+      </SectionError>
     </div>
   )
 }

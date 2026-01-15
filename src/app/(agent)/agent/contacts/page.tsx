@@ -19,6 +19,7 @@ import { toast } from "sonner"
 import { useSession } from "next-auth/react"
 
 import { Badge } from "@/components/ui/badge"
+import { SectionError } from "@/components/error"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -285,14 +286,15 @@ export default function AgentContactsPage() {
   })
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-bold">Assigned Inquiries</h1>
-        <p className="text-muted-foreground mt-2 text-sm sm:text-base">
-          Manage customer inquiries forwarded to you by the admin team
-        </p>
-      </div>
+    <SectionError name="Contact Inquiries">
+      <div className="space-y-6">
+        {/* Header */}
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold">Assigned Inquiries</h1>
+          <p className="text-muted-foreground mt-2 text-sm sm:text-base">
+            Manage customer inquiries forwarded to you by the admin team
+          </p>
+        </div>
 
       {/* Stats Cards */}
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
@@ -619,6 +621,7 @@ export default function AgentContactsPage() {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </SectionError>
   )
 }

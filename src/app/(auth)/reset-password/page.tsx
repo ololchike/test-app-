@@ -22,6 +22,7 @@ import {
   FormDescription,
 } from "@/components/ui/form"
 import { Skeleton } from "@/components/ui/skeleton"
+import { SectionError } from "@/components/error"
 
 function ResetPasswordSkeleton() {
   return (
@@ -111,7 +112,8 @@ function ResetPasswordForm() {
   // If no token, show error state
   if (!token) {
     return (
-      <div className="space-y-6">
+      <SectionError name="Reset Password Error">
+        <div className="space-y-6">
         <div className="space-y-2">
           <div className="flex justify-center mb-4">
             <div className="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-red-100">
@@ -140,13 +142,15 @@ function ResetPasswordForm() {
           </Link>
         </div>
       </div>
+      </SectionError>
     )
   }
 
   // Success state
   if (isSuccess) {
     return (
-      <div className="space-y-6">
+      <SectionError name="Reset Password Success">
+        <div className="space-y-6">
         <div className="space-y-2">
           <div className="flex justify-center mb-4">
             <div className="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-green-100">
@@ -173,12 +177,14 @@ function ResetPasswordForm() {
           </Link>
         </div>
       </div>
+      </SectionError>
     )
   }
 
   // Reset password form
   return (
-    <div className="space-y-6">
+    <SectionError name="Reset Password Form">
+      <div className="space-y-6">
       <div className="space-y-2">
         <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Reset your password</h1>
         <p className="text-sm sm:text-base text-muted-foreground">
@@ -296,5 +302,6 @@ function ResetPasswordForm() {
         </Link>
       </div>
     </div>
+    </SectionError>
   )
 }

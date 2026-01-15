@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useWishlist } from "@/hooks/use-wishlist"
+import { SectionError } from "@/components/error"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -92,8 +93,9 @@ export default function WishlistPage() {
         </div>
       </div>
 
-      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-        {items.map((item) => (
+      <SectionError name="Wishlist Items">
+        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          {items.map((item) => (
           <Card key={item.id} className="overflow-hidden group">
             <div className="relative">
               <Link href={`/tours/${item.tour.slug}`}>
@@ -191,7 +193,8 @@ export default function WishlistPage() {
             </CardContent>
           </Card>
         ))}
-      </div>
+        </div>
+      </SectionError>
 
       {/* Pagination */}
       {meta.totalPages > 1 && (

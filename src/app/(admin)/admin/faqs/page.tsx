@@ -49,6 +49,7 @@ import {
 } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { SectionError } from "@/components/error"
 import { toast } from "sonner"
 
 interface FAQ {
@@ -238,8 +239,9 @@ export default function AdminFAQsPage() {
         </Button>
       </div>
 
-      {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <SectionError name="FAQ Management">
+        {/* Stats */}
+        <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total FAQs</CardTitle>
@@ -370,6 +372,7 @@ export default function AdminFAQsPage() {
           ))}
         </div>
       )}
+      </SectionError>
 
       {/* Add FAQ Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>

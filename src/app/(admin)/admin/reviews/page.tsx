@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { SectionError } from "@/components/error"
 import {
   Select,
   SelectContent,
@@ -140,100 +141,103 @@ export default function AdminReviewsPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
-        <Card
-          className={`cursor-pointer transition-all hover:shadow-lg ${
-            approvalFilter === "all" ? "ring-2 ring-primary" : ""
-          }`}
-          onClick={() => {
-            setApprovalFilter("all")
-            setPage(1)
-          }}
-        >
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">All Reviews</p>
-                <p className="text-2xl font-bold mt-1">
-                  {(approvalCounts.approved || 0) + (approvalCounts.pending || 0)}
-                </p>
-              </div>
-              <Star className="h-8 w-8 text-amber-500" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card
-          className={`cursor-pointer transition-all hover:shadow-lg ${
-            approvalFilter === "false" ? "ring-2 ring-primary" : ""
-          }`}
-          onClick={() => {
-            setApprovalFilter("false")
-            setPage(1)
-          }}
-        >
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Pending</p>
-                <p className="text-2xl font-bold mt-1">
-                  {approvalCounts.pending || 0}
-                </p>
-              </div>
-              <div className="h-3 w-3 rounded-full bg-yellow-500"></div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card
-          className={`cursor-pointer transition-all hover:shadow-lg ${
-            approvalFilter === "true" ? "ring-2 ring-primary" : ""
-          }`}
-          onClick={() => {
-            setApprovalFilter("true")
-            setPage(1)
-          }}
-        >
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Approved</p>
-                <p className="text-2xl font-bold mt-1">
-                  {approvalCounts.approved || 0}
-                </p>
-              </div>
-              <div className="h-3 w-3 rounded-full bg-green-500"></div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {[5, 4, 3].map((rating) => (
+      <SectionError name="Review Stats">
+        <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
           <Card
-            key={rating}
             className={`cursor-pointer transition-all hover:shadow-lg ${
-              ratingFilter === rating.toString() ? "ring-2 ring-primary" : ""
+              approvalFilter === "all" ? "ring-2 ring-primary" : ""
             }`}
             onClick={() => {
-              setRatingFilter(rating.toString())
+              setApprovalFilter("all")
               setPage(1)
             }}
           >
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">{rating} Stars</p>
+                  <p className="text-sm text-muted-foreground">All Reviews</p>
                   <p className="text-2xl font-bold mt-1">
-                    {ratingCounts[rating] || 0}
+                    {(approvalCounts.approved || 0) + (approvalCounts.pending || 0)}
                   </p>
                 </div>
-                <Star className="h-6 w-6 text-amber-500 fill-amber-500" />
+                <Star className="h-8 w-8 text-amber-500" />
               </div>
             </CardContent>
           </Card>
-        ))}
-      </div>
 
-      <Card>
+          <Card
+            className={`cursor-pointer transition-all hover:shadow-lg ${
+              approvalFilter === "false" ? "ring-2 ring-primary" : ""
+            }`}
+            onClick={() => {
+              setApprovalFilter("false")
+              setPage(1)
+            }}
+          >
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Pending</p>
+                  <p className="text-2xl font-bold mt-1">
+                    {approvalCounts.pending || 0}
+                  </p>
+                </div>
+                <div className="h-3 w-3 rounded-full bg-yellow-500"></div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card
+            className={`cursor-pointer transition-all hover:shadow-lg ${
+              approvalFilter === "true" ? "ring-2 ring-primary" : ""
+            }`}
+            onClick={() => {
+              setApprovalFilter("true")
+              setPage(1)
+            }}
+          >
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Approved</p>
+                  <p className="text-2xl font-bold mt-1">
+                    {approvalCounts.approved || 0}
+                  </p>
+                </div>
+                <div className="h-3 w-3 rounded-full bg-green-500"></div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {[5, 4, 3].map((rating) => (
+            <Card
+              key={rating}
+              className={`cursor-pointer transition-all hover:shadow-lg ${
+                ratingFilter === rating.toString() ? "ring-2 ring-primary" : ""
+              }`}
+              onClick={() => {
+                setRatingFilter(rating.toString())
+                setPage(1)
+              }}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">{rating} Stars</p>
+                    <p className="text-2xl font-bold mt-1">
+                      {ratingCounts[rating] || 0}
+                    </p>
+                  </div>
+                  <Star className="h-6 w-6 text-amber-500 fill-amber-500" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </SectionError>
+
+      <SectionError name="Reviews Table">
+        <Card>
         <CardHeader>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <CardTitle>Reviews</CardTitle>
@@ -416,6 +420,7 @@ export default function AdminReviewsPage() {
           )}
         </CardContent>
       </Card>
+      </SectionError>
 
       <ConfirmationDialog
         isOpen={dialogOpen}

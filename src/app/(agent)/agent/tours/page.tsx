@@ -31,6 +31,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Skeleton } from "@/components/ui/skeleton"
+import { SectionError } from "@/components/error"
 
 interface Tour {
   id: string
@@ -152,60 +153,62 @@ export default function AgentToursPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Tours</p>
-                <p className="text-2xl font-bold">{stats.total}</p>
+      <SectionError name="Tours Stats">
+        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Tours</p>
+                  <p className="text-2xl font-bold">{stats.total}</p>
+                </div>
+                <div className="rounded-full bg-primary/10 p-3">
+                  <MapPin className="h-5 w-5 text-primary" />
+                </div>
               </div>
-              <div className="rounded-full bg-primary/10 p-3">
-                <MapPin className="h-5 w-5 text-primary" />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Active</p>
+                  <p className="text-2xl font-bold">{stats.active}</p>
+                </div>
+                <div className="rounded-full bg-green-500/10 p-3">
+                  <TrendingUp className="h-5 w-5 text-green-500" />
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Active</p>
-                <p className="text-2xl font-bold">{stats.active}</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Views</p>
+                  <p className="text-2xl font-bold">{stats.totalViews}</p>
+                </div>
+                <div className="rounded-full bg-blue-500/10 p-3">
+                  <Eye className="h-5 w-5 text-blue-500" />
+                </div>
               </div>
-              <div className="rounded-full bg-green-500/10 p-3">
-                <TrendingUp className="h-5 w-5 text-green-500" />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Bookings</p>
+                  <p className="text-2xl font-bold">{stats.totalBookings}</p>
+                </div>
+                <div className="rounded-full bg-amber-500/10 p-3">
+                  <DollarSign className="h-5 w-5 text-amber-500" />
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Views</p>
-                <p className="text-2xl font-bold">{stats.totalViews}</p>
-              </div>
-              <div className="rounded-full bg-blue-500/10 p-3">
-                <Eye className="h-5 w-5 text-blue-500" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Bookings</p>
-                <p className="text-2xl font-bold">{stats.totalBookings}</p>
-              </div>
-              <div className="rounded-full bg-amber-500/10 p-3">
-                <DollarSign className="h-5 w-5 text-amber-500" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
+        </div>
+      </SectionError>
 
       {/* Filters */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
@@ -228,35 +231,37 @@ export default function AgentToursPage() {
       </div>
 
       {/* Tours Grid */}
-      {filteredTours.length === 0 ? (
-        <Card className="py-12">
-          <CardContent className="flex flex-col items-center justify-center text-center">
-            <div className="rounded-full bg-muted p-4 mb-4">
-              <MapPin className="h-8 w-8 text-muted-foreground" />
-            </div>
-            <h3 className="text-lg font-semibold mb-2">No tours found</h3>
-            <p className="text-muted-foreground mb-4 max-w-sm">
-              {search || statusFilter !== "all"
-                ? "Try adjusting your search or filters"
-                : "Get started by creating your first tour listing"}
-            </p>
-            {!search && statusFilter === "all" && (
-              <Button asChild>
-                <Link href="/agent/tours/new">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Your First Tour
-                </Link>
-              </Button>
-            )}
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredTours.map((tour) => (
-            <TourCard key={tour.id} tour={tour} />
-          ))}
-        </div>
-      )}
+      <SectionError name="Tours List">
+        {filteredTours.length === 0 ? (
+          <Card className="py-12">
+            <CardContent className="flex flex-col items-center justify-center text-center">
+              <div className="rounded-full bg-muted p-4 mb-4">
+                <MapPin className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">No tours found</h3>
+              <p className="text-muted-foreground mb-4 max-w-sm">
+                {search || statusFilter !== "all"
+                  ? "Try adjusting your search or filters"
+                  : "Get started by creating your first tour listing"}
+              </p>
+              {!search && statusFilter === "all" && (
+                <Button asChild>
+                  <Link href="/agent/tours/new">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create Your First Tour
+                  </Link>
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+            {filteredTours.map((tour) => (
+              <TourCard key={tour.id} tour={tour} />
+            ))}
+          </div>
+        )}
+      </SectionError>
     </div>
   )
 }

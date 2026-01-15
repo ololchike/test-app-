@@ -4,505 +4,621 @@ import {
   Text,
   View,
   StyleSheet,
-  Font,
   Image,
   Svg,
   Path,
   Circle,
   G,
   Rect,
+  Line,
+  Defs,
+  LinearGradient,
+  Stop,
 } from "@react-pdf/renderer"
 import { format } from "date-fns"
 
-// Brand Colors - Matching SafariPlus UI Theme
+// ============================================
+// PREMIUM EXECUTIVE COLOR PALETTE
+// ============================================
 const colors = {
-  // Primary brand color - Sunset Orange
-  primary: "#E07B39",
-  primaryDark: "#C56A2E",
-  primaryLight: "#F5923F",
-  primaryBg: "#FEF7F3",
-  primaryBgAlt: "#FDEEE5",
+  // Primary - Deep Navy (Executive)
+  navy: "#0A1628",
+  navyLight: "#1A2942",
+  navyDark: "#050D18",
 
-  // Secondary - Forest Green
-  secondary: "#1B4D3E",
-  secondaryDark: "#0F2E25",
-  secondaryLight: "#2D7A5F",
-  secondaryBg: "#F0F7F5",
+  // Accent - Luxury Gold
+  gold: "#B8860B",
+  goldLight: "#D4A84B",
+  goldMuted: "#C9A227",
+  goldPale: "#F5ECD7",
 
-  // Accent - Safari Gold
-  gold: "#C9A227",
-  goldLight: "#E5C85C",
-  goldDark: "#9A7B1A",
-  goldBg: "#FFFBEB",
+  // Safari Signature - Sunset Orange
+  sunset: "#E07B39",
+  sunsetLight: "#F5923F",
+  sunsetDark: "#C56A2E",
+  sunsetPale: "#FEF7F3",
 
-  // Safari Theme Colors
-  savanna: "#D4A574",
-  terracotta: "#C75B39",
-  clay: "#8B5E3C",
-  cream: "#FDFBF7",
+  // Forest - Deep Green
+  forest: "#1B4D3E",
+  forestLight: "#2D7A5F",
+  forestPale: "#E8F5F0",
 
-  // Neutrals
-  white: "#ffffff",
-  charcoal: "#1A1A1A",
-  gray50: "#FDFBF7",
-  gray100: "#f5f5f4",
-  gray200: "#e5e5e5",
-  gray300: "#d4d4d4",
-  gray400: "#a3a3a3",
-  gray500: "#737373",
-  gray600: "#525252",
-  gray700: "#404040",
-  gray800: "#262626",
-  gray900: "#171717",
+  // Premium Neutrals
+  white: "#FFFFFF",
+  ivory: "#FDFCFA",
+  cream: "#F8F6F3",
+  sand: "#EDE8E0",
+  stone: "#D4CFC5",
+  slate: "#6B7280",
+  charcoal: "#374151",
+  black: "#111827",
 
-  // Status colors
+  // Status
   success: "#059669",
-  successBg: "#D1FAE5",
+  successPale: "#D1FAE5",
+  warning: "#D97706",
+  warningPale: "#FEF3C7",
 }
 
+// ============================================
+// EXECUTIVE STYLE DEFINITIONS
+// ============================================
 const styles = StyleSheet.create({
   // ===== PAGE LAYOUT =====
   page: {
-    padding: 0,
-    fontSize: 10,
-    fontFamily: "Helvetica",
     backgroundColor: colors.white,
+    fontFamily: "Helvetica",
   },
 
-  // ===== HEADER =====
-  header: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: 40,
-    paddingVertical: 25,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+  // ===== PREMIUM HEADER =====
+  headerContainer: {
+    position: "relative",
+    height: 140,
+    backgroundColor: colors.navy,
   },
-  headerGradientOverlay: {
+  headerGradient: {
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: colors.primaryDark,
-    opacity: 0.3,
   },
-  logoContainer: {
+  headerContent: {
+    position: "relative",
+    paddingHorizontal: 50,
+    paddingTop: 30,
+    paddingBottom: 25,
+    height: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+  headerLeft: {
+    flex: 1,
+  },
+  brandContainer: {
     flexDirection: "row",
     alignItems: "center",
+    marginBottom: 8,
   },
-  logoIcon: {
-    width: 36,
-    height: 36,
-    marginRight: 10,
+  brandIcon: {
+    width: 32,
+    height: 32,
+    marginRight: 12,
   },
-  logoText: {
-    fontSize: 26,
+  brandName: {
+    fontSize: 28,
     fontWeight: "bold",
     color: colors.white,
-    letterSpacing: 0.5,
-  },
-  logoSubtext: {
-    fontSize: 9,
-    color: colors.primaryBg,
-    marginTop: 2,
     letterSpacing: 1,
+  },
+  brandTagline: {
+    fontSize: 10,
+    color: colors.goldLight,
+    letterSpacing: 2,
+    textTransform: "uppercase",
+    marginTop: 4,
+    marginLeft: 2,
+  },
+  documentTitle: {
+    fontSize: 11,
+    color: colors.stone,
+    marginTop: 15,
+    letterSpacing: 3,
     textTransform: "uppercase",
   },
-  bookingRefBox: {
-    backgroundColor: "rgba(255,255,255,0.15)",
-    borderRadius: 8,
-    padding: 12,
+  headerRight: {
     alignItems: "flex-end",
   },
-  bookingRefLabel: {
-    fontSize: 8,
-    color: colors.primaryBg,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-    marginBottom: 3,
+  referenceBox: {
+    alignItems: "flex-end",
   },
-  bookingRefValue: {
-    fontSize: 18,
+  referenceLabel: {
+    fontSize: 8,
+    color: colors.slate,
+    letterSpacing: 1,
+    textTransform: "uppercase",
+    marginBottom: 4,
+  },
+  referenceValue: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: colors.white,
+    letterSpacing: 2,
+  },
+  statusBadge: {
+    marginTop: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 5,
+    borderRadius: 20,
+    backgroundColor: colors.success,
+  },
+  statusBadgePending: {
+    backgroundColor: colors.warning,
+  },
+  statusText: {
+    fontSize: 8,
     fontWeight: "bold",
     color: colors.white,
     letterSpacing: 1,
-  },
-  confirmationBadge: {
-    backgroundColor: colors.white,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-    marginTop: 6,
-  },
-  confirmationText: {
-    fontSize: 8,
-    color: colors.primary,
-    fontWeight: "bold",
-    letterSpacing: 0.5,
     textTransform: "uppercase",
+  },
+  headerAccent: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 4,
+    backgroundColor: colors.gold,
   },
 
   // ===== CONTENT AREA =====
   content: {
-    padding: 40,
-    paddingTop: 30,
+    paddingHorizontal: 50,
+    paddingTop: 35,
+    paddingBottom: 100,
   },
 
-  // ===== TOUR HERO SECTION =====
-  tourHero: {
-    marginBottom: 25,
+  // ===== TOUR HERO =====
+  heroSection: {
+    marginBottom: 30,
   },
-  tourTitle: {
-    fontSize: 24,
+  heroTitle: {
+    fontSize: 26,
     fontWeight: "bold",
-    color: colors.gray800,
-    marginBottom: 6,
+    color: colors.navy,
+    marginBottom: 8,
+    letterSpacing: 0.5,
   },
-  tourSubtitle: {
-    fontSize: 12,
-    color: colors.gray500,
+  heroMeta: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 15,
+  },
+  heroMetaItem: {
     flexDirection: "row",
     alignItems: "center",
   },
-  tourSubtitleIcon: {
-    width: 12,
-    height: 12,
-    marginRight: 6,
+  heroMetaText: {
+    fontSize: 11,
+    color: colors.slate,
+  },
+  heroMetaDivider: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: colors.gold,
   },
 
-  // ===== INFO CARDS GRID =====
-  infoCardsGrid: {
+  // ===== INFO GRID =====
+  infoGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    marginBottom: 25,
-    gap: 12,
+    gap: 15,
+    marginBottom: 35,
   },
   infoCard: {
     width: "48%",
-    backgroundColor: colors.gray50,
-    borderRadius: 8,
-    padding: 14,
-    borderLeftWidth: 3,
-    borderLeftColor: colors.primary,
-  },
-  infoCardSecondary: {
-    borderLeftColor: colors.secondary,
-  },
-  infoCardGold: {
+    backgroundColor: colors.cream,
+    borderRadius: 10,
+    padding: 18,
+    borderLeftWidth: 4,
     borderLeftColor: colors.gold,
   },
-  infoCardTerracotta: {
-    borderLeftColor: colors.terracotta,
+  infoCardAlt: {
+    borderLeftColor: colors.sunset,
+  },
+  infoCardSecondary: {
+    borderLeftColor: colors.forest,
+  },
+  infoCardNavy: {
+    borderLeftColor: colors.navy,
   },
   infoCardLabel: {
     fontSize: 8,
-    color: colors.gray500,
+    color: colors.slate,
+    letterSpacing: 1,
     textTransform: "uppercase",
-    letterSpacing: 0.5,
-    marginBottom: 4,
+    marginBottom: 6,
   },
   infoCardValue: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: "bold",
-    color: colors.gray800,
+    color: colors.navy,
+    lineHeight: 1.3,
+  },
+  infoCardSubtext: {
+    fontSize: 9,
+    color: colors.slate,
+    marginTop: 4,
   },
 
   // ===== SECTION STYLES =====
   section: {
-    marginBottom: 25,
+    marginBottom: 30,
   },
   sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 15,
-    paddingBottom: 10,
-    borderBottomWidth: 2,
-    borderBottomColor: colors.primary,
+    marginBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.sand,
+    paddingBottom: 12,
   },
-  sectionIconBox: {
-    width: 28,
-    height: 28,
-    backgroundColor: colors.primaryBg,
-    borderRadius: 6,
-    marginRight: 10,
+  sectionIcon: {
+    width: 36,
+    height: 36,
+    backgroundColor: colors.navy,
+    borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
+    marginRight: 14,
+  },
+  sectionIconAlt: {
+    backgroundColor: colors.sunset,
   },
   sectionTitle: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "bold",
-    color: colors.gray800,
-    letterSpacing: 0.3,
+    color: colors.navy,
+    letterSpacing: 0.5,
+  },
+  sectionSubtitle: {
+    fontSize: 10,
+    color: colors.slate,
+    marginTop: 2,
   },
 
-  // ===== DAY CARDS =====
+  // ===== ITINERARY TIMELINE =====
+  timelineContainer: {
+    position: "relative",
+    paddingLeft: 25,
+  },
+  timelineLine: {
+    position: "absolute",
+    left: 7,
+    top: 20,
+    bottom: 20,
+    width: 2,
+    backgroundColor: colors.sand,
+  },
   dayCard: {
-    marginBottom: 16,
-    borderRadius: 10,
+    marginBottom: 18,
+    position: "relative",
+  },
+  dayMarker: {
+    position: "absolute",
+    left: -25,
+    top: 0,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: colors.gold,
+    borderWidth: 3,
+    borderColor: colors.white,
+  },
+  dayMarkerInner: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: colors.navy,
+  },
+  dayContent: {
+    backgroundColor: colors.ivory,
+    borderRadius: 12,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: colors.gray200,
-    backgroundColor: colors.white,
+    borderColor: colors.sand,
   },
-  dayCardHeader: {
-    backgroundColor: colors.primaryBg,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+  dayHeader: {
+    backgroundColor: colors.navy,
+    paddingHorizontal: 18,
+    paddingVertical: 12,
     flexDirection: "row",
     alignItems: "center",
-    borderBottomWidth: 1,
-    borderBottomColor: colors.primaryBgAlt,
+    justifyContent: "space-between",
   },
-  dayNumberCircle: {
-    backgroundColor: colors.primary,
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-  dayNumberText: {
-    color: colors.white,
-    fontSize: 12,
+  dayNumber: {
+    fontSize: 10,
     fontWeight: "bold",
-  },
-  dayTitleContainer: {
-    flex: 1,
+    color: colors.goldLight,
+    letterSpacing: 1,
+    textTransform: "uppercase",
   },
   dayTitle: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: "bold",
-    color: colors.gray800,
+    color: colors.white,
+    flex: 1,
+    marginLeft: 12,
   },
   dayLocation: {
     fontSize: 9,
-    color: colors.gray500,
-    marginTop: 2,
+    color: colors.stone,
     flexDirection: "row",
     alignItems: "center",
   },
-  dayCardBody: {
-    padding: 14,
+  dayBody: {
+    padding: 18,
   },
   dayDescription: {
     fontSize: 10,
-    color: colors.gray600,
-    lineHeight: 1.5,
-    marginBottom: 12,
+    color: colors.charcoal,
+    lineHeight: 1.6,
+    marginBottom: 14,
   },
-  dayMetaRow: {
+  dayDetails: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
-    marginBottom: 10,
+    gap: 10,
   },
-  dayMetaItem: {
+  dayDetailItem: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: colors.gray50,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 4,
-  },
-  dayMetaLabel: {
-    fontSize: 8,
-    color: colors.gray500,
-    marginRight: 4,
-    textTransform: "uppercase",
-  },
-  dayMetaValue: {
-    fontSize: 9,
-    color: colors.gray700,
-    fontWeight: "bold",
-  },
-
-  // ===== ACCOMMODATION BOX =====
-  accommodationBox: {
-    marginTop: 10,
-    backgroundColor: colors.secondaryBg,
+    backgroundColor: colors.cream,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: 6,
-    padding: 10,
+  },
+  dayDetailIcon: {
+    width: 14,
+    height: 14,
+    marginRight: 6,
+  },
+  dayDetailText: {
+    fontSize: 9,
+    color: colors.charcoal,
+  },
+  accommodationBadge: {
+    marginTop: 14,
+    backgroundColor: colors.forestPale,
+    borderRadius: 8,
+    padding: 14,
     borderLeftWidth: 3,
-    borderLeftColor: colors.secondary,
+    borderLeftColor: colors.forest,
   },
   accommodationLabel: {
     fontSize: 8,
-    color: colors.gray500,
+    color: colors.slate,
+    letterSpacing: 1,
     textTransform: "uppercase",
-    letterSpacing: 0.5,
-    marginBottom: 3,
+    marginBottom: 4,
   },
   accommodationName: {
     fontSize: 11,
     fontWeight: "bold",
-    color: colors.gray800,
+    color: colors.navy,
   },
-  accommodationTierBadge: {
-    backgroundColor: colors.secondary,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 4,
-    marginTop: 4,
-    alignSelf: "flex-start",
-  },
-  accommodationTierText: {
-    fontSize: 7,
-    color: colors.white,
+  accommodationTier: {
+    fontSize: 8,
+    color: colors.forest,
     fontWeight: "bold",
+    marginTop: 4,
     textTransform: "uppercase",
-    letterSpacing: 0.3,
+    letterSpacing: 0.5,
   },
 
-  // ===== ADD-ONS SECTION =====
-  addonsGrid: {
+  // ===== ADD-ONS =====
+  addonsContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
+    gap: 10,
   },
-  addonBadge: {
-    backgroundColor: colors.goldBg,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+  addonItem: {
+    backgroundColor: colors.goldPale,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: colors.gold,
+    borderColor: colors.goldMuted,
   },
   addonText: {
-    fontSize: 9,
-    color: colors.goldDark,
+    fontSize: 10,
+    color: colors.charcoal,
     fontWeight: "bold",
   },
 
-  // ===== PRICE SECTION =====
-  priceSection: {
-    backgroundColor: colors.primaryBg,
-    borderRadius: 10,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: colors.primaryBgAlt,
+  // ===== PRICE BREAKDOWN =====
+  priceContainer: {
+    backgroundColor: colors.navy,
+    borderRadius: 16,
+    overflow: "hidden",
   },
   priceHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 15,
-    paddingBottom: 12,
+    paddingHorizontal: 24,
+    paddingVertical: 18,
     borderBottomWidth: 1,
-    borderBottomColor: colors.primaryBgAlt,
+    borderBottomColor: colors.navyLight,
   },
   priceTitle: {
     fontSize: 14,
     fontWeight: "bold",
-    color: colors.gray800,
+    color: colors.white,
+    letterSpacing: 0.5,
+  },
+  priceBody: {
+    paddingHorizontal: 24,
+    paddingVertical: 20,
   },
   priceRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 8,
+    marginBottom: 10,
   },
   priceLabel: {
     fontSize: 10,
-    color: colors.gray600,
+    color: colors.stone,
   },
   priceValue: {
     fontSize: 10,
-    color: colors.gray800,
+    color: colors.white,
     fontWeight: "bold",
   },
   priceDivider: {
-    borderTopWidth: 2,
-    borderTopColor: colors.primary,
-    borderStyle: "dashed",
-    marginVertical: 12,
+    height: 1,
+    backgroundColor: colors.navyLight,
+    marginVertical: 15,
   },
-  totalRow: {
+  priceSubtotal: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: colors.primary,
-    marginHorizontal: -20,
-    marginBottom: -20,
     marginTop: 5,
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    borderBottomLeftRadius: 10,
-    borderBottomRightRadius: 10,
   },
-  totalLabel: {
+  priceSubtotalLabel: {
+    fontSize: 11,
+    color: colors.goldLight,
+    fontWeight: "bold",
+  },
+  priceSubtotalValue: {
+    fontSize: 11,
+    color: colors.goldLight,
+    fontWeight: "bold",
+  },
+  priceTotal: {
+    backgroundColor: colors.gold,
+    marginTop: 15,
+    marginHorizontal: -24,
+    marginBottom: -20,
+    paddingHorizontal: 24,
+    paddingVertical: 18,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  priceTotalLabel: {
     fontSize: 13,
     fontWeight: "bold",
-    color: colors.white,
+    color: colors.navy,
+    textTransform: "uppercase",
+    letterSpacing: 1,
   },
-  totalValue: {
-    fontSize: 18,
+  priceTotalValue: {
+    fontSize: 22,
     fontWeight: "bold",
-    color: colors.white,
+    color: colors.navy,
+  },
+
+  // ===== PAYMENT STATUS =====
+  paymentNotice: {
+    marginTop: 20,
+    backgroundColor: colors.successPale,
+    borderRadius: 10,
+    padding: 18,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.success,
+  },
+  paymentNoticePending: {
+    backgroundColor: colors.warningPale,
+    borderLeftColor: colors.warning,
+  },
+  paymentNoticeTitle: {
+    fontSize: 11,
+    fontWeight: "bold",
+    color: colors.success,
+    marginBottom: 6,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  paymentNoticeTitlePending: {
+    color: colors.warning,
+  },
+  paymentNoticeText: {
+    fontSize: 10,
+    color: colors.charcoal,
+    lineHeight: 1.5,
+  },
+  paymentNoticeAmount: {
+    fontSize: 12,
+    fontWeight: "bold",
+    color: colors.navy,
+    marginTop: 8,
   },
 
   // ===== CONTACT SECTION =====
-  contactSection: {
+  contactGrid: {
     flexDirection: "row",
-    marginTop: 25,
     gap: 20,
+    marginTop: 25,
   },
   contactCard: {
     flex: 1,
-    backgroundColor: colors.gray50,
-    borderRadius: 8,
-    padding: 15,
+    backgroundColor: colors.cream,
+    borderRadius: 10,
+    padding: 18,
   },
   contactCardPrimary: {
     borderTopWidth: 3,
-    borderTopColor: colors.primary,
+    borderTopColor: colors.sunset,
   },
   contactCardSecondary: {
     borderTopWidth: 3,
-    borderTopColor: colors.secondary,
+    borderTopColor: colors.navy,
   },
   contactTitle: {
     fontSize: 10,
     fontWeight: "bold",
-    color: colors.gray800,
-    marginBottom: 8,
+    color: colors.navy,
     textTransform: "uppercase",
     letterSpacing: 0.5,
+    marginBottom: 12,
   },
   contactRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 5,
+    marginBottom: 6,
   },
   contactIcon: {
-    width: 12,
-    height: 12,
-    marginRight: 8,
+    width: 14,
+    height: 14,
+    marginRight: 10,
   },
   contactText: {
-    fontSize: 9,
-    color: colors.gray600,
+    fontSize: 10,
+    color: colors.charcoal,
   },
 
   // ===== SPECIAL REQUESTS =====
   specialRequestsBox: {
     marginTop: 20,
-    backgroundColor: colors.goldBg,
-    borderRadius: 8,
-    padding: 15,
+    backgroundColor: colors.sunsetPale,
+    borderRadius: 10,
+    padding: 18,
     borderLeftWidth: 4,
-    borderLeftColor: colors.gold,
+    borderLeftColor: colors.sunset,
   },
   specialRequestsTitle: {
     fontSize: 10,
     fontWeight: "bold",
-    color: colors.goldDark,
-    marginBottom: 6,
+    color: colors.sunsetDark,
     textTransform: "uppercase",
+    letterSpacing: 0.5,
+    marginBottom: 8,
   },
   specialRequestsText: {
-    fontSize: 9,
-    color: colors.gray600,
+    fontSize: 10,
+    color: colors.charcoal,
     lineHeight: 1.5,
   },
 
@@ -512,9 +628,9 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: colors.charcoal,
-    paddingHorizontal: 40,
-    paddingVertical: 20,
+    backgroundColor: colors.navy,
+    paddingHorizontal: 50,
+    paddingVertical: 22,
   },
   footerContent: {
     flexDirection: "row",
@@ -524,187 +640,258 @@ const styles = StyleSheet.create({
   footerLeft: {
     flex: 1,
   },
-  footerLogo: {
+  footerBrand: {
     fontSize: 14,
     fontWeight: "bold",
     color: colors.white,
     marginBottom: 4,
   },
-  footerText: {
-    fontSize: 8,
-    color: colors.gray400,
-    marginBottom: 2,
+  footerTagline: {
+    fontSize: 9,
+    color: colors.slate,
+    marginBottom: 3,
   },
   footerRight: {
     alignItems: "flex-end",
   },
-  footerHighlight: {
-    backgroundColor: colors.primary,
+  footerBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: colors.navyLight,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 4,
     marginBottom: 6,
   },
-  footerHighlightText: {
+  footerBadgeText: {
     fontSize: 8,
-    color: colors.white,
+    color: colors.goldLight,
     fontWeight: "bold",
   },
-  footerWebsite: {
-    fontSize: 9,
-    color: colors.gray300,
-  },
-
-  // ===== PAYMENT STATUS =====
-  paymentStatusBox: {
-    marginTop: 15,
-    backgroundColor: colors.successBg,
-    borderRadius: 8,
-    padding: 15,
-    borderLeftWidth: 4,
-    borderLeftColor: colors.success,
-  },
-  paymentStatusBoxPending: {
-    backgroundColor: "#FEF3C7",
-    borderLeftColor: "#D97706",
-  },
-  paymentStatusTitle: {
+  footerUrl: {
     fontSize: 10,
+    color: colors.goldLight,
     fontWeight: "bold",
-    color: colors.success,
-    marginBottom: 8,
-    textTransform: "uppercase",
-  },
-  paymentStatusTitlePending: {
-    color: "#D97706",
-  },
-  paymentStatusRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 4,
-  },
-  paymentStatusLabel: {
-    fontSize: 9,
-    color: colors.gray600,
-  },
-  paymentStatusValue: {
-    fontSize: 9,
-    fontWeight: "bold",
-    color: colors.gray800,
-  },
-  paymentStatusValueSuccess: {
-    color: colors.success,
-  },
-  paymentStatusValuePending: {
-    color: "#D97706",
-  },
-  balanceDueBox: {
-    marginTop: 10,
-    backgroundColor: "#FFFBEB",
-    borderRadius: 6,
-    padding: 10,
-  },
-  balanceDueText: {
-    fontSize: 9,
-    color: "#92400E",
   },
 
-  // ===== AFRICAN DECORATIONS =====
-  decorationContainer: {
-    position: "absolute",
-    opacity: 0.15,
-  },
-  patternBorder: {
-    marginVertical: 10,
-  },
-  cornerDecoration: {
-    position: "absolute",
-  },
-
-  // ===== IMAGE GALLERY =====
+  // ===== GALLERY PAGE =====
   galleryPage: {
-    padding: 40,
-    backgroundColor: colors.cream,
+    backgroundColor: colors.ivory,
+    padding: 0,
   },
   galleryHeader: {
-    flexDirection: "row",
+    backgroundColor: colors.navy,
+    paddingHorizontal: 50,
+    paddingVertical: 35,
     alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 25,
   },
   galleryTitle: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "bold",
-    color: colors.secondary,
-    textAlign: "center",
-    marginHorizontal: 15,
+    color: colors.white,
+    letterSpacing: 1,
+    marginBottom: 6,
   },
   gallerySubtitle: {
     fontSize: 11,
-    color: colors.gray500,
-    textAlign: "center",
-    marginBottom: 20,
+    color: colors.goldLight,
+    letterSpacing: 2,
+    textTransform: "uppercase",
+  },
+  galleryContent: {
+    padding: 50,
+  },
+  coverImageWrapper: {
+    marginBottom: 25,
+    borderRadius: 12,
+    overflow: "hidden",
+    borderWidth: 4,
+    borderColor: colors.gold,
+  },
+  coverImage: {
+    width: "100%",
+    height: 240,
+    objectFit: "cover",
   },
   galleryGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 15,
-    justifyContent: "center",
   },
-  galleryImageContainer: {
-    width: "47%",
+  galleryImageWrapper: {
+    width: "48%",
     borderRadius: 10,
     overflow: "hidden",
-    borderWidth: 3,
-    borderColor: colors.white,
     backgroundColor: colors.white,
-    shadowColor: colors.gray400,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    borderWidth: 1,
+    borderColor: colors.sand,
   },
   galleryImage: {
     width: "100%",
-    height: 140,
+    height: 150,
     objectFit: "cover",
   },
-  galleryImageLarge: {
-    width: "100%",
-    height: 200,
-    objectFit: "cover",
-  },
-  galleryImageCaption: {
-    padding: 8,
-    backgroundColor: colors.white,
-  },
-  galleryCaptionText: {
-    fontSize: 8,
-    color: colors.gray500,
-    textAlign: "center",
-  },
-  coverImageContainer: {
-    width: "100%",
-    marginBottom: 20,
-    borderRadius: 12,
-    overflow: "hidden",
-    borderWidth: 4,
-    borderColor: colors.primary,
-  },
-  coverImage: {
-    width: "100%",
-    height: 220,
-    objectFit: "cover",
-  },
-  decorativeAnimalRow: {
-    flexDirection: "row",
-    justifyContent: "center",
+  galleryFooter: {
+    marginTop: 40,
     alignItems: "center",
-    gap: 20,
-    marginTop: 20,
-    opacity: 0.6,
+    paddingTop: 30,
+    borderTopWidth: 1,
+    borderTopColor: colors.sand,
+  },
+  galleryTagline: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: colors.navy,
+    marginBottom: 8,
+    letterSpacing: 0.5,
+  },
+  gallerySubTagline: {
+    fontSize: 10,
+    color: colors.slate,
+    marginBottom: 20,
+  },
+  galleryBrandUrl: {
+    fontSize: 11,
+    color: colors.gold,
+    fontWeight: "bold",
+  },
+
+  // ===== DECORATIVE ELEMENTS =====
+  goldLine: {
+    height: 2,
+    backgroundColor: colors.gold,
+  },
+  dividerLine: {
+    height: 1,
+    backgroundColor: colors.sand,
+    marginVertical: 25,
   },
 })
 
+// ============================================
+// PREMIUM SVG ICONS
+// ============================================
+const PremiumBrandIcon = () => (
+  <Svg viewBox="0 0 40 40" style={{ width: 32, height: 32 }}>
+    <Circle cx={20} cy={20} r={18} fill={colors.gold} />
+    <Circle cx={20} cy={20} r={14} fill={colors.navy} />
+    <Path
+      d="M20 8 L23 16 L31 16 L25 21 L27 29 L20 24 L13 29 L15 21 L9 16 L17 16 Z"
+      fill={colors.goldLight}
+    />
+  </Svg>
+)
+
+const CalendarIcon = ({ color = colors.white }: { color?: string }) => (
+  <Svg viewBox="0 0 24 24" style={{ width: 16, height: 16 }}>
+    <Path
+      fill={color}
+      d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM5 8V6h14v2H5z"
+    />
+  </Svg>
+)
+
+const MapPinIcon = ({ color = colors.slate }: { color?: string }) => (
+  <Svg viewBox="0 0 24 24" style={{ width: 12, height: 12 }}>
+    <Path
+      fill={color}
+      d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
+    />
+  </Svg>
+)
+
+const SparkleIcon = ({ color = colors.gold }: { color?: string }) => (
+  <Svg viewBox="0 0 24 24" style={{ width: 16, height: 16 }}>
+    <Path
+      fill={color}
+      d="M12 2L9.5 9.5 2 12l7.5 2.5L12 22l2.5-7.5L22 12l-7.5-2.5L12 2z"
+    />
+  </Svg>
+)
+
+const CheckCircleIcon = ({ color = colors.success }: { color?: string }) => (
+  <Svg viewBox="0 0 24 24" style={{ width: 14, height: 14 }}>
+    <Path
+      fill={color}
+      d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"
+    />
+  </Svg>
+)
+
+const UserIcon = ({ color = colors.slate }: { color?: string }) => (
+  <Svg viewBox="0 0 24 24" style={{ width: 14, height: 14 }}>
+    <Path
+      fill={color}
+      d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+    />
+  </Svg>
+)
+
+const MailIcon = ({ color = colors.slate }: { color?: string }) => (
+  <Svg viewBox="0 0 24 24" style={{ width: 14, height: 14 }}>
+    <Path
+      fill={color}
+      d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
+    />
+  </Svg>
+)
+
+const PhoneIcon = ({ color = colors.slate }: { color?: string }) => (
+  <Svg viewBox="0 0 24 24" style={{ width: 14, height: 14 }}>
+    <Path
+      fill={color}
+      d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"
+    />
+  </Svg>
+)
+
+const MealIcon = ({ color = colors.charcoal }: { color?: string }) => (
+  <Svg viewBox="0 0 24 24" style={{ width: 14, height: 14 }}>
+    <Path
+      fill={color}
+      d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"
+    />
+  </Svg>
+)
+
+const ShieldIcon = ({ color = colors.goldLight }: { color?: string }) => (
+  <Svg viewBox="0 0 24 24" style={{ width: 12, height: 12 }}>
+    <Path
+      fill={color}
+      d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"
+    />
+  </Svg>
+)
+
+const StarIcon = ({ color = colors.gold }: { color?: string }) => (
+  <Svg viewBox="0 0 24 24" style={{ width: 40, height: 40 }}>
+    <Path
+      fill={color}
+      d="M12 2L9.5 9.5 2 12l7.5 2.5L12 22l2.5-7.5L22 12l-7.5-2.5L12 2z"
+    />
+  </Svg>
+)
+
+// Decorative line with diamonds
+const PremiumDivider = ({ width = 495 }: { width?: number }) => (
+  <Svg viewBox={`0 0 ${width} 12`} style={{ width, height: 12, marginVertical: 20 }}>
+    <Line x1={0} y1={6} x2={width * 0.4} y2={6} stroke={colors.sand} strokeWidth={1} />
+    <Path
+      d={`M${width * 0.42} 6 L${width * 0.45} 2 L${width * 0.48} 6 L${width * 0.45} 10 Z`}
+      fill={colors.gold}
+    />
+    <Circle cx={width * 0.5} cy={6} r={3} fill={colors.navy} />
+    <Path
+      d={`M${width * 0.52} 6 L${width * 0.55} 2 L${width * 0.58} 6 L${width * 0.55} 10 Z`}
+      fill={colors.gold}
+    />
+    <Line x1={width * 0.6} y1={6} x2={width} y2={6} stroke={colors.sand} strokeWidth={1} />
+  </Svg>
+)
+
+// ============================================
+// MAIN COMPONENT INTERFACE
+// ============================================
 interface ItineraryPDFProps {
   booking: {
     bookingReference: string
@@ -717,7 +904,6 @@ interface ItineraryPDFProps {
     contactEmail: string
     contactPhone: string
     specialRequests?: string | null
-    // Payment status info
     status: string
     paymentStatus: string
     paymentType: string
@@ -771,298 +957,9 @@ interface ItineraryPDFProps {
   }
 }
 
-// Simple icon components for PDF
-const MapPinIcon = () => (
-  <Svg viewBox="0 0 24 24" style={{ width: 12, height: 12 }}>
-    <Path
-      fill={colors.gray500}
-      d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
-    />
-  </Svg>
-)
-
-const CalendarIcon = () => (
-  <Svg viewBox="0 0 24 24" style={{ width: 14, height: 14 }}>
-    <Path
-      fill={colors.primary}
-      d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zm-8 4H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z"
-    />
-  </Svg>
-)
-
-const SparklesIcon = ({ color = colors.primary }: { color?: string }) => (
-  <Svg viewBox="0 0 24 24" style={{ width: 16, height: 16 }}>
-    <Path
-      fill={color}
-      d="M12 3L10.34 8.13 5 9.24l4 3.89-.94 5.47L12 16.5l3.94 2.1-.94-5.47 4-3.89-5.34-1.11L12 3z"
-    />
-  </Svg>
-)
-
 // ============================================
-// PREMIUM AFRICAN-INSPIRED DECORATIVE ELEMENTS
+// MAIN PDF COMPONENT
 // ============================================
-
-// Elegant geometric border with African motif
-const PremiumAfricanBorder = ({ width = 515, variant = "primary" }: { width?: number; variant?: "primary" | "gold" | "secondary" }) => {
-  const colorMap = { primary: colors.primary, gold: colors.gold, secondary: colors.secondary }
-  const color = colorMap[variant]
-  return (
-    <Svg viewBox={`0 0 ${width} 8`} style={{ width, height: 8 }}>
-      {/* Main line */}
-      <Path d={`M0 4 L${width} 4`} stroke={color} strokeWidth={1} opacity={0.3} />
-      {/* Diamond pattern */}
-      {Array.from({ length: Math.floor(width / 30) }).map((_, i) => (
-        <G key={i}>
-          <Path
-            d={`M${i * 30 + 15} 0 L${i * 30 + 19} 4 L${i * 30 + 15} 8 L${i * 30 + 11} 4 Z`}
-            fill={i % 3 === 0 ? color : "none"}
-            stroke={color}
-            strokeWidth={0.5}
-          />
-        </G>
-      ))}
-    </Svg>
-  )
-}
-
-// Flight route with airplane
-const FlightRouteDecoration = ({ width = 200 }: { width?: number }) => (
-  <Svg viewBox={`0 0 ${width} 30`} style={{ width, height: 30 }}>
-    {/* Dotted flight path */}
-    <Path
-      d={`M10 20 Q${width / 4} 5 ${width / 2} 15 Q${width * 0.75} 25 ${width - 30} 10`}
-      fill="none"
-      stroke={colors.primary}
-      strokeWidth={1.5}
-      strokeDasharray="4,3"
-      opacity={0.6}
-    />
-    {/* Takeoff point */}
-    <Circle cx={10} cy={20} r={4} fill={colors.secondary} />
-    <Path d="M5 24 L15 24" stroke={colors.secondary} strokeWidth={2} />
-    {/* Airplane icon at end */}
-    <G transform={`translate(${width - 25}, 5)`}>
-      <Path
-        d="M12 2L8 6H4L2 10L6 10L4 14H8L12 10L16 10L14 6H18L20 2L16 4L12 2Z"
-        fill={colors.primary}
-        transform="rotate(30, 10, 8) scale(0.8)"
-      />
-    </G>
-    {/* Landing point */}
-    <Circle cx={width - 10} cy={15} r={3} fill={colors.gold} stroke={colors.primary} strokeWidth={1} />
-  </Svg>
-)
-
-// Safari Jeep silhouette
-const SafariJeepIcon = ({ size = 40, color = colors.secondary }: { size?: number; color?: string }) => (
-  <Svg viewBox="0 0 50 25" style={{ width: size, height: size * 0.5 }}>
-    <Path
-      d="M5 18 L5 12 L12 12 L15 8 L35 8 L38 12 L45 12 L45 18 L40 18 L40 15 C40 13 38 13 38 15 L38 18 L15 18 L15 15 C15 13 13 13 13 15 L13 18 Z"
-      fill={color}
-    />
-    {/* Windows */}
-    <Path d="M17 10 L22 10 L22 12 L17 12 Z" fill={colors.white} opacity={0.5} />
-    <Path d="M24 10 L29 10 L29 12 L24 12 Z" fill={colors.white} opacity={0.5} />
-    {/* Wheels */}
-    <Circle cx={14} cy={18} r={3} fill={colors.charcoal} />
-    <Circle cx={39} cy={18} r={3} fill={colors.charcoal} />
-  </Svg>
-)
-
-// Binoculars icon
-const BinocularsIcon = ({ size = 20, color = colors.secondary }: { size?: number; color?: string }) => (
-  <Svg viewBox="0 0 24 24" style={{ width: size, height: size }}>
-    <Circle cx={7} cy={14} r={5} fill="none" stroke={color} strokeWidth={2} />
-    <Circle cx={17} cy={14} r={5} fill="none" stroke={color} strokeWidth={2} />
-    <Path d="M12 12 L12 16" stroke={color} strokeWidth={2} />
-    <Path d="M7 9 L7 6 L10 6" stroke={color} strokeWidth={1.5} />
-    <Path d="M17 9 L17 6 L14 6" stroke={color} strokeWidth={1.5} />
-  </Svg>
-)
-
-// Compass rose
-const CompassIcon = ({ size = 30 }: { size?: number }) => (
-  <Svg viewBox="0 0 40 40" style={{ width: size, height: size }}>
-    <Circle cx={20} cy={20} r={18} fill="none" stroke={colors.gray300} strokeWidth={1} />
-    <Circle cx={20} cy={20} r={15} fill="none" stroke={colors.gray200} strokeWidth={0.5} />
-    {/* Cardinal directions */}
-    <Path d="M20 5 L22 15 L20 12 L18 15 Z" fill={colors.primary} />
-    <Path d="M20 35 L22 25 L20 28 L18 25 Z" fill={colors.gray400} />
-    <Path d="M5 20 L15 18 L12 20 L15 22 Z" fill={colors.gray400} />
-    <Path d="M35 20 L25 18 L28 20 L25 22 Z" fill={colors.gray400} />
-    <Circle cx={20} cy={20} r={2} fill={colors.primary} />
-    <Text style={{ fontSize: 5, fill: colors.gray600 }} x={19} y={4}>N</Text>
-  </Svg>
-)
-
-// African sun with rays
-const AfricanSunIcon = ({ size = 50 }: { size?: number }) => (
-  <Svg viewBox="0 0 50 50" style={{ width: size, height: size }}>
-    {/* Outer glow */}
-    <Circle cx={25} cy={25} r={20} fill={colors.gold} opacity={0.15} />
-    {/* Sun rays */}
-    {Array.from({ length: 8 }).map((_, i) => (
-      <Path
-        key={i}
-        d={`M25 25 L${25 + 22 * Math.cos((i * 45 * Math.PI) / 180)} ${25 + 22 * Math.sin((i * 45 * Math.PI) / 180)}`}
-        stroke={colors.gold}
-        strokeWidth={i % 2 === 0 ? 2 : 1}
-        opacity={i % 2 === 0 ? 0.8 : 0.4}
-      />
-    ))}
-    {/* Sun center */}
-    <Circle cx={25} cy={25} r={10} fill={colors.gold} />
-    <Circle cx={25} cy={25} r={7} fill={colors.primaryLight} opacity={0.5} />
-  </Svg>
-)
-
-// Elegant acacia tree silhouette
-const AcaciaTreeSilhouette = ({ size = 40, color = colors.secondary }: { size?: number; color?: string }) => (
-  <Svg viewBox="0 0 40 50" style={{ width: size, height: size * 1.25 }}>
-    {/* Tree canopy - umbrella shape */}
-    <Path
-      d="M5 20 Q8 12 15 15 Q18 8 20 8 Q22 8 25 15 Q32 12 35 20 Q32 22 28 20 Q25 25 20 25 Q15 25 12 20 Q8 22 5 20"
-      fill={color}
-      opacity={0.9}
-    />
-    {/* Trunk */}
-    <Path d="M18 25 L18 45 L22 45 L22 25" fill={color} />
-    {/* Ground line */}
-    <Path d="M10 45 L30 45" stroke={color} strokeWidth={1} opacity={0.5} />
-  </Svg>
-)
-
-// Mountain silhouette (Kilimanjaro style)
-const MountainSilhouette = ({ width = 100 }: { width?: number }) => (
-  <Svg viewBox="0 0 100 40" style={{ width, height: width * 0.4 }}>
-    <Path
-      d="M0 40 L20 25 L35 30 L50 10 L65 30 L80 25 L100 40 Z"
-      fill={colors.secondary}
-      opacity={0.2}
-    />
-    {/* Snow cap */}
-    <Path
-      d="M42 18 L50 10 L58 18 Q55 20 50 18 Q45 20 42 18"
-      fill={colors.white}
-      opacity={0.8}
-    />
-  </Svg>
-)
-
-// Safari animals row
-const SafariAnimalsRow = ({ width = 300 }: { width?: number }) => (
-  <Svg viewBox="0 0 300 30" style={{ width, height: 30 }}>
-    {/* Elephant */}
-    <G transform="translate(20, 5)">
-      <Path
-        d="M0 20 L2 10 Q5 5 10 5 L15 5 Q20 5 22 10 L22 15 L25 15 L25 20 L20 20 L20 25 L18 25 L18 20 L7 20 L7 25 L5 25 L5 20 Z M3 12 Q1 14 3 16"
-        fill={colors.secondary}
-        opacity={0.7}
-        transform="scale(0.8)"
-      />
-    </G>
-    {/* Giraffe */}
-    <G transform="translate(80, 0)">
-      <Path
-        d="M10 5 L10 0 L12 0 L12 5 L14 8 L14 20 L16 20 L16 25 L14 25 L14 22 L8 22 L8 25 L6 25 L6 20 L8 20 L8 8 Z"
-        fill={colors.gold}
-        opacity={0.7}
-        transform="scale(0.9)"
-      />
-    </G>
-    {/* Lion */}
-    <G transform="translate(140, 8)">
-      <Circle cx={10} cy={8} r={8} fill={colors.primary} opacity={0.6} />
-      <Circle cx={10} cy={8} r={5} fill={colors.primary} opacity={0.8} />
-      <Path d="M5 16 L5 22 L7 22 L7 18 L13 18 L13 22 L15 22 L15 16 L20 14 L20 12 L15 14 L5 14 Z" fill={colors.primary} opacity={0.7} />
-    </G>
-    {/* Zebra */}
-    <G transform="translate(200, 5)">
-      <Path
-        d="M5 15 L8 5 L12 5 L12 8 L18 8 L20 15 L20 20 L18 20 L18 22 L16 22 L16 20 L9 20 L9 22 L7 22 L7 20 L5 20 Z"
-        fill={colors.charcoal}
-        opacity={0.6}
-      />
-    </G>
-    {/* Rhino */}
-    <G transform="translate(260, 8)">
-      <Path
-        d="M0 12 L5 10 L5 8 L3 6 L8 8 L20 8 Q25 10 25 15 L25 18 L22 18 L22 20 L20 20 L20 18 L10 18 L10 20 L8 20 L8 18 L5 18 L5 15 L0 15 Z"
-        fill={colors.gray500}
-        opacity={0.6}
-        transform="scale(0.8)"
-      />
-    </G>
-  </Svg>
-)
-
-// Dotted journey path
-const JourneyPath = ({ width = 400 }: { width?: number }) => (
-  <Svg viewBox={`0 0 ${width} 20`} style={{ width, height: 20 }}>
-    {/* Wavy dotted path */}
-    <Path
-      d={`M0 10 Q${width * 0.25} 0 ${width * 0.5} 10 Q${width * 0.75} 20 ${width} 10`}
-      fill="none"
-      stroke={colors.primary}
-      strokeWidth={2}
-      strokeDasharray="8,4"
-      opacity={0.4}
-    />
-    {/* Journey markers */}
-    <Circle cx={0} cy={10} r={4} fill={colors.secondary} />
-    <Circle cx={width * 0.33} cy={5} r={3} fill={colors.gold} />
-    <Circle cx={width * 0.66} cy={15} r={3} fill={colors.gold} />
-    <Circle cx={width} cy={10} r={4} fill={colors.primary} />
-  </Svg>
-)
-
-// Maasai spear decoration
-const MaasaiSpearDecoration = ({ height = 60 }: { height?: number }) => (
-  <Svg viewBox="0 0 15 80" style={{ width: height * 0.19, height }}>
-    {/* Spear tip */}
-    <Path d="M7.5 0 L10 15 L7.5 12 L5 15 Z" fill={colors.gray600} />
-    {/* Shaft */}
-    <Rect x={6.5} y={12} width={2} height={55} fill={colors.clay} />
-    {/* Decorative bands */}
-    <Rect x={5} y={20} width={5} height={3} fill={colors.terracotta} />
-    <Rect x={5} y={25} width={5} height={2} fill={colors.charcoal} />
-    <Rect x={5} y={55} width={5} height={3} fill={colors.terracotta} />
-    {/* Bottom */}
-    <Path d="M7.5 67 L9 80 L6 80 Z" fill={colors.gray600} />
-  </Svg>
-)
-
-// Premium section divider
-const SectionDivider = ({ width = 515, showIcon = true }: { width?: number; showIcon?: boolean }) => (
-  <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", marginVertical: 15 }}>
-    <Svg viewBox={`0 0 ${(width - 40) / 2} 2`} style={{ width: (width - 40) / 2, height: 2 }}>
-      <Path d={`M0 1 L${(width - 40) / 2} 1`} stroke={colors.gray300} strokeWidth={1} />
-      <Circle cx={(width - 40) / 4} cy={1} r={2} fill={colors.primary} opacity={0.5} />
-    </Svg>
-    {showIcon && (
-      <View style={{ marginHorizontal: 8 }}>
-        <CompassIcon size={20} />
-      </View>
-    )}
-    <Svg viewBox={`0 0 ${(width - 40) / 2} 2`} style={{ width: (width - 40) / 2, height: 2 }}>
-      <Path d={`M0 1 L${(width - 40) / 2} 1`} stroke={colors.gray300} strokeWidth={1} />
-      <Circle cx={(width - 40) / 4} cy={1} r={2} fill={colors.primary} opacity={0.5} />
-    </Svg>
-  </View>
-)
-
-// Legacy components (keeping for compatibility)
-const AfricanPatternBorder = ({ width = 515, color }: { width?: number; color?: string }) => {
-  const variant = color === colors.secondary ? "secondary" : color === colors.gold ? "gold" : "primary"
-  return <PremiumAfricanBorder width={width} variant={variant} />
-}
-const AfricanTrianglePattern = ({ size = 40 }: { size?: number }) => <CompassIcon size={size * 0.6} />
-const AcaciaTreeIcon = AcaciaTreeSilhouette
-const SafariAnimalIcon = ({ size = 24 }: { animal?: string; size?: number }) => <SafariJeepIcon size={size * 1.5} />
-const SunburstDecoration = AfricanSunIcon
-const MaasaiShieldPattern = ({ size = 50 }: { size?: number }) => <MaasaiSpearDecoration height={size} />
-
 export function ItineraryPDF({ booking, itinerary, pricing }: ItineraryPDFProps) {
   const startDate = new Date(booking.startDate)
   const endDate = new Date(booking.endDate)
@@ -1076,186 +973,182 @@ export function ItineraryPDF({ booking, itinerary, pricing }: ItineraryPDFProps)
     }
   })
 
+  const formatCurrency = (amount: number) => {
+    return `$${amount.toLocaleString()}`
+  }
+
+  const isPaid = booking.paymentStatus === "COMPLETED"
+  const isDeposit = booking.paymentType === "DEPOSIT"
+  const hasBalance = isDeposit && booking.balanceAmount && booking.balanceAmount > 0
+
   return (
     <Document>
+      {/* ===== MAIN ITINERARY PAGE ===== */}
       <Page size="A4" style={styles.page}>
-        {/* Premium Header with African decoration */}
-        <View style={styles.header}>
-          {/* Corner decorations - left */}
-          <View style={[styles.cornerDecoration, { top: 8, left: 10, opacity: 0.4 }]}>
-            <CompassIcon size={22} />
-          </View>
-          <View style={[styles.cornerDecoration, { bottom: 8, left: 10, opacity: 0.3 }]}>
-            <BinocularsIcon size={18} color={colors.white} />
-          </View>
-          {/* Corner decorations - right */}
-          <View style={[styles.cornerDecoration, { top: 5, right: 5, opacity: 0.25 }]}>
-            <AfricanSunIcon size={35} />
-          </View>
-          <View style={[styles.cornerDecoration, { bottom: 5, right: 5, opacity: 0.2 }]}>
-            <AcaciaTreeSilhouette size={25} color={colors.white} />
-          </View>
-
-          <View style={styles.logoContainer}>
-            <View>
-              <Text style={styles.logoText}>SafariPlus</Text>
-              <Text style={styles.logoSubtext}>Your African Adventure Awaits</Text>
+        {/* Premium Header */}
+        <View style={styles.headerContainer}>
+          <View style={styles.headerContent}>
+            <View style={styles.headerLeft}>
+              <View style={styles.brandContainer}>
+                <PremiumBrandIcon />
+                <View style={{ marginLeft: 12 }}>
+                  <Text style={styles.brandName}>SafariPlus</Text>
+                  <Text style={styles.brandTagline}>Luxury African Expeditions</Text>
+                </View>
+              </View>
+              <Text style={styles.documentTitle}>Travel Itinerary</Text>
+            </View>
+            <View style={styles.headerRight}>
+              <View style={styles.referenceBox}>
+                <Text style={styles.referenceLabel}>Booking Reference</Text>
+                <Text style={styles.referenceValue}>{booking.bookingReference}</Text>
+              </View>
+              <View style={isPaid ? styles.statusBadge : [styles.statusBadge, styles.statusBadgePending]}>
+                <Text style={styles.statusText}>
+                  {isPaid
+                    ? (isDeposit ? "Deposit Confirmed" : "Fully Paid")
+                    : "Payment Pending"}
+                </Text>
+              </View>
             </View>
           </View>
-          <View style={styles.bookingRefBox}>
-            <Text style={styles.bookingRefLabel}>Booking Reference</Text>
-            <Text style={styles.bookingRefValue}>{booking.bookingReference}</Text>
-            <View style={[
-              styles.confirmationBadge,
-              booking.paymentStatus !== "COMPLETED" ? { backgroundColor: "#FEF3C7" } : {}
-            ]}>
-              <Text style={[
-                styles.confirmationText,
-                booking.paymentStatus !== "COMPLETED" ? { color: "#D97706" } : {}
-              ]}>
-                {booking.paymentStatus === "COMPLETED"
-                  ? (booking.paymentType === "DEPOSIT" ? "Deposit Paid" : "Fully Paid")
-                  : booking.paymentStatus === "PENDING"
-                    ? "Payment Pending"
-                    : booking.paymentStatus}
-              </Text>
-            </View>
-          </View>
+          <View style={styles.headerAccent} />
         </View>
 
         {/* Content Area */}
         <View style={styles.content}>
-          {/* Tour Hero with Flight Route */}
-          <View style={styles.tourHero}>
-            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" }}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.tourTitle}>{booking.tour.title}</Text>
-                <View style={styles.tourSubtitle}>
-                  <Text>
-                    {booking.tour.durationDays} Days / {booking.tour.durationNights} Nights
-                    {" • "}{booking.tour.destination}
-                  </Text>
-                </View>
+          {/* Tour Hero Section */}
+          <View style={styles.heroSection}>
+            <Text style={styles.heroTitle}>{booking.tour.title}</Text>
+            <View style={styles.heroMeta}>
+              <View style={styles.heroMetaItem}>
+                <Text style={styles.heroMetaText}>
+                  {booking.tour.durationDays} Days / {booking.tour.durationNights} Nights
+                </Text>
               </View>
-              {/* Safari Jeep Icon */}
-              <View style={{ opacity: 0.7 }}>
-                <SafariJeepIcon size={50} color={colors.secondary} />
+              <View style={styles.heroMetaDivider} />
+              <View style={styles.heroMetaItem}>
+                <MapPinIcon color={colors.gold} />
+                <Text style={[styles.heroMetaText, { marginLeft: 4 }]}>
+                  {booking.tour.destination}
+                </Text>
               </View>
-            </View>
-            {/* Flight Route Decoration */}
-            <View style={{ marginTop: 15 }}>
-              <FlightRouteDecoration width={515} />
             </View>
           </View>
 
-          {/* Premium African Pattern Divider */}
-          <View style={styles.patternBorder}>
-            <PremiumAfricanBorder width={515} variant="primary" />
-          </View>
+          {/* Premium Divider */}
+          <PremiumDivider width={495} />
 
           {/* Info Cards Grid */}
-          <View style={styles.infoCardsGrid}>
+          <View style={styles.infoGrid}>
             <View style={styles.infoCard}>
               <Text style={styles.infoCardLabel}>Travel Dates</Text>
               <Text style={styles.infoCardValue}>
-                {format(startDate, "MMM d")} - {format(endDate, "MMM d, yyyy")}
+                {format(startDate, "MMMM d")} - {format(endDate, "d, yyyy")}
+              </Text>
+              <Text style={styles.infoCardSubtext}>
+                {booking.tour.durationDays} days of adventure
               </Text>
             </View>
-            <View style={[styles.infoCard, styles.infoCardSecondary]}>
+            <View style={[styles.infoCard, styles.infoCardAlt]}>
               <Text style={styles.infoCardLabel}>Travelers</Text>
               <Text style={styles.infoCardValue}>
                 {booking.adults} Adult{booking.adults > 1 ? "s" : ""}
-                {booking.children > 0 &&
-                  `, ${booking.children} Child${booking.children > 1 ? "ren" : ""}`}
+                {booking.children > 0 && `, ${booking.children} Child${booking.children > 1 ? "ren" : ""}`}
+              </Text>
+              <Text style={styles.infoCardSubtext}>
+                {booking.adults + booking.children} total guests
               </Text>
             </View>
-            <View style={[styles.infoCard, styles.infoCardGold]}>
+            <View style={[styles.infoCard, styles.infoCardSecondary]}>
               <Text style={styles.infoCardLabel}>Lead Traveler</Text>
               <Text style={styles.infoCardValue}>{booking.contactName}</Text>
+              <Text style={styles.infoCardSubtext}>{booking.contactEmail}</Text>
             </View>
-            <View style={[styles.infoCard, styles.infoCardTerracotta]}>
+            <View style={[styles.infoCard, styles.infoCardNavy]}>
               <Text style={styles.infoCardLabel}>Tour Operator</Text>
               <Text style={styles.infoCardValue}>{booking.agent.businessName}</Text>
+              <Text style={styles.infoCardSubtext}>Your safari partner</Text>
             </View>
-          </View>
-
-          {/* Journey Path Decoration */}
-          <View style={{ marginBottom: 10 }}>
-            <JourneyPath width={515} />
           </View>
 
           {/* Itinerary Section */}
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <View style={styles.sectionIconBox}>
-                <CalendarIcon />
+              <View style={styles.sectionIcon}>
+                <CalendarIcon color={colors.white} />
               </View>
-              <Text style={styles.sectionTitle}>Your Itinerary</Text>
-              <View style={{ marginLeft: "auto", opacity: 0.5 }}>
-                <BinocularsIcon size={16} color={colors.secondary} />
+              <View>
+                <Text style={styles.sectionTitle}>Your Journey</Text>
+                <Text style={styles.sectionSubtitle}>Day-by-day adventure itinerary</Text>
               </View>
             </View>
 
-            {itinerary.map((day) => (
-              <View key={day.dayNumber} style={styles.dayCard} wrap={false}>
-                <View style={styles.dayCardHeader}>
-                  <View style={styles.dayNumberCircle}>
-                    <Text style={styles.dayNumberText}>{day.dayNumber}</Text>
-                  </View>
-                  <View style={styles.dayTitleContainer}>
-                    <Text style={styles.dayTitle}>{day.title}</Text>
-                    {day.location && (
-                      <Text style={styles.dayLocation}>{day.location}</Text>
-                    )}
+            <View style={styles.timelineContainer}>
+              <View style={styles.timelineLine} />
+              {itinerary.map((day) => (
+                <View key={day.dayNumber} style={styles.dayCard} wrap={false}>
+                  <View style={styles.dayMarker} />
+                  <View style={styles.dayContent}>
+                    <View style={styles.dayHeader}>
+                      <Text style={styles.dayNumber}>Day {day.dayNumber}</Text>
+                      <Text style={styles.dayTitle}>{day.title}</Text>
+                      {day.location && (
+                        <View style={styles.dayLocation}>
+                          <MapPinIcon color={colors.stone} />
+                          <Text style={{ fontSize: 9, color: colors.stone, marginLeft: 4 }}>
+                            {day.location}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                    <View style={styles.dayBody}>
+                      <Text style={styles.dayDescription}>{day.description}</Text>
+
+                      {day.meals.length > 0 && (
+                        <View style={styles.dayDetails}>
+                          <View style={styles.dayDetailItem}>
+                            <MealIcon color={colors.charcoal} />
+                            <Text style={styles.dayDetailText}>
+                              {day.meals.join(", ")}
+                            </Text>
+                          </View>
+                        </View>
+                      )}
+
+                      {accommodationByDay[day.dayNumber] && (
+                        <View style={styles.accommodationBadge}>
+                          <Text style={styles.accommodationLabel}>Overnight Stay</Text>
+                          <Text style={styles.accommodationName}>
+                            {accommodationByDay[day.dayNumber].name}
+                          </Text>
+                          <Text style={styles.accommodationTier}>
+                            {accommodationByDay[day.dayNumber].tier} Accommodation
+                          </Text>
+                        </View>
+                      )}
+                    </View>
                   </View>
                 </View>
-                <View style={styles.dayCardBody}>
-                  <Text style={styles.dayDescription}>{day.description}</Text>
-
-                  {day.meals.length > 0 && (
-                    <View style={styles.dayMetaRow}>
-                      <View style={styles.dayMetaItem}>
-                        <Text style={styles.dayMetaLabel}>Meals:</Text>
-                        <Text style={styles.dayMetaValue}>{day.meals.join(", ")}</Text>
-                      </View>
-                    </View>
-                  )}
-
-                  {accommodationByDay[day.dayNumber] && (
-                    <View style={styles.accommodationBox}>
-                      <Text style={styles.accommodationLabel}>Overnight Accommodation</Text>
-                      <Text style={styles.accommodationName}>
-                        {accommodationByDay[day.dayNumber].name}
-                      </Text>
-                      <View style={styles.accommodationTierBadge}>
-                        <Text style={styles.accommodationTierText}>
-                          {accommodationByDay[day.dayNumber].tier}
-                        </Text>
-                      </View>
-                    </View>
-                  )}
-                </View>
-              </View>
-            ))}
+              ))}
+            </View>
           </View>
-
-          {/* Section Divider before Add-ons */}
-          {booking.activities.length > 0 && (
-            <SectionDivider width={515} showIcon={false} />
-          )}
 
           {/* Add-ons Section */}
           {booking.activities.length > 0 && (
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
-                <View style={[styles.sectionIconBox, { backgroundColor: colors.goldBg }]}>
-                  <SparklesIcon color={colors.gold} />
+                <View style={[styles.sectionIcon, styles.sectionIconAlt]}>
+                  <SparkleIcon color={colors.white} />
                 </View>
-                <Text style={styles.sectionTitle}>Included Add-ons</Text>
+                <View>
+                  <Text style={styles.sectionTitle}>Premium Experiences</Text>
+                  <Text style={styles.sectionSubtitle}>Your selected add-ons and activities</Text>
+                </View>
               </View>
-              <View style={styles.addonsGrid}>
+              <View style={styles.addonsContainer}>
                 {booking.activities.map((activity, idx) => (
-                  <View key={idx} style={styles.addonBadge}>
+                  <View key={idx} style={styles.addonItem}>
                     <Text style={styles.addonText}>{activity.activityAddon.name}</Text>
                   </View>
                 ))}
@@ -1263,133 +1156,117 @@ export function ItineraryPDF({ booking, itinerary, pricing }: ItineraryPDFProps)
             </View>
           )}
 
-          {/* Section Divider before Price Summary */}
-          <SectionDivider width={515} showIcon={true} />
-
-          {/* Price Summary */}
-          <View style={styles.priceSection}>
+          {/* Price Breakdown */}
+          <View style={styles.priceContainer}>
             <View style={styles.priceHeader}>
-              <Text style={styles.priceTitle}>Price Summary</Text>
+              <Text style={styles.priceTitle}>Investment Summary</Text>
             </View>
-
-            <View style={styles.priceRow}>
-              <Text style={styles.priceLabel}>
-                Base Package ({booking.adults} adult{booking.adults > 1 ? "s" : ""})
-              </Text>
-              <Text style={styles.priceValue}>${pricing.baseTotal.toLocaleString()}</Text>
-            </View>
-
-            {booking.children > 0 && (
+            <View style={styles.priceBody}>
               <View style={styles.priceRow}>
                 <Text style={styles.priceLabel}>
-                  Children ({booking.children})
+                  Safari Package ({booking.adults} adult{booking.adults > 1 ? "s" : ""})
                 </Text>
-                <Text style={styles.priceValue}>${pricing.childTotal.toLocaleString()}</Text>
+                <Text style={styles.priceValue}>{formatCurrency(pricing.baseTotal)}</Text>
               </View>
-            )}
 
-            <View style={styles.priceRow}>
-              <Text style={styles.priceLabel}>Accommodations</Text>
-              <Text style={styles.priceValue}>
-                ${pricing.accommodationTotal.toLocaleString()}
-              </Text>
-            </View>
+              {booking.children > 0 && (
+                <View style={styles.priceRow}>
+                  <Text style={styles.priceLabel}>
+                    Children ({booking.children})
+                  </Text>
+                  <Text style={styles.priceValue}>{formatCurrency(pricing.childTotal)}</Text>
+                </View>
+              )}
 
-            {pricing.addonsTotal > 0 && (
               <View style={styles.priceRow}>
-                <Text style={styles.priceLabel}>Add-ons & Activities</Text>
-                <Text style={styles.priceValue}>
-                  ${pricing.addonsTotal.toLocaleString()}
-                </Text>
+                <Text style={styles.priceLabel}>Accommodations</Text>
+                <Text style={styles.priceValue}>{formatCurrency(pricing.accommodationTotal)}</Text>
               </View>
-            )}
 
-            <View style={styles.priceRow}>
-              <Text style={styles.priceLabel}>Service Fee & Taxes</Text>
-              <Text style={styles.priceValue}>${pricing.serviceFee.toLocaleString()}</Text>
-            </View>
-
-            <View style={styles.priceDivider} />
-
-            <View style={styles.priceRow}>
-              <Text style={[styles.priceLabel, { fontWeight: "bold" }]}>Total Amount</Text>
-              <Text style={[styles.priceValue, { fontSize: 12 }]}>${pricing.total.toLocaleString()}</Text>
-            </View>
-
-            {/* Payment Status Section */}
-            {booking.paymentType === "DEPOSIT" && booking.depositAmount ? (
-              <>
+              {pricing.addonsTotal > 0 && (
                 <View style={styles.priceRow}>
-                  <Text style={styles.priceLabel}>Deposit Paid</Text>
-                  <Text style={[styles.priceValue, { color: colors.success }]}>
-                    ${booking.depositAmount.toLocaleString()}
-                  </Text>
+                  <Text style={styles.priceLabel}>Premium Experiences</Text>
+                  <Text style={styles.priceValue}>{formatCurrency(pricing.addonsTotal)}</Text>
                 </View>
-                <View style={styles.priceRow}>
-                  <Text style={styles.priceLabel}>Balance Due</Text>
-                  <Text style={[styles.priceValue, { color: "#D97706" }]}>
-                    ${booking.balanceAmount?.toLocaleString() || 0}
-                  </Text>
-                </View>
-                {booking.balanceDueDate && (
+              )}
+
+              <View style={styles.priceRow}>
+                <Text style={styles.priceLabel}>Service Fee & Taxes</Text>
+                <Text style={styles.priceValue}>{formatCurrency(pricing.serviceFee)}</Text>
+              </View>
+
+              <View style={styles.priceDivider} />
+
+              {isDeposit && booking.depositAmount ? (
+                <>
                   <View style={styles.priceRow}>
-                    <Text style={styles.priceLabel}>Balance Due By</Text>
-                    <Text style={styles.priceValue}>
-                      {format(new Date(booking.balanceDueDate), "MMM d, yyyy")}
+                    <Text style={styles.priceLabel}>Deposit Paid</Text>
+                    <Text style={[styles.priceValue, { color: colors.success }]}>
+                      {formatCurrency(booking.depositAmount)}
                     </Text>
                   </View>
-                )}
-                <View style={styles.totalRow}>
-                  <Text style={styles.totalLabel}>Deposit Paid</Text>
-                  <Text style={styles.totalValue}>${booking.depositAmount.toLocaleString()}</Text>
-                </View>
-              </>
-            ) : (
-              <View style={styles.totalRow}>
-                <Text style={styles.totalLabel}>
-                  {booking.paymentStatus === "COMPLETED" ? "Total Paid" : "Amount Due"}
+                  {hasBalance && (
+                    <View style={styles.priceRow}>
+                      <Text style={styles.priceLabel}>Balance Due</Text>
+                      <Text style={[styles.priceValue, { color: colors.warning }]}>
+                        {formatCurrency(booking.balanceAmount!)}
+                      </Text>
+                    </View>
+                  )}
+                </>
+              ) : null}
+
+              <View style={styles.priceTotal}>
+                <Text style={styles.priceTotalLabel}>
+                  {isPaid ? "Total Paid" : "Total Due"}
                 </Text>
-                <Text style={styles.totalValue}>${pricing.total.toLocaleString()}</Text>
+                <Text style={styles.priceTotalValue}>{formatCurrency(pricing.total)}</Text>
               </View>
-            )}
+            </View>
           </View>
 
-          {/* Payment Status Notice for Deposit */}
-          {booking.paymentType === "DEPOSIT" && booking.balanceAmount && booking.balanceAmount > 0 && (
-            <View style={[styles.paymentStatusBox, styles.paymentStatusBoxPending]}>
-              <Text style={[styles.paymentStatusTitle, styles.paymentStatusTitlePending]}>
+          {/* Payment Status Notice */}
+          {hasBalance && (
+            <View style={[styles.paymentNotice, styles.paymentNoticePending]}>
+              <Text style={[styles.paymentNoticeTitle, styles.paymentNoticeTitlePending]}>
                 Balance Payment Required
               </Text>
-              <Text style={styles.balanceDueText}>
-                Please pay the remaining balance of ${booking.balanceAmount.toLocaleString()}
-                {booking.balanceDueDate
-                  ? ` by ${format(new Date(booking.balanceDueDate), "MMMM d, yyyy")}`
-                  : " before your trip"} to complete your booking.
+              <Text style={styles.paymentNoticeText}>
+                Please pay the remaining balance to complete your booking confirmation.
+                {booking.balanceDueDate && (
+                  ` Payment due by ${format(new Date(booking.balanceDueDate), "MMMM d, yyyy")}.`
+                )}
+              </Text>
+              <Text style={styles.paymentNoticeAmount}>
+                Amount Due: {formatCurrency(booking.balanceAmount!)}
               </Text>
             </View>
           )}
 
-          {/* Payment Confirmed Notice */}
-          {booking.paymentStatus === "COMPLETED" && booking.paymentType !== "DEPOSIT" && (
-            <View style={styles.paymentStatusBox}>
-              <Text style={styles.paymentStatusTitle}>Payment Confirmed</Text>
-              <Text style={{ fontSize: 9, color: colors.gray600 }}>
-                Your payment has been received in full. Your safari adventure is confirmed!
+          {isPaid && !hasBalance && (
+            <View style={styles.paymentNotice}>
+              <Text style={styles.paymentNoticeTitle}>Payment Confirmed</Text>
+              <Text style={styles.paymentNoticeText}>
+                Your payment has been received. Your African safari adventure is fully confirmed.
+                We look forward to creating unforgettable memories with you!
               </Text>
             </View>
           )}
 
           {/* Contact Section */}
-          <View style={styles.contactSection}>
+          <View style={styles.contactGrid}>
             <View style={[styles.contactCard, styles.contactCardPrimary]}>
-              <Text style={styles.contactTitle}>Your Contact Details</Text>
+              <Text style={styles.contactTitle}>Your Details</Text>
               <View style={styles.contactRow}>
+                <UserIcon color={colors.slate} />
                 <Text style={styles.contactText}>{booking.contactName}</Text>
               </View>
               <View style={styles.contactRow}>
+                <MailIcon color={colors.slate} />
                 <Text style={styles.contactText}>{booking.contactEmail}</Text>
               </View>
               <View style={styles.contactRow}>
+                <PhoneIcon color={colors.slate} />
                 <Text style={styles.contactText}>{booking.contactPhone}</Text>
               </View>
             </View>
@@ -1397,15 +1274,18 @@ export function ItineraryPDF({ booking, itinerary, pricing }: ItineraryPDFProps)
             <View style={[styles.contactCard, styles.contactCardSecondary]}>
               <Text style={styles.contactTitle}>Tour Operator</Text>
               <View style={styles.contactRow}>
+                <UserIcon color={colors.slate} />
                 <Text style={styles.contactText}>{booking.agent.businessName}</Text>
               </View>
               {booking.agent.businessEmail && (
                 <View style={styles.contactRow}>
+                  <MailIcon color={colors.slate} />
                   <Text style={styles.contactText}>{booking.agent.businessEmail}</Text>
                 </View>
               )}
               {booking.agent.businessPhone && (
                 <View style={styles.contactRow}>
+                  <PhoneIcon color={colors.slate} />
                   <Text style={styles.contactText}>{booking.agent.businessPhone}</Text>
                 </View>
               )}
@@ -1421,123 +1301,77 @@ export function ItineraryPDF({ booking, itinerary, pricing }: ItineraryPDFProps)
           )}
         </View>
 
-        {/* Footer */}
+        {/* Premium Footer */}
         <View style={styles.footer}>
           <View style={styles.footerContent}>
             <View style={styles.footerLeft}>
-              <Text style={styles.footerLogo}>SafariPlus</Text>
-              <Text style={styles.footerText}>
-                Thank you for booking with us!
+              <Text style={styles.footerBrand}>SafariPlus</Text>
+              <Text style={styles.footerTagline}>
+                Thank you for choosing us for your African adventure.
               </Text>
-              <Text style={styles.footerText}>
-                For questions or changes, contact us at support@safariplus.com
+              <Text style={styles.footerTagline}>
+                Questions? Contact us at support@safariplus.com
               </Text>
             </View>
             <View style={styles.footerRight}>
-              <View style={styles.footerHighlight}>
-                <Text style={styles.footerHighlightText}>
-                  Free cancellation up to 30 days before your trip
+              <View style={styles.footerBadge}>
+                <ShieldIcon color={colors.goldLight} />
+                <Text style={[styles.footerBadgeText, { marginLeft: 6 }]}>
+                  100% Secure Booking
                 </Text>
               </View>
-              <Text style={styles.footerWebsite}>www.safariplus.com</Text>
+              <Text style={styles.footerUrl}>www.safariplus.com</Text>
             </View>
           </View>
         </View>
       </Page>
 
-      {/* Image Gallery Page - Only if there are images */}
+      {/* ===== GALLERY PAGE ===== */}
       {(booking.tour.coverImage || (booking.tour.images && booking.tour.images.length > 0)) && (
         <Page size="A4" style={[styles.page, styles.galleryPage]}>
-          {/* Corner Decorations */}
-          <View style={{ position: "absolute", top: 15, left: 15, opacity: 0.2 }}>
-            <AcaciaTreeSilhouette size={35} color={colors.secondary} />
-          </View>
-          <View style={{ position: "absolute", top: 15, right: 15, opacity: 0.2, transform: "scaleX(-1)" }}>
-            <AcaciaTreeSilhouette size={35} color={colors.secondary} />
+          <View style={styles.galleryHeader}>
+            <Text style={styles.galleryTitle}>Your Destination Gallery</Text>
+            <Text style={styles.gallerySubtitle}>
+              {booking.tour.title} • {booking.tour.destination}
+            </Text>
           </View>
 
-          {/* Gallery Header */}
-          <View style={[styles.galleryHeader, { marginTop: 30 }]}>
-            <MaasaiSpearDecoration height={45} />
-            <View style={{ alignItems: "center" }}>
-              <Text style={styles.galleryTitle}>Tour Gallery</Text>
-              <View style={{ marginTop: 5 }}>
-                <FlightRouteDecoration width={200} />
+          <View style={styles.galleryContent}>
+            {/* Cover Image */}
+            {booking.tour.coverImage && (
+              <View style={styles.coverImageWrapper}>
+                <Image
+                  src={booking.tour.coverImage}
+                  style={styles.coverImage}
+                />
               </View>
-            </View>
-            <MaasaiSpearDecoration height={45} />
-          </View>
+            )}
 
-          <Text style={styles.gallerySubtitle}>
-            {booking.tour.title} • {booking.tour.destination}
-          </Text>
-
-          {/* Premium Section Divider */}
-          <SectionDivider width={515} showIcon={true} />
-
-          {/* Cover Image */}
-          {booking.tour.coverImage && (
-            <View style={styles.coverImageContainer}>
-              <Image
-                src={booking.tour.coverImage}
-                style={styles.coverImage}
-              />
-              {/* Safari Jeep overlay on cover image */}
-              <View style={{ position: "absolute", bottom: 10, right: 15, opacity: 0.7 }}>
-                <SafariJeepIcon size={35} color={colors.white} />
+            {/* Gallery Grid */}
+            {booking.tour.images && booking.tour.images.length > 0 && (
+              <View style={styles.galleryGrid}>
+                {booking.tour.images.slice(0, 4).map((image, index) => (
+                  <View key={index} style={styles.galleryImageWrapper}>
+                    <Image
+                      src={image}
+                      style={styles.galleryImage}
+                    />
+                  </View>
+                ))}
               </View>
+            )}
+
+            {/* Gallery Footer */}
+            <View style={styles.galleryFooter}>
+              <StarIcon color={colors.gold} />
+              <Text style={styles.galleryTagline}>
+                Experience the Magic of Africa
+              </Text>
+              <Text style={styles.gallerySubTagline}>
+                Unforgettable adventures await with SafariPlus
+              </Text>
+              <Text style={styles.galleryBrandUrl}>www.safariplus.com</Text>
             </View>
-          )}
-
-          {/* Gallery Grid */}
-          {booking.tour.images && booking.tour.images.length > 0 && (
-            <View style={styles.galleryGrid}>
-              {booking.tour.images.slice(0, 4).map((image, index) => (
-                <View key={index} style={styles.galleryImageContainer}>
-                  <Image
-                    src={image}
-                    style={styles.galleryImage}
-                  />
-                </View>
-              ))}
-            </View>
-          )}
-
-          {/* Safari Animals Row - Full width decoration */}
-          <View style={{ marginTop: 25, alignItems: "center" }}>
-            <SafariAnimalsRow width={400} />
-          </View>
-
-          {/* Premium African Pattern */}
-          <View style={[styles.patternBorder, { marginTop: 20 }]}>
-            <PremiumAfricanBorder width={515} variant="gold" />
-          </View>
-
-          {/* Gallery Footer with African Sun */}
-          <View style={{ marginTop: 25, alignItems: "center", position: "relative" }}>
-            {/* Background mountain silhouette */}
-            <View style={{ position: "absolute", top: -10, opacity: 0.1, zIndex: -1 }}>
-              <MountainSilhouette width={300} />
-            </View>
-
-            <AfricanSunIcon size={60} />
-            <Text style={{ fontSize: 12, color: colors.secondary, marginTop: 12, textAlign: "center", fontWeight: "bold" }}>
-              Experience the Magic of Africa
-            </Text>
-            <Text style={{ fontSize: 9, color: colors.gray500, marginTop: 5, textAlign: "center" }}>
-              Unforgettable adventures await with SafariPlus
-            </Text>
-
-            {/* Acacia trees flanking the text */}
-            <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "flex-end", marginTop: 15, gap: 80 }}>
-              <AcaciaTreeSilhouette size={30} color={colors.secondary} />
-              <CompassIcon size={25} />
-              <AcaciaTreeSilhouette size={30} color={colors.secondary} />
-            </View>
-
-            <Text style={{ fontSize: 9, color: colors.primary, marginTop: 15, fontWeight: "bold" }}>
-              www.safariplus.com
-            </Text>
           </View>
         </Page>
       )}

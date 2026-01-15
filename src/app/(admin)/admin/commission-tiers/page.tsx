@@ -33,6 +33,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import { SectionError } from "@/components/error"
 
 interface CommissionTier {
   id: string
@@ -193,8 +194,9 @@ export default function CommissionTiersPage() {
         </Button>
       </div>
 
-      {/* Info Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <SectionError name="Commission Tiers Table">
+        {/* Info Cards */}
+        <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total Tiers</CardTitle>
@@ -326,6 +328,7 @@ export default function CommissionTiersPage() {
           )}
         </CardContent>
       </Card>
+      </SectionError>
 
       {/* Create/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

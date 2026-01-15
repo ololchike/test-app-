@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { SectionError } from "@/components/error"
 
 interface FAQCategory {
   category: string
@@ -46,6 +47,7 @@ export function FAQPageClient({ faqCategories }: FAQPageClientProps) {
   return (
     <div className="pt-20">
       {/* Hero Header */}
+      <SectionError name="Hero">
       <section className="relative bg-gradient-to-br from-secondary via-secondary/95 to-primary/30 py-16 sm:py-20 lg:py-28 overflow-hidden">
         {/* Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -114,8 +116,10 @@ export function FAQPageClient({ faqCategories }: FAQPageClientProps) {
           </motion.div>
         </div>
       </section>
+      </SectionError>
 
       {/* Category Quick Links */}
+      <SectionError name="Categories">
       <section className="py-8 -mt-8 relative z-10">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex flex-wrap justify-center gap-3 max-w-4xl mx-auto">
@@ -135,8 +139,10 @@ export function FAQPageClient({ faqCategories }: FAQPageClientProps) {
           </div>
         </div>
       </section>
+      </SectionError>
 
       {/* FAQ Content */}
+      <SectionError name="FAQ Content">
       <section className="py-12 sm:py-16 lg:py-24">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-4xl space-y-12">
@@ -205,8 +211,10 @@ export function FAQPageClient({ faqCategories }: FAQPageClientProps) {
           </div>
         </div>
       </section>
+      </SectionError>
 
       {/* Still Have Questions */}
+      <SectionError name="CTA">
       <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-r from-primary/5 via-accent/5 to-secondary/5">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -253,6 +261,7 @@ export function FAQPageClient({ faqCategories }: FAQPageClientProps) {
           </motion.div>
         </div>
       </section>
+      </SectionError>
     </div>
   )
 }

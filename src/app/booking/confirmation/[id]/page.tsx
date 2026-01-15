@@ -29,6 +29,7 @@ import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { SectionError } from "@/components/error"
 
 interface BookingData {
   id: string
@@ -313,6 +314,7 @@ function ConfirmationContent() {
           </motion.div>
 
           {/* Booking Reference */}
+          <SectionError name="Booking Reference">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -363,8 +365,10 @@ function ConfirmationContent() {
               </CardContent>
             </Card>
           </motion.div>
+          </SectionError>
 
           {/* Tour Details */}
+          <SectionError name="Trip Details">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -588,8 +592,10 @@ function ConfirmationContent() {
               </CardContent>
             </Card>
           </motion.div>
+          </SectionError>
 
           {/* Contact Information */}
+          <SectionError name="Contact Information">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -641,8 +647,10 @@ function ConfirmationContent() {
               </CardContent>
             </Card>
           </motion.div>
+          </SectionError>
 
           {/* Tour Operator */}
+          <SectionError name="Tour Operator">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -675,8 +683,10 @@ function ConfirmationContent() {
               </CardContent>
             </Card>
           </motion.div>
+          </SectionError>
 
           {/* Actions */}
+          <SectionError name="Actions">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -708,6 +718,7 @@ function ConfirmationContent() {
               <Link href="/dashboard/bookings">View My Bookings</Link>
             </Button>
           </motion.div>
+          </SectionError>
 
           {/* Cancel Booking Option */}
           {booking.status !== "CANCELLED" &&

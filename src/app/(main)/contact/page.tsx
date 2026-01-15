@@ -28,6 +28,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
+import { SectionError } from "@/components/error"
 
 const contactFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -115,6 +116,7 @@ export default function ContactPage() {
   return (
     <div className="pt-20">
       {/* Hero Header */}
+      <SectionError name="Hero">
       <section className="relative bg-gradient-to-br from-secondary via-secondary/95 to-primary/30 py-16 sm:py-20 lg:py-28 overflow-hidden">
         {/* Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -166,8 +168,10 @@ export default function ContactPage() {
           </motion.div>
         </div>
       </section>
+      </SectionError>
 
       {/* Contact Info Cards */}
+      <SectionError name="Contact Info">
       <section className="py-8 sm:py-12 -mt-12 sm:-mt-16 relative z-10">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid gap-4 sm:gap-6 md:grid-cols-3 max-w-4xl mx-auto">
@@ -203,8 +207,10 @@ export default function ContactPage() {
           </div>
         </div>
       </section>
+      </SectionError>
 
       {/* Contact Form and Info */}
+      <SectionError name="Contact Form">
       <section className="py-12 sm:py-16 lg:py-24">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid gap-6 sm:gap-8 lg:grid-cols-3 max-w-6xl mx-auto">
@@ -424,8 +430,10 @@ export default function ContactPage() {
           </div>
         </div>
       </section>
+      </SectionError>
 
       {/* FAQ Teaser */}
+      <SectionError name="FAQ Teaser">
       <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-r from-primary/5 via-accent/5 to-secondary/5">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -454,6 +462,7 @@ export default function ContactPage() {
           </motion.div>
         </div>
       </section>
+      </SectionError>
     </div>
   )
 }

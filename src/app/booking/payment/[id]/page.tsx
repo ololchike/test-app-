@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
+import { SectionError } from "@/components/error"
 
 type PaymentMethodType = "MPESA" | "CARD" | "BANK_TRANSFER"
 
@@ -227,6 +228,7 @@ export default function PaymentPage() {
       <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
         <div className="max-w-2xl mx-auto space-y-4 sm:space-y-6">
           {/* Tour Preview */}
+          <SectionError name="Tour Preview">
           {booking.tour?.coverImage && (
             <Card className="overflow-hidden">
               <div className="flex gap-4 p-4">
@@ -251,8 +253,10 @@ export default function PaymentPage() {
               </div>
             </Card>
           )}
+          </SectionError>
 
           {/* Booking Summary */}
+          <SectionError name="Payment Summary">
           <Card>
             <CardHeader className="pb-3 sm:pb-6">
               <CardTitle className="text-base sm:text-lg">Payment Summary</CardTitle>
@@ -314,8 +318,10 @@ export default function PaymentPage() {
               )}
             </CardContent>
           </Card>
+          </SectionError>
 
           {/* Payment Method Selection */}
+          <SectionError name="Payment Method">
           <Card>
             <CardHeader className="pb-3 sm:pb-6">
               <CardTitle className="text-base sm:text-lg">Choose Payment Method</CardTitle>
@@ -357,8 +363,10 @@ export default function PaymentPage() {
               })}
             </CardContent>
           </Card>
+          </SectionError>
 
           {/* Security Info */}
+          <SectionError name="Security Information">
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center justify-center gap-6 text-xs text-muted-foreground">
@@ -376,6 +384,7 @@ export default function PaymentPage() {
               </p>
             </CardContent>
           </Card>
+          </SectionError>
         </div>
       </div>
 

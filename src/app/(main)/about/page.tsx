@@ -19,6 +19,7 @@ import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
+import { SectionError } from "@/components/error"
 
 const values = [
   {
@@ -89,6 +90,7 @@ export default function AboutPage() {
   return (
     <div className="pt-20">
       {/* Hero Section */}
+      <SectionError name="Hero">
       <section className="relative py-16 sm:py-20 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 z-0">
           <Image
@@ -169,8 +171,10 @@ export default function AboutPage() {
           </motion.div>
         </div>
       </section>
+      </SectionError>
 
       {/* Stats Section */}
+      <SectionError name="Stats">
       <section className="relative border-b bg-gradient-to-r from-muted/50 via-background to-muted/50 py-12 sm:py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 gap-6 sm:gap-8 md:grid-cols-4">
@@ -194,8 +198,10 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
+      </SectionError>
 
       {/* Story Section */}
+      <SectionError name="Story">
       <section className="py-12 sm:py-16 lg:py-28">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid gap-8 sm:gap-12 lg:grid-cols-2 lg:gap-20 items-center">
@@ -271,8 +277,10 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
+      </SectionError>
 
       {/* Mission & Vision */}
+      <SectionError name="Mission">
       <section className="bg-secondary py-12 sm:py-16 lg:py-28 text-white relative overflow-hidden">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <motion.div
@@ -329,8 +337,10 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
+      </SectionError>
 
       {/* Values Section */}
+      <SectionError name="Values">
       <section className="py-12 sm:py-16 lg:py-28">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -385,8 +395,10 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
+      </SectionError>
 
       {/* Team Section */}
+      <SectionError name="Team">
       <section className="bg-muted/30 py-12 sm:py-16 lg:py-28">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -444,8 +456,10 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
+      </SectionError>
 
       {/* CTA Section */}
+      <SectionError name="CTA">
       <section className="py-12 sm:py-16 lg:py-28">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -508,6 +522,7 @@ export default function AboutPage() {
           </motion.div>
         </div>
       </section>
+      </SectionError>
     </div>
   )
 }

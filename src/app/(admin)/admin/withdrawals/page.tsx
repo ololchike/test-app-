@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { SectionError } from "@/components/error"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Table,
@@ -259,23 +260,25 @@ export default function AdminWithdrawalsPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
-        {Object.entries(statusCounts).map(([status, data]: [string, any]) => (
-          <Card key={status}>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {status.charAt(0) + status.slice(1).toLowerCase()}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{data.count}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                ${data.totalAmount.toLocaleString()}
-              </p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <SectionError name="Withdrawal Stats">
+        <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+          {Object.entries(statusCounts).map(([status, data]: [string, any]) => (
+            <Card key={status}>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  {status.charAt(0) + status.slice(1).toLowerCase()}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{data.count}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  ${data.totalAmount.toLocaleString()}
+                </p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </SectionError>
 
       {/* Filters */}
       <Card>
@@ -305,7 +308,8 @@ export default function AdminWithdrawalsPage() {
       </Card>
 
       {/* Withdrawals Table */}
-      <Card>
+      <SectionError name="Withdrawals Table">
+        <Card>
         <CardHeader>
           <CardTitle>Withdrawal Requests</CardTitle>
           <CardDescription>
@@ -441,6 +445,7 @@ export default function AdminWithdrawalsPage() {
           )}
         </CardContent>
       </Card>
+      </SectionError>
 
       {/* Approve Dialog */}
       <Dialog

@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { SectionError } from "@/components/error"
 import {
   Select,
   SelectContent,
@@ -131,64 +132,67 @@ export default function AdminBookingsPage() {
         <p className="text-muted-foreground mt-2">View and manage all bookings</p>
       </div>
 
-      <div className="grid gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4">
-        <Card
-          className={`cursor-pointer transition-all hover:shadow-lg ${
-            statusFilter === "all" ? "ring-2 ring-primary" : ""
-          }`}
-          onClick={() => {
-            setStatusFilter("all")
-            setPage(1)
-          }}
-        >
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">All Bookings</p>
-                <p className="text-2xl font-bold mt-1">
-                  {Object.values(statusCounts).reduce((a, b) => a + b, 0)}
-                </p>
-              </div>
-              <Calendar className="h-8 w-8 text-blue-500" />
-            </div>
-          </CardContent>
-        </Card>
-
-        {["CONFIRMED", "PAID", "CANCELLED"].map((status) => {
-          const count = statusCounts[status] || 0
-
-          return (
-            <Card
-              key={status}
-              className={`cursor-pointer transition-all hover:shadow-lg ${
-                statusFilter === status ? "ring-2 ring-primary" : ""
-              }`}
-              onClick={() => {
-                setStatusFilter(status)
-                setPage(1)
-              }}
-            >
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">
-                      {statusConfig[status as keyof typeof statusConfig]?.label}
-                    </p>
-                    <p className="text-2xl font-bold mt-1">{count}</p>
-                  </div>
-                  <div
-                    className={`h-3 w-3 rounded-full ${
-                      statusConfig[status as keyof typeof statusConfig]?.color
-                    }`}
-                  ></div>
+      <SectionError name="Booking Stats">
+        <div className="grid gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4">
+          <Card
+            className={`cursor-pointer transition-all hover:shadow-lg ${
+              statusFilter === "all" ? "ring-2 ring-primary" : ""
+            }`}
+            onClick={() => {
+              setStatusFilter("all")
+              setPage(1)
+            }}
+          >
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">All Bookings</p>
+                  <p className="text-2xl font-bold mt-1">
+                    {Object.values(statusCounts).reduce((a, b) => a + b, 0)}
+                  </p>
                 </div>
-              </CardContent>
-            </Card>
-          )
-        })}
-      </div>
+                <Calendar className="h-8 w-8 text-blue-500" />
+              </div>
+            </CardContent>
+          </Card>
 
-      <Card>
+          {["CONFIRMED", "PAID", "CANCELLED"].map((status) => {
+            const count = statusCounts[status] || 0
+
+            return (
+              <Card
+                key={status}
+                className={`cursor-pointer transition-all hover:shadow-lg ${
+                  statusFilter === status ? "ring-2 ring-primary" : ""
+                }`}
+                onClick={() => {
+                  setStatusFilter(status)
+                  setPage(1)
+                }}
+              >
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">
+                        {statusConfig[status as keyof typeof statusConfig]?.label}
+                      </p>
+                      <p className="text-2xl font-bold mt-1">{count}</p>
+                    </div>
+                    <div
+                      className={`h-3 w-3 rounded-full ${
+                        statusConfig[status as keyof typeof statusConfig]?.color
+                      }`}
+                    ></div>
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          })}
+        </div>
+      </SectionError>
+
+      <SectionError name="Bookings Table">
+        <Card>
         <CardHeader>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <CardTitle>Bookings</CardTitle>
@@ -348,6 +352,7 @@ export default function AdminBookingsPage() {
           )}
         </CardContent>
       </Card>
+      </SectionError>
     </div>
   )
 }

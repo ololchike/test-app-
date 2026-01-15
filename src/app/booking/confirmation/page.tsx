@@ -3,6 +3,7 @@
 import { Suspense, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Loader2 } from "lucide-react"
+import { SectionError } from "@/components/error"
 
 /**
  * Redirect handler for Pesapal callbacks with query parameters
@@ -37,12 +38,14 @@ function ConfirmationRedirectContent() {
   }, [router, searchParams])
 
   return (
+    <SectionError name="Booking Redirect">
     <div className="min-h-screen flex items-center justify-center">
       <div className="text-center">
         <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
         <p className="text-muted-foreground">Redirecting to your booking...</p>
       </div>
     </div>
+    </SectionError>
   )
 }
 

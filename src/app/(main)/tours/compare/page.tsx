@@ -5,6 +5,7 @@ import { ComparisonTable } from "@/components/tours/comparison-table"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ArrowLeft, GitCompare } from "lucide-react"
+import { SectionError } from "@/components/error"
 
 export const metadata: Metadata = {
   title: "Compare Tours | SafariPlus",
@@ -78,6 +79,7 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
   return (
     <div className="pt-20 min-h-screen bg-gradient-to-b from-background to-muted/20">
       {/* Header */}
+      <SectionError name="Tour Comparison Header">
       <div className="bg-gradient-to-br from-secondary via-secondary/95 to-primary/30 py-12">
         <div className="container mx-auto px-4">
           <Button variant="ghost" size="sm" asChild className="mb-4 text-white/80 hover:text-white hover:bg-white/10">
@@ -100,11 +102,14 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
           </p>
         </div>
       </div>
+      </SectionError>
 
       {/* Comparison Content */}
+      <SectionError name="Tour Comparison Table">
       <div className="container mx-auto px-4 py-8">
         <ComparisonTable tours={sortedTours} />
       </div>
+      </SectionError>
     </div>
   )
 }

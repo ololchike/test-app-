@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
+import { SectionError } from "@/components/error"
 
 interface Booking {
   id: string
@@ -320,48 +321,51 @@ export default function BookingsPage() {
       </div>
 
       {/* Stats Summary */}
-      <div className="grid gap-4 grid-cols-2 sm:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
-              Upcoming Trips
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl sm:text-2xl font-bold">{upcomingBookings.length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
-              Completed Trips
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl sm:text-2xl font-bold">{pastBookings.length}</div>
-          </CardContent>
-        </Card>
-        <Card className="col-span-2 sm:col-span-1">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
-              Total Spent
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl sm:text-2xl font-bold">
-              ${bookings.reduce((sum, b) => sum + b.totalAmount, 0).toLocaleString()}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <SectionError name="Booking Stats">
+        <div className="grid gap-4 grid-cols-2 sm:grid-cols-3">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
+                Upcoming Trips
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-xl sm:text-2xl font-bold">{upcomingBookings.length}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
+                Completed Trips
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-xl sm:text-2xl font-bold">{pastBookings.length}</div>
+            </CardContent>
+          </Card>
+          <Card className="col-span-2 sm:col-span-1">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
+                Total Spent
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-xl sm:text-2xl font-bold">
+                ${bookings.reduce((sum, b) => sum + b.totalAmount, 0).toLocaleString()}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </SectionError>
 
       {/* Bookings Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg sm:text-xl">Booking History</CardTitle>
-          <CardDescription className="text-sm">All your safari bookings in one place</CardDescription>
-        </CardHeader>
-        <CardContent>
+      <SectionError name="Booking History">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg sm:text-xl">Booking History</CardTitle>
+            <CardDescription className="text-sm">All your safari bookings in one place</CardDescription>
+          </CardHeader>
+          <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="mb-4 flex-wrap h-auto gap-1">
               <TabsTrigger value="all" className="text-xs sm:text-sm">All ({bookings.length})</TabsTrigger>
@@ -545,6 +549,7 @@ export default function BookingsPage() {
           </Tabs>
         </CardContent>
       </Card>
+      </SectionError>
 
       {/* Cancel Booking Dialog */}
       <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>

@@ -228,6 +228,34 @@ enum AccommodationTier {
   ULTRA_LUXURY
 }
 
+// Vehicle types for safari tours
+enum VehicleType {
+  SAFARI_VAN          // Standard 7-seater safari van with pop-up roof
+  LAND_CRUISER        // 4x4 Land Cruiser (6 pax) - premium option
+  EXTENDED_CRUISER    // Extended Land Cruiser (8 pax) - luxury
+  OVERLAND_TRUCK      // Large overland truck for group safaris
+  PRIVATE_VEHICLE     // Customer's own vehicle
+}
+
+// Add-on types for categorization
+enum AddonType {
+  ACTIVITY      // Activities like balloon safari, hiking
+  SERVICE       // Services like airport transfer, guide
+  EQUIPMENT     // Equipment rental like binoculars, camera
+  UPGRADE       // Upgrades like private vehicle, premium meals
+}
+
+// Add-on categories for filtering
+enum AddonCategory {
+  ADVENTURE      // Balloon safari, bungee, etc.
+  CULTURAL       // Village visit, cooking class
+  WILDLIFE       // Extra game drives, night safari
+  TRANSFER       // Airport transfers, inter-park
+  EQUIPMENT      // Equipment rental
+  WELLNESS       // Spa, yoga, etc.
+  DINING         // Special dining experiences
+}
+
 enum WithdrawalMethod {
   MPESA
   BANK
@@ -311,6 +339,7 @@ model Tour {
   // Relations
   agent            Agent       @relation(fields: [agentId], references: [id], onDelete: Cascade)
   itinerary        Itinerary[]
+  vehicles         Vehicle[]
   accommodationOptions AccommodationOption[]
   activityAddons   ActivityAddon[]
   bookings         Booking[]
@@ -318,6 +347,8 @@ model Tour {
   wishlist         Wishlist[]
   seasonalPricing  SeasonalPricing[]
   availability     TourAvailability[]
+  pricing          TourPricing?
+  availabilityHolds AvailabilityHold[]
 
   @@index([agentId])
   @@index([status])
@@ -325,6 +356,45 @@ model Tour {
   @@index([country])
   @@index([basePrice])
   @@index([featured])
+}
+
+// ============================================================================
+// VEHICLES FOR SAFARI TOURS
+// ============================================================================
+
+model Vehicle {
+  id              String      @id @default(cuid())
+  tourId          String
+  type            VehicleType
+  name            String      // e.g., "Toyota Land Cruiser 4x4"
+  description     String?
+
+  // Capacity
+  maxPassengers   Int         // Maximum passengers for this vehicle
+
+  // Pricing
+  pricePerDay     Float       // Additional price per day for this vehicle
+  currency        String      @default("USD")
+
+  // Features
+  features        String      @default("[]") // JSON array: ["Pop-up roof", "4x4", "Air conditioning"]
+  images          String      @default("[]") // JSON array of image URLs
+
+  // Availability
+  isDefault       Boolean     @default(false) // If true, this is the default vehicle for the tour
+  isActive        Boolean     @default(true)
+  sortOrder       Int         @default(0)
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  // Relations
+  tour            Tour        @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  bookingVehicles BookingVehicle[]
+
+  @@index([tourId])
+  @@index([type])
+  @@index([isActive])
 }
 
 model Itinerary {
@@ -338,21 +408,56 @@ model Itinerary {
   activities  String    @default("[]") // JSON array
   overnight   String?  // Display name for overnight stay
 
-  // Accommodation and add-on references for booking
+  // Legacy JSON fields (kept for backward compatibility during migration)
   availableAccommodationIds String  @default("[]") // JSON array of accommodation IDs available this night
   defaultAccommodationId    String? // Default accommodation for this night
   availableAddonIds         String  @default("[]") // JSON array of add-on IDs available this day
 
+  // Relations
   tour        Tour     @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  accommodations ItineraryAccommodation[]
+  addons      ItineraryAddon[]
 
   @@unique([tourId, dayNumber])
   @@index([tourId])
 }
 
+// Join table: Itinerary <-> AccommodationOption
+model ItineraryAccommodation {
+  id                    String              @id @default(cuid())
+  itineraryId           String
+  accommodationOptionId String
+  isDefault             Boolean             @default(false) // Is this the default for this night?
+  sortOrder             Int                 @default(0)
+
+  itinerary             Itinerary           @relation(fields: [itineraryId], references: [id], onDelete: Cascade)
+  accommodationOption   AccommodationOption @relation(fields: [accommodationOptionId], references: [id], onDelete: Cascade)
+
+  @@unique([itineraryId, accommodationOptionId])
+  @@index([itineraryId])
+  @@index([accommodationOptionId])
+}
+
+// Join table: Itinerary <-> ActivityAddon
+model ItineraryAddon {
+  id              String        @id @default(cuid())
+  itineraryId     String
+  activityAddonId String
+  isRecommended   Boolean       @default(false) // Highlight as recommended for this day
+  sortOrder       Int           @default(0)
+
+  itinerary       Itinerary     @relation(fields: [itineraryId], references: [id], onDelete: Cascade)
+  activityAddon   ActivityAddon @relation(fields: [activityAddonId], references: [id], onDelete: Cascade)
+
+  @@unique([itineraryId, activityAddonId])
+  @@index([itineraryId])
+  @@index([activityAddonId])
+}
+
 model AccommodationOption {
   id           String   @id @default(cuid())
   tourId       String
-  dayNumber    Int?     // If null, applies to all days
+  dayNumber    Int?     // If null, applies to all days (pool-based)
   name         String
   description  String?
   tier         AccommodationTier
@@ -362,28 +467,52 @@ model AccommodationOption {
   location     String?
   rating       Float?
 
+  // Enhanced fields
+  roomType     String?   // e.g., "Double Room", "Suite", "Tent"
+  isActive     Boolean   @default(true)
+  sortOrder    Int       @default(0)
+
   tour         Tour     @relation(fields: [tourId], references: [id], onDelete: Cascade)
   bookingAccommodations BookingAccommodation[]
+  itineraryAccommodations ItineraryAccommodation[]
 
   @@index([tourId])
   @@index([tier])
+  @@index([isActive])
 }
 
 model ActivityAddon {
-  id          String   @id @default(cuid())
+  id          String        @id @default(cuid())
   tourId      String
   name        String
   description String?
   price       Float
-  duration    String?  // e.g., "2 hours", "Half day"
-  images      String    @default("[]") // JSON array
+  duration    String?       // e.g., "2 hours", "Half day"
+  images      String        @default("[]") // JSON array
   maxCapacity Int?
-  dayAvailable String   @default("[]") // JSON array of day numbers
+  dayAvailable String       @default("[]") // JSON array of day numbers
+
+  // Enhanced categorization
+  type        AddonType     @default(ACTIVITY)
+  category    AddonCategory @default(ADVENTURE)
+
+  // Pricing options
+  priceType   String        @default("PER_PERSON") // "PER_PERSON" | "PER_GROUP" | "FLAT"
+  childPrice  Float?        // Optional child-specific price
+
+  // Display
+  isPopular   Boolean       @default(false)
+  sortOrder   Int           @default(0)
+  isActive    Boolean       @default(true)
 
   tour        Tour     @relation(fields: [tourId], references: [id], onDelete: Cascade)
   bookingActivities BookingActivity[]
+  itineraryAddons ItineraryAddon[]
 
   @@index([tourId])
+  @@index([type])
+  @@index([category])
+  @@index([isActive])
 }
 
 model SeasonalPricing {
@@ -398,6 +527,90 @@ model SeasonalPricing {
   tour        Tour     @relation(fields: [tourId], references: [id], onDelete: Cascade)
 
   @@index([tourId])
+  @@index([startDate, endDate])
+}
+
+// ============================================================================
+// TOUR PRICING CONFIGURATION
+// ============================================================================
+
+model TourPricing {
+  id                    String   @id @default(cuid())
+  tourId                String   @unique
+
+  // Child pricing
+  childDiscountPercent  Float    @default(30)   // e.g., 30 means 30% discount
+  childMinAge           Int      @default(3)    // Minimum age to be considered child
+  childMaxAge           Int      @default(11)   // Maximum age to be considered child
+
+  // Infant pricing (usually free)
+  infantMaxAge          Int      @default(2)    // Max age for infant (usually free)
+  infantPrice           Float    @default(0)    // Usually 0
+
+  // Service/booking fee
+  serviceFeePercent     Float    @default(5)    // Platform service fee percentage
+  serviceFeeFixed       Float?                  // Optional fixed service fee
+
+  // Deposit settings (overrides tour defaults)
+  depositPercent        Float?                  // Override deposit percentage
+  depositMinimum        Float?                  // Minimum deposit amount
+
+  // Group discounts
+  groupDiscountThreshold Int?                   // Min group size for discount
+  groupDiscountPercent  Float?                  // Discount percentage for groups
+
+  // Early bird discount
+  earlyBirdDays         Int?                    // Days before trip for early bird
+  earlyBirdPercent      Float?                  // Early bird discount percentage
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  tour                  Tour     @relation(fields: [tourId], references: [id], onDelete: Cascade)
+}
+
+// ============================================================================
+// AVAILABILITY HOLDS (Prevents race conditions during checkout)
+// ============================================================================
+
+enum HoldStatus {
+  ACTIVE      // Hold is currently active
+  CONVERTED   // Hold converted to confirmed booking
+  EXPIRED     // Hold expired without conversion
+  RELEASED    // Hold manually released
+}
+
+model AvailabilityHold {
+  id            String      @id @default(cuid())
+  tourId        String
+  userId        String?     // Optional - can be anonymous session
+
+  // Hold details
+  startDate     DateTime
+  endDate       DateTime
+  spotsHeld     Int         @default(1)
+
+  // Session tracking (for non-authenticated users)
+  sessionId     String?     // Browser session ID for anonymous users
+
+  // Status
+  status        HoldStatus  @default(ACTIVE)
+
+  // Timing
+  expiresAt     DateTime    // When the hold expires (default: 15 minutes)
+  convertedAt   DateTime?   // When converted to booking
+  bookingId     String?     // Resulting booking ID if converted
+
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  tour          Tour        @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
+  @@index([tourId])
+  @@index([userId])
+  @@index([sessionId])
+  @@index([status])
+  @@index([expiresAt])
   @@index([startDate, endDate])
 }
 
@@ -449,6 +662,7 @@ model Booking {
   baseAmount        Float
   accommodationAmount Float       @default(0)
   activitiesAmount  Float         @default(0)
+  vehicleAmount     Float         @default(0)
   taxAmount         Float         @default(0)
   discountAmount    Float         @default(0)
   totalAmount       Float
@@ -490,6 +704,7 @@ model Booking {
   payments          Payment[]
   accommodations    BookingAccommodation[]
   activities        BookingActivity[]
+  vehicles          BookingVehicle[]
   review            Review?
 
   @@index([userId])
@@ -526,12 +741,29 @@ model BookingActivity {
   @@index([bookingId])
 }
 
+model BookingVehicle {
+  id              String   @id @default(cuid())
+  bookingId       String
+  vehicleId       String
+  quantity        Int      @default(1)  // Number of this vehicle type
+  pricePerDay     Float                 // Price per day at time of booking
+  totalDays       Int                   // Duration in days
+  totalPrice      Float                 // Total price for vehicle(s)
+
+  booking         Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  vehicle         Vehicle  @relation(fields: [vehicleId], references: [id])
+
+  @@index([bookingId])
+  @@index([vehicleId])
+}
+
 // ============================================================================
 // PAYMENTS
 // ============================================================================
 
 enum PaymentMethod {
   MPESA
+  AIRTEL_MONEY
   CARD
   BANK_TRANSFER
   PAYPAL
@@ -792,6 +1024,19 @@ model PlatformSettings {
   supportPhone          String?
   termsUrl              String?
   privacyUrl            String?
+
+  // Default pricing settings (can be overridden per tour)
+  defaultChildDiscount  Float    @default(30)  // Default 30% off for children
+  defaultChildMinAge    Int      @default(3)   // Minimum age for child pricing
+  defaultChildMaxAge    Int      @default(11)  // Maximum age for child pricing
+  defaultInfantMaxAge   Int      @default(2)   // Infants (usually free)
+  defaultServiceFee     Float    @default(5)   // Default 5% service fee
+  defaultDepositPercent Float    @default(30)  // Default 30% deposit
+
+  // Availability hold settings
+  holdDurationMinutes   Int      @default(15)  // How long holds last
+  maxHoldsPerUser       Int      @default(3)   // Max concurrent holds per user
+
   updatedAt             DateTime @updatedAt
 }
 

@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { DestinationForm } from "@/components/admin/destination-form"
+import { SectionError } from "@/components/error"
 import { toast } from "sonner"
 
 export default function NewDestinationPage() {
@@ -44,7 +45,9 @@ export default function NewDestinationPage() {
         </p>
       </div>
 
-      <DestinationForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
+      <SectionError name="Destination Form">
+        <DestinationForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
+      </SectionError>
     </div>
   )
 }

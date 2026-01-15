@@ -3,6 +3,7 @@ import { notFound } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
 import { Star, MapPin, Clock } from "lucide-react"
+import { SectionError } from "@/components/error"
 
 interface EmbedPageProps {
   params: Promise<{ id: string }>
@@ -147,6 +148,7 @@ export default async function AgentEmbedPage({ params }: EmbedPageProps) {
         `}</style>
       </head>
       <body>
+        <SectionError name="Embedded Operator Tours">
         <div className="header">
           <h1>{agent.businessName}</h1>
           <p>{agent.tours.length} tours available</p>
@@ -201,6 +203,7 @@ export default async function AgentEmbedPage({ params }: EmbedPageProps) {
         <div className="powered-by">
           Powered by <a href={baseUrl} target="_blank" rel="noopener noreferrer">SafariPlus</a>
         </div>
+        </SectionError>
       </body>
     </html>
   )

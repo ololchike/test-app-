@@ -1,9 +1,11 @@
 import Link from "next/link"
 import { ShieldAlert } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { SectionError } from "@/components/error"
 
 export default function UnauthorizedPage() {
   return (
+    <SectionError name="Unauthorized Content">
     <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4">
       <div className="text-center space-y-4 sm:space-y-6 max-w-md w-full">
         <div className="flex justify-center">
@@ -29,5 +31,6 @@ export default function UnauthorizedPage() {
         </div>
       </div>
     </div>
+    </SectionError>
   )
 }

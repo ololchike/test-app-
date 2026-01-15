@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
+import { SectionError } from "@/components/error"
 
 const DESTINATIONS = [
   {
@@ -59,6 +60,7 @@ export default function DestinationsPage() {
   return (
     <div className="pt-20">
       {/* Hero Section */}
+      <SectionError name="Hero">
       <section className="relative bg-gradient-to-br from-secondary via-secondary/95 to-primary/30 py-16 sm:py-20 lg:py-28 overflow-hidden">
         {/* Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -145,8 +147,10 @@ export default function DestinationsPage() {
           </motion.div>
         </div>
       </section>
+      </SectionError>
 
       {/* Destinations Grid */}
+      <SectionError name="Destinations">
       <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-24">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -235,8 +239,10 @@ export default function DestinationsPage() {
           ))}
         </div>
       </section>
+      </SectionError>
 
       {/* CTA Section */}
+      <SectionError name="CTA">
       <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-r from-primary/5 via-accent/5 to-secondary/5">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -267,6 +273,7 @@ export default function DestinationsPage() {
           </motion.div>
         </div>
       </section>
+      </SectionError>
     </div>
   )
 }

@@ -4,6 +4,7 @@ import { useState, useEffect, use } from "react"
 import { useRouter } from "next/navigation"
 import { DestinationForm } from "@/components/admin/destination-form"
 import { DestinationFAQManager } from "@/components/admin/destination-faq-manager"
+import { SectionError } from "@/components/error"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
@@ -147,19 +148,23 @@ export default function EditDestinationPage({
         </TabsList>
 
         <TabsContent value="content">
-          <DestinationForm
-            initialData={destination}
-            onSubmit={handleSubmit}
-            isSubmitting={isSubmitting}
-          />
+          <SectionError name="Destination Editor">
+            <DestinationForm
+              initialData={destination}
+              onSubmit={handleSubmit}
+              isSubmitting={isSubmitting}
+            />
+          </SectionError>
         </TabsContent>
 
         <TabsContent value="faqs">
-          <DestinationFAQManager
-            destinationId={id}
-            faqs={destination.faqs}
-            onUpdate={fetchDestination}
-          />
+          <SectionError name="Destination FAQ Manager">
+            <DestinationFAQManager
+              destinationId={id}
+              faqs={destination.faqs}
+              onUpdate={fetchDestination}
+            />
+          </SectionError>
         </TabsContent>
       </Tabs>
     </div>
